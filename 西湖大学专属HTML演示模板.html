@@ -1034,10 +1034,11 @@
       loader: {paths: {mathjax:'assets/vendor/mathjax/es5'}},
       startup: {typeset:false},
       tex: {packages:['base','ams','noundefined'], maxBuffer:20000},
-      chtml: {fontURL:'assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2'}
+      chtml: {adaptiveCSS:false,fontURL:'assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2'}
     };
   </script>
   <script async src="assets/vendor/mathjax/es5/tex-chtml.js" onload="window.dispatchEvent(new Event('ppt-math-ready'))"></script>
+  <script src="assets/i18n.js"></script>
   <script src="assets/chat.js"></script>
   <script>
     (() => {

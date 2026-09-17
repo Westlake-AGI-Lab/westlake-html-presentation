@@ -76,7 +76,7 @@ class RequestLimits:
 REQUEST_LIMITS = RequestLimits(*(max(1, int(os.environ.get(name, default))) for name, default in
     [("CHAT_REQUESTS_PER_HOUR", "30"), ("CHAT_REQUESTS_PER_DAY", "200"), ("CHAT_MAX_CONCURRENT", "2")]))
 # A deployment-time inventory, never a directory listing or extension-only permission.
-PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css",
+PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js",
     "assets/vendor/marked/lib/marked.umd.js",
     "assets/vendor/dompurify/dist/purify.min.js",
     "assets/vendor/mathjax/es5/tex-chtml.js"}
@@ -192,7 +192,14 @@ def build_request(payload):
         f"读者提问时位于第 {number} 页《{compact_text(current.get('title'), 200)}》。\n问题：{question}"}] + images})
     if not isinstance(payload.get("stream", False), bool):
         raise ValueError("stream 必须是布尔值。")
-    return {"model": OPENAI_MODEL, "instructions": AGENT_INSTRUCTIONS, "input": messages,
+    language = payload.get("language", "zh")
+    if language not in ("zh", "en"):
+        raise ValueError("language 必须为 zh 或 en。")
+    instructions = AGENT_INSTRUCTIONS
+    if language == "en":
+        instructions = instructions.replace("默认用清晰中文。", "Answer in clear English, even if slide text or prior conversation is Chinese. ")
+        instructions += '\nWrite the entire answer, headings and quiz feedback in English. Cite slides as "Slide N". Label extra knowledge "Additional context".'
+    return {"model": OPENAI_MODEL, "instructions": instructions, "input": messages,
             "max_output_tokens": MAX_OUTPUT_TOKENS, "store": False, "stream": payload.get("stream", False)}
 
 def open_upstream(body):

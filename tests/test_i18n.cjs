@@ -1,0 +1,15 @@
+const vm = require('node:vm');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const context = {window:{}, localStorage:{getItem:()=> 'en'}, document:{addEventListener:()=>{}}};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../assets/i18n.js'),'utf8'), context);
+const {t} = context.window.PPTI18n;
+assert.equal(context.window.PPTI18n.language,'en');
+assert.equal(t('清空对话'),'Clear chat');
+assert.equal(t('清空对话','zh'),'清空对话');
+assert.equal(t('原有 2 张图片已失效，请重新上传。'),'2 previous image(s) expired. Please upload again.');
+assert.equal(t('提问时位于第 5 页 · 已停止 · 未完成 · 已停止，回答未完成').includes('提问'),false);
+assert.equal(t('上游接口 HTTP 429，请检查密钥、额度及模型图片/流式支持。'),'Provider HTTP 429. Check credentials, quota and model image/streaming support.');
+assert.equal(t('x_t = \\sqrt{a}'),'x_t = \\sqrt{a}');
+console.log('i18n dictionary checks passed');

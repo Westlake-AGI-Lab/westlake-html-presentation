@@ -2,13 +2,14 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  const t = (text) => window.PPTI18n.t(text);
   // randomUUID is unavailable on ordinary LAN HTTP origins.
   const uniqueId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
   const make = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
   const escape = s => { const el = make('span', '', s); return el.innerHTML; };
   const markdown = new marked.Marked({ gfm: true, breaks: false, renderer: {
     html: token => escape(token.text),
-    image: token => escape(`[图片未自动加载：${token.text || ''}]`)
+    image: token => escape(`[${PPTI18n.language==='en'?'Image not loaded':'图片未自动加载'}: ${token.text || ''}]`)
   }});
   const mathCache = new Map();
   let mathQueue = Promise.resolve();
@@ -76,8 +77,8 @@
       } catch (_) { /* Keep readable TeX if parsing fails. */ }
     }
     // Conversion APIs do not install their output stylesheet automatically.
-    if (stylesChanged) {
-      document.getElementById('MJX-CHTML-styles')?.remove();
+    if (stylesChanged && !document.getElementById('MJX-CHTML-styles')) {
+      // Non-adaptive CSS covers cached and streamed equations without dropping glyphs.
       document.head.append(MathJax.chtmlStylesheet());
     }
   }
@@ -97,6 +98,7 @@
       this.panel = $('agentPanel'); this.log = $('agentConversation'); this.input = $('agentInput');
       this.mount(); this.restore(); this.health(); this.update();
       window.addEventListener('ppt-math-ready', () => this.messages.forEach(m => this.paint(m)), {once:true});
+      window.addEventListener('ppt-language-change', () => { this.messages.filter(m=>!m.text).forEach(m=>this.paint(m)); });
     }
     button(label, fn, parent, id) {
       const button = make('button', 'chat-action', label); button.type = 'button';
@@ -141,7 +143,14 @@
       this.log.addEventListener('scroll', () => { this.follow = this.log.scrollHeight - this.log.scrollTop - this.log.clientHeight < 70; this.latest.hidden = this.follow; });
       $('agentLauncher').onclick = () => this.open(); $('agentClose').onclick = () => this.close(); $('agentScrim').onclick = () => this.close();
       $('agentSend').onclick = () => this.ask(); $('agentClear').onclick = () => this.clear();
-      this.panel.querySelectorAll('.agent-suggestion').forEach(b => b.onclick = () => this.ask(b.dataset.question || b.textContent));
+      this.panel.querySelectorAll('.agent-suggestion').forEach((b,index) => {
+        const label=b.textContent;
+        b.onclick = () => this.ask(PPTI18n.language==='en' ? [
+          'Please summarize the key points on the current slide.',
+          'Please explain the key concept on this slide in simple terms, with a worked example where useful.',
+          label==='考考我' ? 'Quiz me on the current slide: ask only one question and wait for my answer before giving feedback.' : 'How does this slide connect to the rest of the presentation?'
+        ][index] : b.dataset.question || label);
+      });
       this.input.addEventListener('input', () => { this.input.style.height = 'auto'; this.input.style.height = Math.min(this.input.scrollHeight,120)+'px'; });
       this.input.addEventListener('keydown', e => { if(e.key === 'Enter' && !e.shiftKey && !e.isComposing) {e.preventDefault(); this.ask();} });
     }
@@ -229,7 +238,7 @@
     }
     paint(message) {
       message.revision=(message.revision||0)+1;const revision=message.revision;
-      const root=message.role==='assistant'?renderMarkdown(message.text||(message.status==='streaming'?'正在思考…':'未收到正文。')):make('div','chat-user-text',message.text);
+      const root=message.role==='assistant'?renderMarkdown(message.text||t(message.status==='streaming'?'正在思考…':'未收到正文。')):make('div','chat-user-text',message.text);
       for(const image of message.images||[]) {const img=make('img','chat-message-image');img.src=image.dataUrl;img.alt=image.name;const b=make('button','chat-image-button');b.type='button';b.setAttribute('aria-label','查看附件 '+image.name);b.onclick=()=>this.showImage(image);b.append(img);root.append(b);}
       if(message.imageCount && !message.images?.length) root.append(make('p','chat-expired',`原有 ${message.imageCount} 张图片已失效，请重新上传。`));
       this.linkPages(root);
@@ -245,19 +254,19 @@
       const count=this.getContext().slides.length;
       for(const node of nodes) {
         if(node.parentElement.closest('pre,code,a,.chat-math'))continue;
-        const matches=[...node.textContent.matchAll(/第\s*(\d+)\s*页/g)];if(!matches.length)continue;
+        const matches=[...node.textContent.matchAll(/(?:第\s*(\d+)\s*页|\b(?:slide|page)\s+(\d+)\b)/gi)];if(!matches.length)continue;
         const frag=document.createDocumentFragment();let pos=0;
-        for(const match of matches){frag.append(node.textContent.slice(pos,match.index));const n=Number(match[1]);if(n>=1&&n<=count){const b=make('button','chat-page-link',match[0]);b.type='button';b.title='跳转到模型引用的页面（未自动核验引用）';b.onclick=()=>{this.navigate(n-1);this.update();};frag.append(b);}else frag.append(match[0]);pos=match.index+match[0].length;}
+        for(const match of matches){frag.append(node.textContent.slice(pos,match.index));const n=Number(match[1]||match[2]);if(n>=1&&n<=count){const b=make('button','chat-page-link',match[0]);b.type='button';b.title='跳转到模型引用的页面（未自动核验引用）';b.onclick=()=>{this.navigate(n-1);this.update();};frag.append(b);}else frag.append(match[0]);pos=match.index+match[0].length;}
         frag.append(node.textContent.slice(pos));node.replaceWith(frag);
       }
     }
     async ask(override='') {
       if(this.busy||this.processing)return;
-      const question=(override||this.input.value).trim()||(this.pending.length?'请结合当前 PPT 解释这张图片':'');if(!question)return;
+      const question=(override||this.input.value).trim()||(this.pending.length?t('请结合当前 PPT 解释这张图片'):'');if(!question)return;
       const previous=this.messages.slice(-12);
       if(previous.reduce((sum,m)=>sum+(m.images?.length||0),0)+this.pending.length>6){this.notice.textContent='上下文累计超过 6 张图片，请清空对话后继续。';return;}
       const context=this.getContext();
-      const request={...context,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
+      const request={...context,language:PPTI18n.language,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
       this.lastRequest=JSON.parse(JSON.stringify(request));this.pending=[];this.drawPending();this.input.value='';this.input.style.height='auto';this.notice.textContent='';this.follow=true;
       const user={role:'user',text:question,images:request.images,status:'complete',meta:`提问时位于第 ${context.currentSlide.number} 页 · ${context.currentSlide.title}`};
       this.messages.push(user);this.addRow(user);await this.run(this.lastRequest,false);
@@ -288,7 +297,7 @@
     }
     clear() {if(this.busy||this.processing)return;this.messages=[];this.pending=[];this.lastRequest=null;this.preview.close();this.previewImage.removeAttribute('src');this.log.querySelectorAll('.agent-message').forEach(n=>n.remove());this.drawPending();this.persist();this.controls();this.notice.textContent='文字和内存附件已清空。';}
     export() {
-      const text='# PPT 问答记录\n\n'+this.messages.map(m=>`## ${m.role==='user'?'读者':'助手'}\n\n${m.meta||''}\n\n${m.text}\n\n${m.status==='complete'?'':'[未完成]'}${(m.images?.length||m.imageCount)?'\n[图片未包含在导出文件中]':''}`).join('\n\n');
+      const text='# '+t('PPT 问答记录')+'\n\n'+this.messages.map(m=>`## ${t(m.role==='user'?'读者':'助手')}\n\n${t(m.meta||'')}\n\n${m.text}\n\n${m.status==='complete'?'':t('[未完成]')}${(m.images?.length||m.imageCount)?'\n'+t('[图片未包含在导出文件中]'):''}`).join('\n\n');
       const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'}));const a=make('a');a.href=url;a.download='ppt-chat.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
   }

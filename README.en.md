@@ -6,6 +6,12 @@ A lightweight browser-based slide template for teaching, research talks, and mee
 
 ## Current status (2026-09-17)
 
+### One-click Chinese / English UI
+
+Use `English / 中文` in the presentation toolbar or chat header. Chat controls, statuses, errors, upload/preview notices, copy/export, editing, notes, fullscreen, print, navigation and quick questions switch together. The choice is saved in this site's browser storage and survives reloads. Slide content, speaker notes, slide titles and existing messages are not automatically translated; switching does not incur a translation API call.
+
+Each question freezes `language: "zh" | "en"` (omitted legacy requests default to Chinese). English mode requests English explanations and quiz feedback. Switching during generation changes the UI only; the running response and retries keep the original request language. English `Slide N` / `Page N` citations are clickable. Markdown export labels follow the current UI language without altering raw messages. The dictionary and UI adapter live in `assets/i18n.js`; run `node tests/test_i18n.cjs` alongside the Python tests.
+
 - **This GitHub repository** contains the reusable 10-slide Westlake template, shared chat components, Python backend, deployment example, and tests.
 - **Internal demo**: [Diffusion theory introduction](http://10.21.3.45:8765/) serves a 16-slide teaching example, not the blank template. It requires campus networking or a VPN that can reach the server; it is not a public-internet URL.
 - **Publication boundary**: the Diffusion deck is maintained outside this repository and deployed separately, excluded from the generic release bundle. Browser edits are not automatically published to other readers.
@@ -202,6 +208,8 @@ Before sharing:
 - No open-source license is currently included. The publisher should choose a code license and address brand assets separately; unrestricted reuse must not be assumed.
 
 ## 7. Maintenance policy
+
+After every update, synchronize applicable changes to the existing server-hosted **Diffusion example** at the internal URL `http://10.21.3.45:8765/` and verify the deployed result. Preserve the Diffusion content: never replace it with the generic template. Preserve private configuration, security limits, and unrelated services. The Diffusion example must remain outside the GitHub repository and release bundle. If the server is unreachable or verification fails, explicitly report deployment as pending rather than successful. This policy does not authorize automatic Git commits or pushes.
 
 Every change to features, APIs, configuration, startup steps, or known limitations must update both `README.md` and `README.en.md` in the same change. Keep examples consistent with the implementation. Update `使用说明.md` when everyday usage changes and `.env.example` when configuration changes. This policy is also recorded in `AGENTS.md` for future developers and coding assistants.
 

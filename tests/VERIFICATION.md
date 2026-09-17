@@ -4,6 +4,13 @@
 
 ## 内网部署追加验证 / LAN deployment verification
 
+### 双语界面本地验证 / Local bilingual verification
+
+- 新增 `assets/i18n.js`；工具栏和聊天标题栏均可切换中英文，浏览器刷新后保留语言。中文输入与历史英文回答不会被切换操作改写。/ Both language controls and reload persistence were verified; typed Chinese and previous English answers remain unchanged.
+- 本地 Diffusion 真实调用：英文模式输入中文问题，模型返回英文纠错与公式；`Slide 4` 引用可以跳转且聊天保持打开。390px 窄屏界面可用。/ Live local Diffusion Q&A answered a Chinese question in English, rendered equations, and supported Slide 4 navigation with the panel open; 390px layout was checked.
+- 13 项后端测试及 `node tests/test_i18n.cjs` 通过；检查 zh/en 指令、旧请求默认中文、非法语言拒绝与 i18n 资源白名单。修正流式公式缓存的字符样式遗漏。/ 13 backend tests plus dictionary checks pass; language validation, legacy defaults and static serving are covered. Streamed/cached formula glyph styles were fixed.
+- 本次双语版服务器同步未完成：SSH 返回 `Host is down`，不能把上述本地通过结果视为新版已上线。/ Bilingual deployment is not complete: SSH returned Host is down. These local passes do not establish that the update is live.
+
 - 主项目和服务器均通过 12 项后端测试，新增来源网段、Host 校验及请求额度/并发限制测试。/ All 12 backend tests pass locally and on the server, including network/Host restrictions and request/concurrency limits.
 - 服务器服务已自动启动，原进展文档网站保持运行；网页返回 200，源码路径返回 404，未允许的 Host 返回 403。/ The service is enabled, the existing document website remains active, the page returns 200, source paths return 404, and unapproved Host values return 403.
 - 已用 16 页 Diffusion 稿件替换服务器上的空白模板，核对 HTML 哈希一致；保留独立浏览器存储键、“本页追问”和“考考我”。/ The server now serves the 16-slide Diffusion deck with a matching HTML hash, separate browser storage, slide-specific prompts and quiz controls.

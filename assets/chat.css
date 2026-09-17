@@ -327,6 +327,10 @@
 .chat-action {border:1px solid #ccd5e3;border-radius:8px;background:#fff;color:#23426c;font-size:12px;padding:6px 9px;cursor:pointer;}
 .chat-action:disabled {opacity:.45;cursor:default;}
 .chat-tools,.chat-composer-actions {display:flex;gap:6px;align-items:center;}
+.chat-tools {flex-wrap:wrap;justify-content:flex-end;max-width:210px;}
+.chat-tools .chat-action {white-space:nowrap;}
+html[lang="en"] .agent-title {font-size:15px;}
+@media(max-width:480px) {.agent-header .agent-avatar{display:none;} .agent-header{grid-template-columns:minmax(0,1fr) auto auto;} .chat-tools{max-width:140px;} .utility-controls{flex-wrap:wrap;max-width:calc(100vw - 24px);}}
 .chat-composer-actions {margin:8px 0;}
 .chat-tools .chat-action {background:transparent;color:#fff;border-color:#ffffff55;}
 .chat-notice {font-size:12px;color:#905519;margin:7px 0 0;line-height:1.5;}

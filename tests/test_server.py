@@ -26,6 +26,15 @@ class FakeResponse(io.BytesIO):
     headers = {'Content-Type':'text/event-stream'}
 
 class ValidationTests(unittest.TestCase):
+    def test_response_language(self):
+        self.assertIn('默认用清晰中文', server.build_request(payload())['instructions'])
+        english = server.build_request(dict(payload(), language='en'))
+        self.assertIn('Answer in clear English', english['instructions'])
+        self.assertIn('Slide N', english['instructions'])
+        self.assertNotIn('默认用清晰中文', english['instructions'])
+        for invalid in ['fr', '', None, 1]:
+            with self.assertRaises(ValueError):
+                server.build_request(dict(payload(), language=invalid))
     def test_sharing_limits(self):
         limits = server.RequestLimits(hourly=1, daily=2, concurrent=1)
         self.assertIsNone(limits.acquire('a'))
@@ -100,7 +109,7 @@ class HTTPTests(unittest.TestCase):
             for path in ['/server.py','/.env','/assets/','/assets/../server.py','/%2e%2e/server.py','/requirements.txt']:
                 with self.assertRaises(HTTPError) as error: urlopen(Request(self.base+path,method=method))
                 self.assertEqual(error.exception.code,404)
-            for path in ['/','/assets/chat.js','/assets/chat.css','/assets/vendor/mathjax/es5/tex-chtml.js']:
+            for path in ['/','/assets/chat.js','/assets/chat.css','/assets/i18n.js','/assets/vendor/mathjax/es5/tex-chtml.js']:
                 with urlopen(Request(self.base+path,method=method)) as response:
                     self.assertEqual(response.status,200)
                     response.read()
