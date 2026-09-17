@@ -656,6 +656,45 @@
     }
 
     .agent-launcher-copy { font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .agent-launcher {
+      top: auto; bottom: 82px; right: 20px;
+      width: 112px; height: 158px; padding: 0;
+      flex-direction: column; gap: 5px;
+      border: 0; border-radius: 0; background: none; box-shadow: none;
+      transform: none;
+    }
+    .agent-launcher:hover { transform: none; box-shadow: none; }
+    .agent-launcher { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+    .agent-launcher.pet-dragging { cursor: grabbing; }
+    .pet-greeting {
+      position: absolute; bottom: calc(100% + 12px); right: 0;
+      width: min(224px, calc(100vw - 16px)); box-sizing: border-box;
+      padding: 12px 14px; border: 1px solid #dce3eb; border-radius: 8px;
+      background: #fff; color: #173e60; box-shadow: 0 5px 20px rgba(8,23,52,.13);
+      text-align: left; white-space: normal; pointer-events: none;
+      font-size: 13px; line-height: 1.5; letter-spacing: 0; font-weight: 400;
+    }
+    .pet-greeting strong { display: block; font-size: 14px; font-weight: 700; }
+    .agent-launcher.pet-dragging .agent-pet { animation: none; transform: rotate(6deg); }
+    .agent-launcher:focus-visible { outline: 3px solid var(--westlake-orange); outline-offset: 5px; }
+    .agent-launcher-copy { color: var(--westlake-navy); background: #fff; padding: 3px 6px; border-radius: 4px; }
+    .agent-pet { position: relative; display: block; width: 106px; height: 132px; flex: none; animation: petSway 4s ease-in-out infinite; transform-origin: 50% 95%; }
+    .agent-pet img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .pet-blink { animation: petBlink 12s step-end infinite; }
+    .pet-walk { animation: petWalk 12s step-end infinite; }
+    .agent-pet .pet-inspect { opacity: 0; }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet { animation: none; transform: rotate(-4deg); }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet img { opacity: 0; animation: none; }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet .pet-inspect { opacity: 1; }
+    @keyframes petSway { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
+    @keyframes petBlink { 0%, 21%, 46%, 100% { opacity: 0; } 20%, 45% { opacity: 1; } }
+    @keyframes petWalk { 0%, 80%, 90%, 100% { opacity: 0; } 82%, 88% { opacity: 1; } }
+    .agent-pet:has(.pet-walk) .pet-idle { animation: petIdle 12s step-end infinite; }
+    @keyframes petIdle { 0%, 80%, 90%, 100% { opacity: 1; } 82%, 88% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .agent-launcher .agent-pet, .agent-launcher .agent-pet img { animation: none; transition: none; }
+      .agent-pet .pet-blink, .agent-pet .pet-walk { opacity: 0; }
+    }
     body.agent-open .agent-launcher { opacity: 0; pointer-events: none; }
 
     .agent-scrim {
@@ -708,10 +747,11 @@
       place-items: center;
       border-radius: 13px;
       color: var(--westlake-navy);
-      background: var(--westlake-orange);
+      background: transparent;
       font-size: 13px;
       font-weight: 900;
     }
+    .agent-avatar img { width: 42px; height: 52px; object-fit: contain; }
 
     .agent-title { margin: 0; color: #fff; font-size: 16px; font-weight: 720; line-height: 1.25; }
     .agent-subtitle { display: flex; align-items: center; gap: 7px; margin-top: 4px; color: rgba(255,255,255,.68); font-size: 11px; }
@@ -1054,14 +1094,15 @@
       .utility-controls { top: 11px; right: 11px; }
       .utility-button { padding: 7px 9px; }
       .agent-launcher { right: 12px; top: auto; bottom: 72px; transform: none; }
-      .agent-launcher:hover { transform: translateX(-2px); }
+      .agent-launcher:hover { transform: none; }
       .agent-panel { width: min(460px, 92vw); }
     }
 
     @media (max-width: 620px) {
       .agent-panel { width: 100vw; }
       .agent-launcher-copy { display: none; }
-      .agent-launcher { padding: 9px; }
+      .agent-launcher { padding: 0; width: 72px; height: 96px; }
+      .agent-launcher .agent-pet { width: 72px; height: 96px; }
       .agent-scrim { display: none; }
     }
 
@@ -1268,8 +1309,17 @@
 
   <div class="edit-toast">编辑模式已开启 · 点击虚线区域直接修改 · 自动保存在本浏览器</div>
 
-  <button class="agent-launcher" id="agentLauncher" type="button" aria-controls="agentPanel" aria-expanded="false" title="打开 PPT 智能讲解（A）">
-    <span class="agent-launcher-mark">AI</span>
+  <button class="agent-launcher" id="agentLauncher" type="button" aria-label="打开 PPT 智能讲解" aria-controls="agentPanel" aria-expanded="false" title="打开 PPT 智能讲解（A）">
+    <span class="pet-greeting" id="petGreeting" lang="zh-CN">
+      <strong id="petGreetingTitle">你好，我是小西。</strong>
+      <span id="petGreetingQuestion">有什么可以帮你？</span>
+    </span>
+    <span class="agent-pet" aria-hidden="true">
+      <img class="pet-idle" src="assets/pet-idle.png" alt="" width="106" height="132">
+      <img class="pet-blink" src="assets/pet-blink.png" alt="" width="106" height="132">
+      <img class="pet-walk" src="assets/pet-walk.png" alt="" width="106" height="132">
+      <img class="pet-inspect" src="assets/pet-inspect.png" alt="" width="106" height="132">
+    </span>
     <span class="agent-launcher-copy">问问这份 PPT</span>
   </button>
 
@@ -1277,7 +1327,7 @@
 
   <aside class="agent-panel" id="agentPanel" aria-label="PPT 智能讲解 Agent" aria-hidden="true">
     <header class="agent-header">
-      <div class="agent-avatar">AI</div>
+      <div class="agent-avatar" aria-hidden="true"><img src="assets/pet-idle.png" alt="" width="42" height="52"></div>
       <div>
         <h2 class="agent-title">PPT 智能讲解</h2>
         <div class="agent-subtitle">
@@ -1589,7 +1639,91 @@
       });
       printButton.addEventListener('click', () => window.print());
       editables.forEach((element) => element.addEventListener('input', saveEdits));
-      agentLauncher.addEventListener('click', openAgent);
+      const petPositionKey = 'westlake-pet-position-v1';
+      let petDrag = null;
+      let suppressPetClick = false;
+      const petGreeting = document.getElementById('petGreeting');
+      function updatePetLanguage() {
+        const english = document.documentElement.lang.toLowerCase().startsWith('en');
+        petGreeting.lang = english ? 'en' : 'zh-CN';
+        document.getElementById('petGreetingTitle').textContent = english ? "Hello, I'm Xiaoxi." : '你好，我是小西。';
+        document.getElementById('petGreetingQuestion').textContent = english ? 'How can I help you?' : '有什么可以帮你？';
+        agentLauncher.querySelector('.agent-launcher-copy').textContent = english ? 'Ask Xiaoxi' : '问问这份 PPT';
+        agentLauncher.setAttribute('aria-label', english ? 'Open presentation assistant' : '打开 PPT 智能讲解');
+        agentLauncher.title = english ? 'Open presentation assistant (A)' : '打开 PPT 智能讲解（A）';
+        positionPetGreeting();
+      }
+      new MutationObserver(updatePetLanguage).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      function positionPetGreeting() {
+        const rect = agentLauncher.getBoundingClientRect();
+        const width = petGreeting.offsetWidth;
+        const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
+        petGreeting.style.left = `${left - rect.left}px`;
+        petGreeting.style.right = 'auto';
+        const height = petGreeting.offsetHeight;
+        const preferredTop = rect.top >= height + 20 ? rect.top - height - 12 : rect.bottom + 12;
+        const top = Math.max(8, Math.min(preferredTop, window.innerHeight - height - 8));
+        petGreeting.style.top = `${top - rect.top}px`;
+        petGreeting.style.bottom = 'auto';
+      }
+      function placePet(x, y) {
+        const margin = 8;
+        const left = Math.max(margin, Math.min(x, window.innerWidth - agentLauncher.offsetWidth - margin));
+        const top = Math.max(margin, Math.min(y, window.innerHeight - agentLauncher.offsetHeight - margin));
+        Object.assign(agentLauncher.style, { left: `${left}px`, top: `${top}px`, right: 'auto', bottom: 'auto' });
+        positionPetGreeting();
+        return { x: left, y: top };
+      }
+      function savePetPosition(position) {
+        try { localStorage.setItem(petPositionKey, JSON.stringify(position)); } catch (_) {}
+      }
+      try {
+        const saved = JSON.parse(localStorage.getItem(petPositionKey));
+        if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) placePet(saved.x, saved.y);
+      } catch (_) {}
+      agentLauncher.addEventListener('pointerdown', (event) => {
+        if (!event.isPrimary || event.button !== 0) return;
+        const rect = agentLauncher.getBoundingClientRect();
+        suppressPetClick = false;
+        petDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
+        agentLauncher.setPointerCapture(event.pointerId);
+      });
+      agentLauncher.addEventListener('pointermove', (event) => {
+        if (!petDrag || petDrag.id !== event.pointerId) return;
+        const dx = event.clientX - petDrag.x;
+        const dy = event.clientY - petDrag.y;
+        if (!petDrag.moved && Math.hypot(dx, dy) < 6) return;
+        petDrag.moved = true;
+        agentLauncher.classList.add('pet-dragging');
+        placePet(petDrag.left + dx, petDrag.top + dy);
+      });
+      function finishPetDrag(event) {
+        if (!petDrag || petDrag.id !== event.pointerId) return;
+        suppressPetClick = petDrag.moved;
+        if (petDrag.moved) {
+          const rect = agentLauncher.getBoundingClientRect();
+          savePetPosition(placePet(rect.left, rect.top));
+        }
+        petDrag = null;
+        agentLauncher.classList.remove('pet-dragging');
+        if (agentLauncher.hasPointerCapture(event.pointerId)) agentLauncher.releasePointerCapture(event.pointerId);
+      }
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((name) => agentLauncher.addEventListener(name, finishPetDrag));
+      agentLauncher.addEventListener('click', (event) => {
+        // Pointer release after dragging must not open the conversation.
+        if (suppressPetClick && event.detail !== 0) {
+          suppressPetClick = false;
+          event.preventDefault();
+          return;
+        }
+        openAgent();
+      });
+      window.addEventListener('resize', () => {
+        if (!agentLauncher.style.left) { positionPetGreeting(); return; }
+        const rect = agentLauncher.getBoundingClientRect();
+        savePetPosition(placePet(rect.left, rect.top));
+      });
+      updatePetLanguage();
       agentScrim.addEventListener('click', closeAgent);
       agentClose.addEventListener('click', closeAgent);
       agentSend.addEventListener('click', () => askAgent());

@@ -17,6 +17,7 @@ This is a custom project based on supplied materials, not an official university
 - 16:9 slides, navigation, progress indicator, fullscreen, speaker notes, and browser printing / PDF.
 - In-page text editing saved in the current browser's `localStorage`.
 - AI sidebar for slide summaries, concept explanations, cross-slide connections, and follow-up questions.
+- A pet launcher uses the supplied character artwork: it gently moves, blinks, and briefly switches to a walking pose. Hover or keyboard focus shows its magnifying glass; clicking or tapping opens Q&A, and `A` still toggles the panel. System reduced-motion settings disable idle animations. Pet assets work offline and are hidden when printing.
 - Each question includes slide text, speaker notes, the current slide number and title, and recent conversation.
 - A server-side proxy calls the OpenAI Responses API or a compatible endpoint; the browser never receives the API key.
 
@@ -96,6 +97,10 @@ On macOS, after configuring the key, double-click `启动智能PPT.command`. It 
 `.env.example` is a reference only. The application does not automatically load `.env`; use environment variables or the private JSON file.
 
 ## 4. Presenting and editing
+
+Xiaoxi displays one greeting in the presentation's declared language: `<html lang="en">` selects English, while the default `<html lang="zh-CN">` selects Chinese. When creating an English deck, update this language attribute along with its content. The pet label and tooltip follow the same setting; this does not translate slides or the chat panel. The speech bubble follows dragging, stays within the window, and hides with the pet when Q&A opens or the deck is printed. It is a local greeting, not an AI-generated reply.
+
+Drag the pet with a mouse or finger to reposition it within the browser window. Its position is saved in this browser's `localStorage` and kept within the visible window after resizing. A drag does not open Q&A; a normal click or tap still does. This is a webpage pet, not a desktop-wide companion.
 
 | Action | Control |
 | --- | --- |
