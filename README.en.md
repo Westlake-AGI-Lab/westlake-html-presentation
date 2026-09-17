@@ -189,6 +189,8 @@ Every change to features, APIs, configuration, startup steps, or known limitatio
 
 ## Enhanced chat
 
+A compact 44×44 px circular AI icon near the bottom-right opens chat. Click it or press A; a hover tooltip replaces the large text button.
+
 - Add PNG/JPEG/WebP images with the file picker, drag/drop, or clipboard paste. Up to 3 images per message, originals ≤5 MiB each; the browser resizes to a maximum edge of 2048 pixels and ≤1 MiB per sent image. Preview or remove before sending. Image-only questions get a default explanation prompt.
 - The latest 12 context messages may contain up to 6 images total; clear the conversation when over the limit. Image bytes stay in page memory only and are not stored by the server. Reload restores text with explicit expired-image notices; expired attachments are not treated as available.
 - Markdown headings, lists, quotes, tables, code, and `$…$`, `$$…$$`, `\\(...\\)`, `\\[...\\]` math are rendered locally. Wide content scrolls horizontally. Invalid math remains readable source. Raw HTML is escaped, remote Markdown images do not load, and unsafe links are removed.

@@ -2,30 +2,40 @@
       position: fixed;
       z-index: 92;
       right: 18px;
-      top: 50%;
+      top: auto;
+      bottom: 82px;
+      left: auto;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      max-width: 44px;
+      max-height: 44px;
+      box-sizing: border-box;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      gap: 0;
       border: 1px solid rgba(255,255,255,.18);
       border-radius: 999px;
-      padding: 10px 15px 10px 10px;
+      padding: 0;
       color: #fff;
       background: linear-gradient(135deg, var(--westlake-blue), var(--westlake-navy));
-      box-shadow: 0 16px 44px rgba(8, 23, 52, .28);
+      box-shadow: 0 4px 14px rgba(8, 23, 52, .18);
       cursor: pointer;
-      transform: translateY(-50%);
+      transform: none;
       transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
     }
 
     .agent-launcher:hover {
-      transform: translateY(-50%) translateX(-3px);
-      box-shadow: 0 20px 54px rgba(8, 23, 52, .36);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(8, 23, 52, .24);
     }
 
     .agent-launcher-mark {
       display: grid;
-      width: 34px;
-      height: 34px;
+      width: 28px;
+      height: 28px;
       place-items: center;
       border-radius: 50%;
       color: var(--westlake-navy);
@@ -35,7 +45,8 @@
       letter-spacing: -.03em;
     }
 
-    .agent-launcher-copy { font-size: 12px; font-weight: 760; white-space: nowrap; }
+    .agent-launcher-copy { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+    .agent-launcher:focus-visible { outline:3px solid var(--westlake-orange); outline-offset:3px; }
     body.agent-open .agent-launcher { opacity: 0; pointer-events: none; }
 
     .agent-scrim {
