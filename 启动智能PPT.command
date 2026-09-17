@@ -5,4 +5,8 @@ if /usr/bin/curl --silent --fail http://127.0.0.1:8765/api/health >/dev/null; th
   exit 0
 fi
 (sleep 1; open http://127.0.0.1:8765) &
-/usr/bin/python3 server.py
+if [[ -x .venv/bin/python ]]; then
+  .venv/bin/python server.py
+else
+  /usr/bin/python3 server.py
+fi
