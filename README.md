@@ -4,7 +4,25 @@
 
 面向西湖大学教学、科研汇报与会议演示的轻量级网页 PPT 模板：用浏览器演示、编辑和打印幻灯片，并通过右侧 AI 对话面板随时提问。
 
+## 当前项目状态（2026-09-17）
+
+- **此 GitHub 仓库**：通用 10 页西湖大学模板、共享聊天组件、Python 后端、部署示例与测试。
+- **内网演示**：[Diffusion 理论入门](http://10.21.3.45:8765/) 已部署为 16 页教学示例，不是空白模板；仅校内网络或能够访问该服务器的 VPN 可用，不是公网地址。
+- **分享范围**：Diffusion 稿件保存在独立目录并单独部署，不进入此仓库或通用模板发布包。浏览器中的编辑不会自动发布给其他读者。
+- **已验证**：小圆形 AI 入口、线上流式问答与公式渲染、Diffusion 第 5 页数值纠错；主项目及服务器的 12 项后端测试通过。完整记录与未覆盖项见 [验证记录](tests/VERIFICATION.md)。
+- **安全边界**：API Key 保存在服务器私有目录。内网 HTTP 无加密、无账号登录；共享问答使用部署者的 API 额度，请仅向可信读者分享并避免敏感材料。
+
 ## 1. 项目背景
+
+### 内网分享部署
+
+部署示例见 `deploy/westlake-ppt.service`：独立目录 `~/apps/westlake-ppt`、虚拟环境、systemd 用户服务，端口 8765。部署时复制要分享的 HTML 稿件、配套 assets、server.py 和 requirements.txt；后端入口文件名保持为 `西湖大学专属HTML演示模板.html`。当前服务器用独立 Diffusion 稿件替换了默认模板，但 GitHub 仍保留通用模板。不上传 Diffusion 稿件、聊天或密钥到代码仓库。私有配置使用 `PPT_CONFIG_PATH` 指定，服务示例指向 `~/.config/westlake-ppt/config.json`，权限设为 600。
+
+安装依赖后，将 service 文件放入 `~/.config/systemd/user/`，按实际主机修改 `ALLOWED_HOSTS` 和 `ALLOWED_NETWORKS`，运行 `systemctl --user daemon-reload`、`systemctl --user enable --now westlake-ppt`。退出 SSH 后保持运行需启用用户 linger。重启：`systemctl --user restart westlake-ppt`；日志：`journalctl --user -u westlake-ppt`。这些命令只管理本应用，不影响其他服务。
+
+服务默认只允许本机；内网示例明确允许私有网段并校验 Host，忽略客户端伪造的转发 IP 头。聊天默认每 IP 每小时 30 次、全站每天 200 次、最多同时 2 个请求；分别由 `CHAT_REQUESTS_PER_HOUR`、`CHAT_REQUESTS_PER_DAY`、`CHAT_MAX_CONCURRENT` 调整。每日额度按 UTC 重置，全部计数在内存中，重启会清零，失败尝试也计数；这不是金额预算，请另外设置 API 服务商的消费上限。
+
+内网 HTTP 没有传输加密，也没有账号鉴权，仅供可信校内网络/VPN使用，不要提交敏感资料或转发到公网。截图粘贴等能力还受浏览器权限限制，上传按钮可作为替代。客户端 ID 使用 `crypto.getRandomValues`，兼容普通内网 HTTP 地址。公网部署必须另行配置 HTTPS、认证及可靠限流。
 
 本项目结合已有 HTML 演示文稿的交互方式与用户提供的西湖大学会议 PowerPoint 模板，将校徽、深蓝与橙色视觉元素以及常见会议版式整理为可复用的 HTML 模板。目标是让演示文稿不仅能“展示”，也能帮助读者理解内容，方便后续开发者直接修改与扩展。
 
@@ -21,11 +39,11 @@
 - 服务端调用 OpenAI Responses API 或兼容接口；密钥不会发送给网页客户端。
 
 ```text
-HTML 页面：整套文字 + 讲稿 + 提问时所在页 + 最近对话
+HTML 页面：整套文字 + 讲稿 + 提问时所在页 + 最近对话 + 主动添加的图片
     ↓ POST /api/chat
 Python 本地服务：校验输入 → 限制上下文长度 → 组织提示词
     ↓ POST {OPENAI_API_BASE}/responses（服务端携带密钥）
-模型回答 → Python 返回 JSON → 右侧对话面板显示
+模型回答 → Python 返回 NDJSON 流（或兼容旧 JSON）→ Markdown / 公式侧栏
 ```
 
 前端采用原生 HTML / CSS / JavaScript，后端使用 Python 标准库和 Pillow（校验图片），需要先安装 `requirements.txt`。浏览器渲染库已随项目本地化，无需 Node.js 或 npm。每次提问重新从当前页面 DOM 提取内容，因此本地编辑后的文字也能进入问答上下文。

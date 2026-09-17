@@ -1,6 +1,14 @@
 # Local verification / 本地验证记录
 
-日期 / Date: 2026-09-17。本记录来自提交前的本地验证；Diffusion 示例不在发布范围内。 / This record describes pre-commit local verification; the Diffusion example is excluded from publication.
+日期 / Date: 2026-09-17。涵盖本地验证和授权内网部署；Diffusion 稿件不在 GitHub 发布范围内。 / Covers local verification and authorized LAN deployment; the Diffusion deck is excluded from GitHub publication.
+
+## 内网部署追加验证 / LAN deployment verification
+
+- 主项目和服务器均通过 12 项后端测试，新增来源网段、Host 校验及请求额度/并发限制测试。/ All 12 backend tests pass locally and on the server, including network/Host restrictions and request/concurrency limits.
+- 服务器服务已自动启动，原进展文档网站保持运行；网页返回 200，源码路径返回 404，未允许的 Host 返回 403。/ The service is enabled, the existing document website remains active, the page returns 200, source paths return 404, and unapproved Host values return 403.
+- 已用 16 页 Diffusion 稿件替换服务器上的空白模板，核对 HTML 哈希一致；保留独立浏览器存储键、“本页追问”和“考考我”。/ The server now serves the 16-slide Diffusion deck with a matching HTML hash, separate browser storage, slide-specific prompts and quiz controls.
+- 内网 HTTP 浏览器真实问答完成，将第 5 页错误答案 0.08 纠正为 0.4，公式和页码跳转按钮正常渲染；客户端不再依赖仅安全上下文可用的 randomUUID。/ A live LAN HTTP request corrected slide 5's answer from 0.08 to 0.4 and rendered math and citation buttons. Client IDs no longer depend on secure-context-only randomUUID.
+- 本次只发布通用项目、部署支持与文档，不将 Diffusion 稿件、上传图片、聊天记录或私有配置加入 GitHub。/ Only the reusable project, deployment support and docs are published; no Diffusion deck, uploaded images, conversations or private configuration enter GitHub.
 
 ## 已通过 / Passed
 
@@ -12,7 +20,7 @@
 - 刷新后文字记录与公式恢复，明确提示旧图片失效。两套共享 JS/CSS 相同，端口及存储键独立。
 - 导出文件已实际下载并检查：保留 Markdown、图片省略提示与未完成标记，不含 Base64 图片字节。演示讲稿显示、编辑模式切换及退出编辑后的翻页正常。
 - APIWharf 真实链路：现有私有配置模型接受附件并返回流式回答，准确描述非敏感示例图片中的宇航服、幼苗和界面；在 Diffusion 第 5 页把错误答案 0.08 纠正为 0.4，解释开平方系数，返回公式、表格及页码。未切换供应商或模型。
-- 本次项目内容扫描未发现真实 API/GitHub token；私有配置仍在项目外。Git HEAD 未改变。
+- 初始验证时的项目内容扫描未发现真实 API/GitHub token；私有配置仍在项目外。
 
 ## 验证边界 / Coverage limits
 

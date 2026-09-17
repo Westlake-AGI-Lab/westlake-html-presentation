@@ -1,0 +1,27 @@
+[Unit]
+Description=Westlake PPT internal sharing
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/westlake-ppt
+Environment=HOST=0.0.0.0
+Environment=PORT=8765
+Environment=PPT_CONFIG_PATH=%h/.config/westlake-ppt/config.json
+Environment=ALLOWED_HOSTS=10.21.3.45,localhost,127.0.0.1
+Environment=ALLOWED_NETWORKS=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8
+Environment=CHAT_REQUESTS_PER_HOUR=30
+Environment=CHAT_REQUESTS_PER_DAY=200
+Environment=CHAT_MAX_CONCURRENT=2
+Environment=MAX_OUTPUT_TOKENS=3000
+ExecStart=%h/apps/westlake-ppt/.venv/bin/python %h/apps/westlake-ppt/server.py
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=default.target

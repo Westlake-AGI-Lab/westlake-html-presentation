@@ -4,7 +4,25 @@
 
 A lightweight browser-based slide template for teaching, research talks, and meetings in a Westlake University visual style, with an AI sidebar that answers questions about the presentation and the reader's current slide.
 
+## Current status (2026-09-17)
+
+- **This GitHub repository** contains the reusable 10-slide Westlake template, shared chat components, Python backend, deployment example, and tests.
+- **Internal demo**: [Diffusion theory introduction](http://10.21.3.45:8765/) serves a 16-slide teaching example, not the blank template. It requires campus networking or a VPN that can reach the server; it is not a public-internet URL.
+- **Publication boundary**: the Diffusion deck is maintained outside this repository and deployed separately, excluded from the generic release bundle. Browser edits are not automatically published to other readers.
+- **Verified**: compact AI launcher, deployed streaming Q&A and math rendering, and corrective feedback on Diffusion slide 5. All 12 backend tests passed locally and on the server. See [verification coverage and remaining checks](tests/VERIFICATION.md).
+- **Security**: API credentials remain in a private server directory. LAN HTTP is unencrypted and has no account login; shared chat consumes the operator's API quota. Share only with trusted readers and avoid sensitive material.
+
 ## 1. Background
+
+### Internal-network sharing
+
+`deploy/westlake-ppt.service` runs an isolated Python virtual environment in `~/apps/westlake-ppt` as a systemd user service on port 8765. Deploy the chosen HTML deck, its assets, server.py and requirements.txt, keeping the entry filename `西湖大学专属HTML演示模板.html`. The server currently substitutes the separately maintained Diffusion deck; GitHub retains the reusable template. Do not commit the Diffusion deck, conversations or credentials. Set `PPT_CONFIG_PATH` to private credentials outside the source tree (the example uses `~/.config/westlake-ppt/config.json`, mode 600).
+
+Install dependencies, place the service in `~/.config/systemd/user/`, adjust `ALLOWED_HOSTS` and `ALLOWED_NETWORKS`, then run `systemctl --user daemon-reload` and `systemctl --user enable --now westlake-ppt`. User linger is needed to keep it running after SSH logout. Restart with `systemctl --user restart westlake-ppt`; inspect logs with `journalctl --user -u westlake-ppt`. Other applications remain untouched.
+
+The default allows localhost only; the LAN example explicitly permits private networks and validates Host, without trusting client-supplied forwarding headers. Chat limits default to 30 requests per IP per hour, 200 requests globally per UTC day, and 2 concurrent requests. Configure `CHAT_REQUESTS_PER_HOUR`, `CHAT_REQUESTS_PER_DAY`, and `CHAT_MAX_CONCURRENT`. Counts are in memory, reset on restart, and include failed attempts. These are not monetary spending caps; set a provider-side budget separately.
+
+LAN HTTP is unencrypted and has no account authentication. Use only within a trusted campus network/VPN, avoid sensitive uploads, and do not expose the port publicly. Screenshot paste is browser-permission-dependent; use the upload button if unavailable. Client IDs use `crypto.getRandomValues` for LAN HTTP compatibility. Public hosting requires HTTPS, authentication, and durable rate limiting.
 
 This project combines interactions from an existing HTML presentation with a user-provided Westlake University PowerPoint meeting template. It reuses the supplied logo, navy-blue and orange visual elements, and common presentation layouts to create an editable, extensible HTML template. The goal is to support both presenting information and helping readers understand it.
 
@@ -21,11 +39,11 @@ This is a custom project based on supplied materials, not an official university
 - A server-side proxy calls the OpenAI Responses API or a compatible endpoint; the browser never receives the API key.
 
 ```text
-HTML: deck text + notes + slide at question time + recent conversation
+HTML: deck text + notes + slide at question time + recent conversation + attached images
     ↓ POST /api/chat
 Python service: validate input → bound context → compose prompt
     ↓ POST {OPENAI_API_BASE}/responses (server-side API key)
-Model response → Python JSON response → sidebar
+Model response → Python NDJSON stream (or legacy JSON) → Markdown / math sidebar
 ```
 
 The frontend uses plain HTML / CSS / JavaScript. The backend uses the Python standard library plus Pillow for image validation. Install `requirements.txt` first. Browser libraries are vendored locally; no Node.js or npm runtime is required. Content is extracted from the current DOM for every question, so browser edits can be included in the context.

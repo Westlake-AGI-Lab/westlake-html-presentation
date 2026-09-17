@@ -26,6 +26,19 @@ class FakeResponse(io.BytesIO):
     headers = {'Content-Type':'text/event-stream'}
 
 class ValidationTests(unittest.TestCase):
+    def test_sharing_limits(self):
+        limits = server.RequestLimits(hourly=1, daily=2, concurrent=1)
+        self.assertIsNone(limits.acquire('a'))
+        self.assertIsNotNone(limits.acquire('b'))
+        limits.release()
+        self.assertIsNotNone(limits.acquire('a'))
+        self.assertIsNone(limits.acquire('b'))
+        limits.release()
+        self.assertIsNotNone(limits.acquire('c'))
+        with patch.object(server.time, 'time', return_value=server.time.time()+86400):
+            self.assertIsNone(limits.acquire('c'))
+        limits.release()
+
     def test_supported_images(self):
         for fmt,mime in [('PNG','image/png'),('JPEG','image/jpeg'),('WEBP','image/webp')]:
             self.assertEqual(server.validate_images([picture(fmt,mime)])[0]['type'],'input_image')
@@ -96,6 +109,16 @@ class HTTPTests(unittest.TestCase):
         for headers,code in [({'Origin':'https://foreign.test'},403),({'Content-Length':str(server.MAX_REQUEST_BYTES+1)},413)]:
             with self.assertRaises(HTTPError) as error: urlopen(Request(self.base+'/api/chat',data=b'{}',headers=headers))
             self.assertEqual(error.exception.code,code)
+
+    def test_host_and_network_restriction(self):
+        with self.assertRaises(HTTPError) as error:
+            urlopen(Request(self.base+'/', headers={'Host':'foreign.test'}))
+        self.assertEqual(error.exception.code,403)
+        with patch.object(server, 'ALLOWED_NETWORKS', []):
+            for method in ['GET', 'HEAD', 'POST']:
+                with self.assertRaises(HTTPError) as error:
+                    urlopen(Request(self.base+'/', method=method, data=b'{}' if method=='POST' else None))
+                self.assertEqual(error.exception.code,403)
 
     def test_legacy_json(self):
         with patch.object(server,'open_upstream',return_value=FakeResponse(b'{"output_text":"legacy answer"}')):

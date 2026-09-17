@@ -4,12 +4,15 @@ from __future__ import annotations
 import base64
 import binascii
 import io
+import ipaddress
 import json
 import os
 import queue
 import re
 import socket
 import threading
+import time
+from collections import deque
 import warnings
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -19,7 +22,7 @@ from urllib.parse import unquote, urlsplit
 from PIL import Image, UnidentifiedImageError
 
 BASE_DIR = Path(__file__).resolve().parent
-CONFIG_PATH = Path.home() / ".config" / "westlake-ppt-agent" / "config.json"
+CONFIG_PATH = Path(os.environ.get("PPT_CONFIG_PATH", str(Path.home() / ".config" / "westlake-ppt-agent" / "config.json")))
 if CONFIG_PATH.exists():
     private_config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     for name in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_API_BASE"):
@@ -35,6 +38,43 @@ MAX_IMAGE_BYTES = 1024 * 1024
 MAX_DECK_CHARS = 80000
 MAX_HISTORY_CHARS = 20000
 HTML_NAME = "西湖大学专属HTML演示模板.html"
+ALLOWED_NETWORKS = [ipaddress.ip_network(x.strip()) for x in os.environ.get("ALLOWED_NETWORKS", "127.0.0.0/8,::1/128").split(",") if x.strip()]
+ALLOWED_HOSTS = set(os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,::1").split(","))
+
+class RequestLimits:
+    """Single-process safeguards, not a provider-side monetary spending cap."""
+    def __init__(self, hourly=30, daily=200, concurrent=2):
+        self.hourly, self.daily, self.concurrent = hourly, daily, concurrent
+        self.lock = threading.Lock()
+        self.recent = {}
+        self.day, self.count, self.active = None, 0, 0
+
+    def acquire(self, address):
+        now = time.time()
+        with self.lock:
+            day = int(now // 86400)
+            if self.day != day:
+                self.day, self.count = day, 0
+            self.recent = {ip: deque(t for t in stamps if t > now - 3600)
+                           for ip, stamps in self.recent.items() if stamps and stamps[-1] > now - 3600}
+            stamps = self.recent.setdefault(address, deque())
+            if self.active >= self.concurrent:
+                return "当前使用人数较多，请稍后重试。"
+            if self.count >= self.daily:
+                return "今天的共享问答额度已用完，请明天再试。"
+            if len(stamps) >= self.hourly:
+                return "提问过于频繁，请稍后再试。"
+            stamps.append(now)
+            self.count += 1
+            self.active += 1
+            return None
+
+    def release(self):
+        with self.lock:
+            self.active -= 1
+
+REQUEST_LIMITS = RequestLimits(*(max(1, int(os.environ.get(name, default))) for name, default in
+    [("CHAT_REQUESTS_PER_HOUR", "30"), ("CHAT_REQUESTS_PER_DAY", "200"), ("CHAT_MAX_CONCURRENT", "2")]))
 # A deployment-time inventory, never a directory listing or extension-only permission.
 PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css",
     "assets/vendor/marked/lib/marked.umd.js",
@@ -297,7 +337,21 @@ class PresentationHandler(SimpleHTTPRequestHandler):
         if not head:
             self.wfile.write(body)
 
+    def allowed_client(self, head=False):
+        try:
+            address = ipaddress.ip_address(self.client_address[0])
+            hostname = urlsplit("//" + self.headers.get("Host", "")).hostname
+            allowed = hostname in ALLOWED_HOSTS and any(address in network for network in ALLOWED_NETWORKS)
+        except ValueError:
+            allowed = False
+        if not allowed:
+            self.close_connection = True
+            self.json_response(403, {"error": "仅允许指定内网地址访问。"}, head)
+        return allowed
+
     def serve_public(self, head=False):
+        if not self.allowed_client(head):
+            return
         name = unquote(urlsplit(self.path).path).lstrip("/") or HTML_NAME
         if name == "api/health":
             self.json_response(200, {"ok": True, "configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
@@ -321,7 +375,10 @@ class PresentationHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         streaming = False
+        acquired = False
         try:
+            if not self.allowed_client():
+                return
             origin = self.headers.get("Origin")
             if origin and origin != f"http://{self.headers.get('Host')}":
                 self.json_response(403, {"error": "不接受跨站请求。"})
@@ -333,6 +390,12 @@ class PresentationHandler(SimpleHTTPRequestHandler):
             if length <= 0 or length > MAX_REQUEST_BYTES:
                 self.json_response(413, {"error": "请求为空或超过 12 MiB。"})
                 return
+            limited = REQUEST_LIMITS.acquire(self.client_address[0])
+            if limited:
+                self.close_connection = True
+                self.json_response(429, {"error": limited})
+                return
+            acquired = True
             self.connection.settimeout(120)
             payload = json.loads(self.rfile.read(length))
             if not isinstance(payload, dict):
@@ -361,6 +424,9 @@ class PresentationHandler(SimpleHTTPRequestHandler):
                     self.json_response(400 if isinstance(exc, ValueError) else 502, {"error": message})
             except (BrokenPipeError, ConnectionResetError):
                 pass
+        finally:
+            if acquired:
+                REQUEST_LIMITS.release()
 
     def emit(self, event):
         self.wfile.write((json.dumps(event, ensure_ascii=False) + "\n").encode())

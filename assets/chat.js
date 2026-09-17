@@ -2,6 +2,8 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
+  // randomUUID is unavailable on ordinary LAN HTTP origins.
+  const uniqueId = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
   const make = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el; };
   const escape = s => { const el = make('span', '', s); return el.innerHTML; };
   const markdown = new marked.Marked({ gfm: true, breaks: false, renderer: {
@@ -14,7 +16,7 @@
   // Shield TeX before Markdown consumes backslashes, underscores or table pipes.
   function renderMarkdown(text) {
     const equations = [];
-    const prefix = 'PPTMATH' + crypto.randomUUID().replaceAll('-', '') + 'X';
+    const prefix = 'PPTMATH' + uniqueId() + 'X';
     const pattern = /```[^\n]*\n[\s\S]*?(?:```|$)|`[^`\n]*`|\\\[[\s\S]*?(?:\\\]|$)|\\\([\s\S]*?(?:\\\)|$)|\$\$[\s\S]*?(?:\$\$|$)|(?<![\\\w])\$(?!\s)(?:\\.|[^$\n])*?\$(?!\d)/g;
     const protectedText = text.replace(pattern, raw => {
       if (raw.startsWith('`')) return raw;
@@ -174,7 +176,7 @@
           let dataUrl = canvas.toDataURL('image/png');
           if (dataUrl.length > 1398104) dataUrl = canvas.toDataURL('image/jpeg', Math.max(.55,.9-attempt*.05));
           const size = Math.floor((dataUrl.split(',')[1].length*3)/4);
-          if(size<=1024*1024) return {id:crypto.randomUUID(),name:file.name||'剪贴板图片',dataUrl};
+          if(size<=1024*1024) return {id:uniqueId(),name:file.name||'剪贴板图片',dataUrl};
           scale *= .8;
         }
         throw Error('无法将图片压缩到 1 MiB，请选择更小的图片。');
