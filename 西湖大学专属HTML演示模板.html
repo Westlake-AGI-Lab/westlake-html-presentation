@@ -618,352 +618,6 @@
       background: rgba(255, 140, 0, .08);
     }
 
-    .agent-launcher {
-      position: fixed;
-      z-index: 92;
-      right: 18px;
-      top: 50%;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: 999px;
-      padding: 10px 15px 10px 10px;
-      color: #fff;
-      background: linear-gradient(135deg, var(--westlake-blue), var(--westlake-navy));
-      box-shadow: 0 16px 44px rgba(8, 23, 52, .28);
-      cursor: pointer;
-      transform: translateY(-50%);
-      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
-    }
-
-    .agent-launcher:hover {
-      transform: translateY(-50%) translateX(-3px);
-      box-shadow: 0 20px 54px rgba(8, 23, 52, .36);
-    }
-
-    .agent-launcher-mark {
-      display: grid;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border-radius: 50%;
-      color: var(--westlake-navy);
-      background: var(--westlake-orange);
-      font-size: 12px;
-      font-weight: 850;
-      letter-spacing: -.03em;
-    }
-
-    .agent-launcher-copy { font-size: 12px; font-weight: 760; white-space: nowrap; }
-    .agent-launcher {
-      top: auto; bottom: 82px; right: 20px;
-      width: 112px; height: 158px; padding: 0;
-      flex-direction: column; gap: 5px;
-      border: 0; border-radius: 0; background: none; box-shadow: none;
-      transform: none;
-    }
-    .agent-launcher:hover { transform: none; box-shadow: none; }
-    .agent-launcher { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
-    .agent-launcher.pet-dragging { cursor: grabbing; }
-    .pet-greeting {
-      position: absolute; bottom: calc(100% + 12px); right: 0;
-      width: min(224px, calc(100vw - 16px)); box-sizing: border-box;
-      padding: 12px 14px; border: 1px solid #dce3eb; border-radius: 8px;
-      background: #fff; color: #173e60; box-shadow: 0 5px 20px rgba(8,23,52,.13);
-      text-align: left; white-space: normal; pointer-events: none;
-      font-size: 13px; line-height: 1.5; letter-spacing: 0; font-weight: 400;
-    }
-    .pet-greeting strong { display: block; font-size: 14px; font-weight: 700; }
-    .agent-launcher.pet-dragging .agent-pet { animation: none; transform: rotate(6deg); }
-    .agent-launcher:focus-visible { outline: 3px solid var(--westlake-orange); outline-offset: 5px; }
-    .agent-launcher-copy { color: var(--westlake-navy); background: #fff; padding: 3px 6px; border-radius: 4px; }
-    .agent-pet { position: relative; display: block; width: 106px; height: 132px; flex: none; animation: petSway 4s ease-in-out infinite; transform-origin: 50% 95%; }
-    .agent-pet img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-    .pet-blink { animation: petBlink 12s step-end infinite; }
-    .pet-walk { animation: petWalk 12s step-end infinite; }
-    .agent-pet .pet-inspect { opacity: 0; }
-    .agent-launcher:is(:hover, :focus-visible) .agent-pet { animation: none; transform: rotate(-4deg); }
-    .agent-launcher:is(:hover, :focus-visible) .agent-pet img { opacity: 0; animation: none; }
-    .agent-launcher:is(:hover, :focus-visible) .agent-pet .pet-inspect { opacity: 1; }
-    @keyframes petSway { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
-    @keyframes petBlink { 0%, 21%, 46%, 100% { opacity: 0; } 20%, 45% { opacity: 1; } }
-    @keyframes petWalk { 0%, 80%, 90%, 100% { opacity: 0; } 82%, 88% { opacity: 1; } }
-    .agent-pet:has(.pet-walk) .pet-idle { animation: petIdle 12s step-end infinite; }
-    @keyframes petIdle { 0%, 80%, 90%, 100% { opacity: 1; } 82%, 88% { opacity: 0; } }
-    @media (prefers-reduced-motion: reduce) {
-      .agent-launcher .agent-pet, .agent-launcher .agent-pet img { animation: none; transition: none; }
-      .agent-pet .pet-blink, .agent-pet .pet-walk { opacity: 0; }
-    }
-    body.agent-open .agent-launcher { opacity: 0; pointer-events: none; }
-
-    .agent-scrim {
-      position: fixed;
-      z-index: 94;
-      inset: 0;
-      border: 0;
-      padding: 0;
-      background: rgba(7, 17, 35, .28);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .28s ease;
-      backdrop-filter: blur(1px);
-    }
-
-    body.agent-open .agent-scrim { opacity: 1; pointer-events: auto; }
-
-    .agent-panel {
-      position: fixed;
-      z-index: 95;
-      top: 0;
-      right: 0;
-      display: grid;
-      grid-template-rows: auto auto 1fr auto;
-      width: min(460px, 38vw);
-      height: 100svh;
-      color: #253143;
-      background: #f7f9fc;
-      box-shadow: -24px 0 80px rgba(7, 17, 35, .28);
-      transform: translateX(102%);
-      transition: transform .34s cubic-bezier(.2,.75,.2,1);
-    }
-
-    body.agent-open .agent-panel { transform: translateX(0); }
-
-    .agent-header {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 12px;
-      padding: 18px 18px 16px;
-      color: #fff;
-      background: var(--westlake-navy);
-    }
-
-    .agent-avatar {
-      display: grid;
-      width: 42px;
-      height: 42px;
-      place-items: center;
-      border-radius: 13px;
-      color: var(--westlake-navy);
-      background: transparent;
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .agent-avatar img { width: 42px; height: 52px; object-fit: contain; }
-
-    .agent-title { margin: 0; color: #fff; font-size: 16px; font-weight: 720; line-height: 1.25; }
-    .agent-subtitle { display: flex; align-items: center; gap: 7px; margin-top: 4px; color: rgba(255,255,255,.68); font-size: 11px; }
-
-    .agent-status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #aab4c6;
-      box-shadow: 0 0 0 3px rgba(170,180,198,.13);
-    }
-
-    .agent-status-dot.ready { background: #62d39f; box-shadow: 0 0 0 3px rgba(98,211,159,.15); }
-    .agent-status-dot.error { background: #ff8f7c; box-shadow: 0 0 0 3px rgba(255,143,124,.15); }
-
-    .agent-icon-button {
-      display: grid;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.13);
-      border-radius: 50%;
-      color: #fff;
-      background: transparent;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    .agent-icon-button:hover { background: rgba(255,255,255,.09); }
-
-    .agent-context-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-height: 48px;
-      padding: 10px 18px;
-      border-bottom: 1px solid #e1e6ed;
-      color: var(--westlake-blue);
-      background: #fff;
-      font-size: 12px;
-      font-weight: 680;
-    }
-
-    .agent-context-bar span:first-child {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .agent-page-pill {
-      flex: 0 0 auto;
-      border-radius: 999px;
-      padding: 5px 9px;
-      color: #fff;
-      background: var(--westlake-blue);
-      font-size: 10px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .agent-conversation {
-      min-height: 0;
-      overflow-y: auto;
-      padding: 18px;
-      scroll-behavior: smooth;
-    }
-
-    .agent-welcome {
-      margin-bottom: 14px;
-      border: 1px solid #dfe5ed;
-      border-radius: 16px;
-      padding: 15px 16px;
-      background: #fff;
-      box-shadow: 0 8px 28px rgba(25, 45, 80, .06);
-    }
-
-    .agent-welcome strong { display: block; margin-bottom: 7px; color: var(--westlake-blue); font-size: 14px; }
-    .agent-welcome p { margin: 0; color: #637080; font-size: 12px; line-height: 1.6; }
-
-    .agent-message {
-      display: flex;
-      margin: 12px 0;
-    }
-
-    .agent-message.user { justify-content: flex-end; }
-
-    .agent-message-bubble {
-      max-width: 88%;
-      border: 1px solid #dfe5ed;
-      border-radius: 16px 16px 16px 4px;
-      padding: 11px 13px;
-      color: #344052;
-      background: #fff;
-      box-shadow: 0 7px 22px rgba(25, 45, 80, .05);
-      font-size: 13px;
-      line-height: 1.62;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-
-    .agent-message.user .agent-message-bubble {
-      border-color: var(--westlake-blue);
-      border-radius: 16px 16px 4px 16px;
-      color: #fff;
-      background: var(--westlake-blue);
-    }
-
-    .agent-message-meta { display: block; margin-top: 6px; color: #9aa5b3; font-size: 9px; line-height: 1.3; }
-    .agent-message.user .agent-message-meta { color: rgba(255,255,255,.62); }
-
-    .agent-thinking { display: inline-flex; align-items: center; gap: 5px; }
-    .agent-thinking i { width: 5px; height: 5px; border-radius: 50%; background: var(--westlake-blue); animation: agentPulse 1s infinite ease-in-out; }
-    .agent-thinking i:nth-child(2) { animation-delay: .14s; }
-    .agent-thinking i:nth-child(3) { animation-delay: .28s; }
-    @keyframes agentPulse { 0%, 70%, 100% { opacity: .25; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-3px); } }
-
-    .agent-composer {
-      border-top: 1px solid #dfe5ed;
-      padding: 12px 14px max(14px, env(safe-area-inset-bottom));
-      background: #fff;
-    }
-
-    .agent-suggestions {
-      display: flex;
-      gap: 7px;
-      margin-bottom: 10px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
-    .agent-suggestions::-webkit-scrollbar { display: none; }
-
-    .agent-suggestion {
-      flex: 0 0 auto;
-      border: 1px solid #ccd7e5;
-      border-radius: 999px;
-      padding: 7px 10px;
-      color: var(--westlake-blue);
-      background: #f8fbff;
-      cursor: pointer;
-      font-size: 10px;
-      font-weight: 660;
-    }
-
-    .agent-suggestion:hover { border-color: var(--westlake-blue); background: #eef6ff; }
-
-    .agent-input-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: 9px;
-      border: 1px solid #cfd8e4;
-      border-radius: 15px;
-      padding: 8px 8px 8px 12px;
-      background: #fff;
-      box-shadow: 0 7px 22px rgba(25, 45, 80, .06);
-    }
-
-    .agent-input {
-      width: 100%;
-      max-height: 120px;
-      min-height: 38px;
-      resize: none;
-      border: 0;
-      outline: 0;
-      padding: 8px 0;
-      color: #263241;
-      background: transparent;
-      font: inherit;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .agent-input::placeholder { color: #98a3b2; }
-
-    .agent-send {
-      display: grid;
-      width: 40px;
-      height: 40px;
-      place-items: center;
-      border: 0;
-      border-radius: 12px;
-      color: #fff;
-      background: var(--westlake-orange);
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .agent-send:disabled { opacity: .45; cursor: wait; }
-
-    .agent-composer-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 8px;
-      color: #98a3b2;
-      font-size: 9px;
-    }
-
-    .agent-clear {
-      border: 0;
-      padding: 0;
-      color: #7f8a98;
-      background: transparent;
-      cursor: pointer;
-      font-size: 9px;
-    }
-
-    .agent-clear:hover { color: var(--westlake-blue); }
-
     .progress-track {
       position: fixed;
       z-index: 70;
@@ -1094,15 +748,14 @@
       .utility-controls { top: 11px; right: 11px; }
       .utility-button { padding: 7px 9px; }
       .agent-launcher { right: 12px; top: auto; bottom: 72px; transform: none; }
-      .agent-launcher:hover { transform: none; }
+      .agent-launcher:hover { transform: translateX(-2px); }
       .agent-panel { width: min(460px, 92vw); }
     }
 
     @media (max-width: 620px) {
       .agent-panel { width: 100vw; }
       .agent-launcher-copy { display: none; }
-      .agent-launcher { padding: 0; width: 72px; height: 96px; }
-      .agent-launcher .agent-pet { width: 72px; height: 96px; }
+      .agent-launcher { padding: 9px; }
       .agent-scrim { display: none; }
     }
 
@@ -1135,6 +788,8 @@
       [data-editable] { outline: 0 !important; }
     }
   </style>
+  <link rel="stylesheet" href="assets/chat.css">
+  <link rel="stylesheet" href="assets/pet.css">
 </head>
 <body>
   <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
@@ -1309,17 +964,8 @@
 
   <div class="edit-toast">编辑模式已开启 · 点击虚线区域直接修改 · 自动保存在本浏览器</div>
 
-  <button class="agent-launcher" id="agentLauncher" type="button" aria-label="打开 PPT 智能讲解" aria-controls="agentPanel" aria-expanded="false" title="打开 PPT 智能讲解（A）">
-    <span class="pet-greeting" id="petGreeting" lang="zh-CN">
-      <strong id="petGreetingTitle">你好，我是小西。</strong>
-      <span id="petGreetingQuestion">有什么可以帮你？</span>
-    </span>
-    <span class="agent-pet" aria-hidden="true">
-      <img class="pet-idle" src="assets/pet-idle.png" alt="" width="106" height="132">
-      <img class="pet-blink" src="assets/pet-blink.png" alt="" width="106" height="132">
-      <img class="pet-walk" src="assets/pet-walk.png" alt="" width="106" height="132">
-      <img class="pet-inspect" src="assets/pet-inspect.png" alt="" width="106" height="132">
-    </span>
+  <button class="agent-launcher" id="agentLauncher" type="button" aria-controls="agentPanel" aria-expanded="false" title="打开 PPT 智能讲解（A）">
+    <span class="agent-launcher-mark">AI</span>
     <span class="agent-launcher-copy">问问这份 PPT</span>
   </button>
 
@@ -1327,7 +973,7 @@
 
   <aside class="agent-panel" id="agentPanel" aria-label="PPT 智能讲解 Agent" aria-hidden="true">
     <header class="agent-header">
-      <div class="agent-avatar" aria-hidden="true"><img src="assets/pet-idle.png" alt="" width="42" height="52"></div>
+      <div class="agent-avatar">AI</div>
       <div>
         <h2 class="agent-title">PPT 智能讲解</h2>
         <div class="agent-subtitle">
@@ -1345,7 +991,7 @@
 
     <div class="agent-conversation" id="agentConversation" aria-live="polite">
       <div class="agent-welcome">
-        <strong>我已经阅读了整套演示文稿</strong>
+        <strong>整套 PPT 文字已就绪</strong>
         <p>我会优先结合你正在看的页面回答，也可以跨页解释概念、梳理结构或比较不同章节。回答中的“第 N 页”对应当前网页页码。</p>
       </div>
     </div>
@@ -1382,6 +1028,19 @@
 
   <div class="keyboard-hint">← → 翻页 · A 提问 · E 编辑 · N 讲稿 · F 全屏</div>
 
+  <script src="assets/vendor/marked/lib/marked.umd.js"></script>
+  <script src="assets/vendor/dompurify/dist/purify.min.js"></script>
+  <script>
+    window.MathJax = {
+      loader: {paths: {mathjax:'assets/vendor/mathjax/es5'}},
+      startup: {typeset:false},
+      tex: {packages:['base','ams','noundefined'], maxBuffer:20000},
+      chtml: {adaptiveCSS:false,fontURL:'assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2'}
+    };
+  </script>
+  <script async src="assets/vendor/mathjax/es5/tex-chtml.js" onload="window.dispatchEvent(new Event('ppt-math-ready'))"></script>
+  <script src="assets/i18n.js"></script>
+  <script src="assets/chat.js"></script>
   <script>
     (() => {
       const slides = Array.from(document.querySelectorAll('.slide'));
@@ -1394,27 +1053,13 @@
       const notesButton = document.getElementById('notesButton');
       const fullscreenButton = document.getElementById('fullscreenButton');
       const printButton = document.getElementById('printButton');
-      const agentLauncher = document.getElementById('agentLauncher');
-      const agentScrim = document.getElementById('agentScrim');
-      const agentPanel = document.getElementById('agentPanel');
-      const agentClose = document.getElementById('agentClose');
-      const agentStatusDot = document.getElementById('agentStatusDot');
-      const agentStatusText = document.getElementById('agentStatusText');
-      const agentCurrentTitle = document.getElementById('agentCurrentTitle');
-      const agentPagePill = document.getElementById('agentPagePill');
-      const agentConversation = document.getElementById('agentConversation');
-      const agentInput = document.getElementById('agentInput');
-      const agentSend = document.getElementById('agentSend');
-      const agentClear = document.getElementById('agentClear');
-      const agentModelLabel = document.getElementById('agentModelLabel');
       const storageKey = 'westlake-html-deck-edits-v1';
       const agentSessionKey = 'westlake-html-deck-agent-v1';
       let current = 0;
       let touchStartX = 0;
       let touchStartY = 0;
       let editMode = false;
-      let agentBusy = false;
-      let agentHistory = [];
+      let chat;
 
       const pad = (value) => String(value).padStart(2, '0');
 
@@ -1433,162 +1078,18 @@
         try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (_) {}
       }
 
-      function setAgentStatus(state, text, model = '') {
-        agentStatusDot.classList.remove('ready', 'error');
-        if (state === 'ready') agentStatusDot.classList.add('ready');
-        if (state === 'error') agentStatusDot.classList.add('error');
-        agentStatusText.textContent = text;
-        if (model) agentModelLabel.textContent = `OpenAI API · ${model}`;
-      }
-
-      function updateAgentPageContext() {
-        const title = slides[current].dataset.title || `第 ${current + 1} 页`;
-        agentCurrentTitle.textContent = `当前：${title}`;
-        agentPagePill.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
-      }
-
       function collectDeckContext() {
         return slides.map((slide, index) => {
           const copy = slide.cloneNode(true);
-          copy.querySelectorAll('.presenter-notes').forEach((note) => note.remove());
-          const notes = slide.querySelector('.presenter-notes')?.innerText.trim() || '';
-          const content = copy.innerText.replace(/\s+/g, ' ').trim();
-          return {
-            number: index + 1,
-            title: slide.dataset.title || `第 ${index + 1} 页`,
-            content,
-            notes
-          };
+          copy.querySelectorAll('.presenter-notes').forEach(note => note.remove());
+          return {number:index+1,title:slide.dataset.title||`第 ${index+1} 页`,
+            content:copy.textContent.replace(/\s+/g,' ').trim(),
+            notes:slide.querySelector('.presenter-notes')?.textContent.trim()||''};
         });
       }
-
-      function appendAgentMessage(role, text, meta = '') {
-        const row = document.createElement('div');
-        row.className = `agent-message ${role}`;
-        const bubble = document.createElement('div');
-        bubble.className = 'agent-message-bubble';
-        bubble.textContent = text;
-        if (meta) {
-          const metaLine = document.createElement('span');
-          metaLine.className = 'agent-message-meta';
-          metaLine.textContent = meta;
-          bubble.appendChild(metaLine);
-        }
-        row.appendChild(bubble);
-        agentConversation.appendChild(row);
-        agentConversation.scrollTop = agentConversation.scrollHeight;
-        return row;
-      }
-
-      function appendThinking() {
-        const row = document.createElement('div');
-        row.className = 'agent-message assistant';
-        const bubble = document.createElement('div');
-        bubble.className = 'agent-message-bubble';
-        const thinking = document.createElement('span');
-        thinking.className = 'agent-thinking';
-        thinking.setAttribute('aria-label', '正在思考');
-        thinking.innerHTML = '<i></i><i></i><i></i>';
-        bubble.appendChild(thinking);
-        row.appendChild(bubble);
-        agentConversation.appendChild(row);
-        agentConversation.scrollTop = agentConversation.scrollHeight;
-        return row;
-      }
-
-      function saveAgentHistory() {
-        try { sessionStorage.setItem(agentSessionKey, JSON.stringify(agentHistory.slice(-20))); } catch (_) {}
-      }
-
-      function restoreAgentHistory() {
-        try {
-          const saved = JSON.parse(sessionStorage.getItem(agentSessionKey) || '[]');
-          if (!Array.isArray(saved)) return;
-          agentHistory = saved.filter((item) => item && ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-20);
-          agentHistory.forEach((item) => appendAgentMessage(item.role, item.text, item.meta || ''));
-        } catch (_) {}
-      }
-
-      async function checkAgentHealth() {
-        try {
-          const response = await fetch('/api/health', { headers: { Accept: 'application/json' } });
-          if (!response.ok) throw new Error('服务不可用');
-          const data = await response.json();
-          if (data.configured) setAgentStatus('ready', '已阅读全部页面', data.model || 'OpenAI');
-          else setAgentStatus('error', '需要配置 API Key', data.model || 'OpenAI');
-        } catch (_) {
-          setAgentStatus('error', '请通过 server.py 启动', '服务未连接');
-        }
-      }
-
-      function openAgent() {
-        document.body.classList.add('agent-open');
-        agentLauncher.setAttribute('aria-expanded', 'true');
-        agentPanel.setAttribute('aria-hidden', 'false');
-        updateAgentPageContext();
-        checkAgentHealth();
-        window.setTimeout(() => agentInput.focus(), 280);
-      }
-
-      function closeAgent() {
-        document.body.classList.remove('agent-open');
-        agentLauncher.setAttribute('aria-expanded', 'false');
-        agentPanel.setAttribute('aria-hidden', 'true');
-        agentLauncher.focus();
-      }
-
-      async function askAgent(questionOverride = '') {
-        if (agentBusy) return;
-        const question = (questionOverride || agentInput.value).trim();
-        if (!question) return;
-
-        openAgent();
-        agentBusy = true;
-        agentSend.disabled = true;
-        agentInput.value = '';
-        agentInput.style.height = 'auto';
-
-        const questionPage = current;
-        const pageMeta = `提问时位于第 ${questionPage + 1} 页 · ${slides[questionPage].dataset.title}`;
-        appendAgentMessage('user', question, pageMeta);
-        const priorHistory = agentHistory.slice(-12);
-        agentHistory.push({ role: 'user', text: question, meta: pageMeta });
-        saveAgentHistory();
-        const thinking = appendThinking();
-
-        try {
-          setAgentStatus('', '正在结合 PPT 思考…');
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify({
-              question,
-              currentSlide: {
-                number: questionPage + 1,
-                title: slides[questionPage].dataset.title || `第 ${questionPage + 1} 页`
-              },
-              slides: collectDeckContext(),
-              history: priorHistory
-            })
-          });
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(data.error || `请求失败（${response.status}）`);
-          thinking.remove();
-          const answer = String(data.answer || '没有收到有效回答。');
-          appendAgentMessage('assistant', answer, `基于第 ${questionPage + 1} 页与整套 PPT`);
-          agentHistory.push({ role: 'assistant', text: answer, meta: `基于第 ${questionPage + 1} 页与整套 PPT` });
-          saveAgentHistory();
-          setAgentStatus('ready', '已阅读全部页面', data.model || 'OpenAI');
-        } catch (error) {
-          thinking.remove();
-          appendAgentMessage('assistant', `暂时无法回答：${error.message}\n\n请确认已通过 server.py 启动网页，并在服务端配置 OPENAI_API_KEY。`);
-          setAgentStatus('error', '服务连接失败');
-        } finally {
-          agentBusy = false;
-          agentSend.disabled = false;
-          agentInput.focus();
-        }
-      }
+      function openAgent() { chat.open(); }
+      function closeAgent() { chat.close(); }
+      function updateAgentPageContext() { chat?.update(); }
 
       function showSlide(index, updateHash = true) {
         current = Math.max(0, Math.min(slides.length - 1, index));
@@ -1619,9 +1120,12 @@
       }
 
       loadEdits();
-      restoreAgentHistory();
+      chat = new WestlakeChat({
+        storageKey: agentSessionKey,
+        getContext: () => ({slides:collectDeckContext(),currentSlide:{number:current+1,title:slides[current].dataset.title}}),
+        navigate: index => showSlide(index)
+      });
       showSlide(0, false);
-      checkAgentHealth();
 
       prevButton.addEventListener('click', previous);
       nextButton.addEventListener('click', next);
@@ -1639,115 +1143,8 @@
       });
       printButton.addEventListener('click', () => window.print());
       editables.forEach((element) => element.addEventListener('input', saveEdits));
-      const petPositionKey = 'westlake-pet-position-v1';
-      let petDrag = null;
-      let suppressPetClick = false;
-      const petGreeting = document.getElementById('petGreeting');
-      function updatePetLanguage() {
-        const english = document.documentElement.lang.toLowerCase().startsWith('en');
-        petGreeting.lang = english ? 'en' : 'zh-CN';
-        document.getElementById('petGreetingTitle').textContent = english ? "Hello, I'm Xiaoxi." : '你好，我是小西。';
-        document.getElementById('petGreetingQuestion').textContent = english ? 'How can I help you?' : '有什么可以帮你？';
-        agentLauncher.querySelector('.agent-launcher-copy').textContent = english ? 'Ask Xiaoxi' : '问问这份 PPT';
-        agentLauncher.setAttribute('aria-label', english ? 'Open presentation assistant' : '打开 PPT 智能讲解');
-        agentLauncher.title = english ? 'Open presentation assistant (A)' : '打开 PPT 智能讲解（A）';
-        positionPetGreeting();
-      }
-      new MutationObserver(updatePetLanguage).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-      function positionPetGreeting() {
-        const rect = agentLauncher.getBoundingClientRect();
-        const width = petGreeting.offsetWidth;
-        const left = Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8));
-        petGreeting.style.left = `${left - rect.left}px`;
-        petGreeting.style.right = 'auto';
-        const height = petGreeting.offsetHeight;
-        const preferredTop = rect.top >= height + 20 ? rect.top - height - 12 : rect.bottom + 12;
-        const top = Math.max(8, Math.min(preferredTop, window.innerHeight - height - 8));
-        petGreeting.style.top = `${top - rect.top}px`;
-        petGreeting.style.bottom = 'auto';
-      }
-      function placePet(x, y) {
-        const margin = 8;
-        const left = Math.max(margin, Math.min(x, window.innerWidth - agentLauncher.offsetWidth - margin));
-        const top = Math.max(margin, Math.min(y, window.innerHeight - agentLauncher.offsetHeight - margin));
-        Object.assign(agentLauncher.style, { left: `${left}px`, top: `${top}px`, right: 'auto', bottom: 'auto' });
-        positionPetGreeting();
-        return { x: left, y: top };
-      }
-      function savePetPosition(position) {
-        try { localStorage.setItem(petPositionKey, JSON.stringify(position)); } catch (_) {}
-      }
-      try {
-        const saved = JSON.parse(localStorage.getItem(petPositionKey));
-        if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) placePet(saved.x, saved.y);
-      } catch (_) {}
-      agentLauncher.addEventListener('pointerdown', (event) => {
-        if (!event.isPrimary || event.button !== 0) return;
-        const rect = agentLauncher.getBoundingClientRect();
-        suppressPetClick = false;
-        petDrag = { id: event.pointerId, x: event.clientX, y: event.clientY, left: rect.left, top: rect.top, moved: false };
-        agentLauncher.setPointerCapture(event.pointerId);
-      });
-      agentLauncher.addEventListener('pointermove', (event) => {
-        if (!petDrag || petDrag.id !== event.pointerId) return;
-        const dx = event.clientX - petDrag.x;
-        const dy = event.clientY - petDrag.y;
-        if (!petDrag.moved && Math.hypot(dx, dy) < 6) return;
-        petDrag.moved = true;
-        agentLauncher.classList.add('pet-dragging');
-        placePet(petDrag.left + dx, petDrag.top + dy);
-      });
-      function finishPetDrag(event) {
-        if (!petDrag || petDrag.id !== event.pointerId) return;
-        suppressPetClick = petDrag.moved;
-        if (petDrag.moved) {
-          const rect = agentLauncher.getBoundingClientRect();
-          savePetPosition(placePet(rect.left, rect.top));
-        }
-        petDrag = null;
-        agentLauncher.classList.remove('pet-dragging');
-        if (agentLauncher.hasPointerCapture(event.pointerId)) agentLauncher.releasePointerCapture(event.pointerId);
-      }
-      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((name) => agentLauncher.addEventListener(name, finishPetDrag));
-      agentLauncher.addEventListener('click', (event) => {
-        // Pointer release after dragging must not open the conversation.
-        if (suppressPetClick && event.detail !== 0) {
-          suppressPetClick = false;
-          event.preventDefault();
-          return;
-        }
-        openAgent();
-      });
-      window.addEventListener('resize', () => {
-        if (!agentLauncher.style.left) { positionPetGreeting(); return; }
-        const rect = agentLauncher.getBoundingClientRect();
-        savePetPosition(placePet(rect.left, rect.top));
-      });
-      updatePetLanguage();
-      agentScrim.addEventListener('click', closeAgent);
-      agentClose.addEventListener('click', closeAgent);
-      agentSend.addEventListener('click', () => askAgent());
-      agentClear.addEventListener('click', () => {
-        agentHistory = [];
-        saveAgentHistory();
-        agentConversation.querySelectorAll('.agent-message').forEach((message) => message.remove());
-        appendAgentMessage('assistant', '对话已清空。你可以继续询问当前页或整套演示内容。');
-      });
-      document.querySelectorAll('.agent-suggestion').forEach((button) => {
-        button.addEventListener('click', () => askAgent(button.dataset.question || button.textContent));
-      });
-      agentInput.addEventListener('input', () => {
-        agentInput.style.height = 'auto';
-        agentInput.style.height = `${Math.min(agentInput.scrollHeight, 120)}px`;
-      });
-      agentInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
-          event.preventDefault();
-          askAgent();
-        }
-      });
-
       document.addEventListener('keydown', (event) => {
+        if (event.target.closest('#agentPanel, .chat-image-dialog') && event.key !== 'Escape') return;
         const typingTarget = event.target.closest('input, textarea, [contenteditable="true"]');
         if (typingTarget) return;
         if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {
@@ -1785,7 +1182,7 @@
       }, { passive: true });
 
       document.addEventListener('touchend', (event) => {
-        if (editMode) return;
+        if (editMode || event.target.closest('#agentPanel, .chat-image-dialog')) return;
         const touch = event.changedTouches[0];
         const dx = touch.clientX - touchStartX;
         const dy = touch.clientY - touchStartY;
@@ -1801,5 +1198,6 @@
       showSlide(Number.isFinite(hashIndex) ? hashIndex : 0, false);
     })();
   </script>
+  <script src="assets/pet.js"></script>
 </body>
 </html>
