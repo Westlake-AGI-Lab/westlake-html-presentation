@@ -1,10 +1,35 @@
 # Local verification / 本地验证记录
 
+## 发布前回归 / Pre-release regression (2026-09-18)
+
+中英文 README 已对齐当前课堂、档案、部署依赖及安全边界。重新运行 21 项 Python 测试、ZIP/本机保存及配额失败模拟测试、双语字典测试，全部通过；未新增付费 AI 调用。此前记录中的“未推送”仅描述当时的实现验证阶段，本次按用户要求发布到 GitHub。Diffusion 稿件及私有数据仍排除在仓库外。
+
+Both READMEs now reflect classroom/archive features, deployment dependencies and security boundaries. All 21 Python tests, ZIP/local-save/quota-failure simulations and bilingual dictionary tests pass again; no additional paid AI calls were made. Earlier “not pushed” statements describe the implementation stage; this release is explicitly requested by the user. The Diffusion deck and private data remain outside the repository.
+
 日期 / Date: 2026-09-17。涵盖本地验证和授权内网部署；Diffusion 稿件不在 GitHub 发布范围内。 / Covers local verification and authorized LAN deployment; the Diffusion deck is excluded from GitHub publication.
 
 ## 内网部署追加验证 / LAN deployment verification
 
+### 互动课堂与学习档案（2026-09-17）/ Classrooms and learning archives
+
+- 本机与 4090 均通过 21 项 Python 测试；ZIP 校验与 i18n Node 测试通过。覆盖教师权限、跨课堂/稿件隔离、同源校验、成员令牌、请求幂等、点赞/弹幕限流、禁言、重启、保留期限和静态源码保护。
+- 浏览器在本机完成教师登录、创建课堂和二维码显示；学生点赞、困惑反馈、弹幕投影、教师关闭弹幕及同步翻页正常。线上 Diffusion 确认学生默认跟随、自由翻页/返回教师页、点赞、重启后弹幕关闭。
+- 4090 实际 HTTP 模拟 50 名成员，150 次状态读取耗时约 0.051 秒（服务器本机环回地址，非校园网络延迟）；无付费 AI 调用。临时测试课堂已删除。
+- 本机及线上导入带图片、公式和未完成回复的 ZIP，刷新后图片和回复恢复；本机已触发完整 ZIP 下载。损坏测试图片、路径穿越、超限和不完整 ZIP 被拒绝。源码静态白名单覆盖新增脚本和本地依赖。
+- 尚未实测：实际手机浏览器（工具视口覆盖未生效）、磁盘真实耗尽、长时间真实断网、完整打印输出及重新上传“下载所得 ZIP”的第二次往返。本轮未重新调用付费图片问答；原接口由模拟测试回归。不能把本次验证解读为所有设备与异常场景均通过。
+- 线上已备份旧版至 /home/user/apps/westlake-ppt-classroom-backup.BuudUm；教师口令只在私有配置和权限 600 的 access 文件，SQLite 位于 /home/user/.local/share/westlake-ppt。未更换 API Key/模型，原 pdf-report-tool 保持 active。本轮未提交或推送 Git。
+
+English summary: 21 Python tests pass locally and on the 4090. ZIP and i18n checks pass. Browser checks covered teacher login/QR creation, student feedback/likes, projected danmaku, teacher controls and page following. Live HTTP tests exercised 50 members and 150 reads with no paid AI calls. Image/formula/incomplete-message archives survived reload locally and online. Real mobile viewports, actual quota exhaustion, prolonged outages, full print output, and re-importing the downloaded ZIP itself remain unverified. Prior code/config/service were backed up; no Git commit or push was made.
+
+### 4090 同步完成（2026-09-17）/ Deployment completed
+
+- 此条更新取代下文之前的“待部署”状态：连接已恢复，双语及缩略图版本已部署并重启 westlake-ppt；原 pdf-report-tool 服务仍 active。备份位于服务器 /home/user/apps/westlake-ppt-backup.P4AC5E。
+- 13 项服务器测试通过；健康接口正常，源码路径返回 404；远端 Diffusion HTML 与缩略图脚本 SHA-256 和本地一致。
+- 浏览器验证缩略图预览、第 5 页跳转、英文切换；真实请求以英文完成纠错 0.08 → 0.4，公式与 Slide 5 引用正常。/ Live thumbnails, slide navigation, English controls and English Q&A with rendered math passed. Earlier connectivity failures below are historical, not current deployment status.
+
 ### 双语界面本地验证 / Local bilingual verification
+
+- 缩略图导航追加：本地 Diffusion 验证真实排版预览、第 5 页点击跳转、End + Enter 跳到第 16 页、中英文切换、390px 窄屏选页自动收起；浏览器错误日志为空。预览隔离在 Shadow DOM，不进入主稿选择器与聊天上下文。服务器 SSH 再次连接超时，缩略图更新仍待部署。/ Thumbnail checks: rendered slide previews, click to slide 5, End + Enter to slide 16, bilingual controls, and auto-close after selection at 390px passed locally; no browser errors. Shadow DOM isolates previews from deck queries and chat context. SSH timed out again; deployment is pending.
 
 - 新增 `assets/i18n.js`；工具栏和聊天标题栏均可切换中英文，浏览器刷新后保留语言。中文输入与历史英文回答不会被切换操作改写。/ Both language controls and reload persistence were verified; typed Chinese and previous English answers remain unchanged.
 - 本地 Diffusion 真实调用：英文模式输入中文问题，模型返回英文纠错与公式；`Slide 4` 引用可以跳转且聊天保持打开。390px 窄屏界面可用。/ Live local Diffusion Q&A answered a Chinese question in English, rendered equations, and supported Slide 4 navigation with the panel open; 390px layout was checked.

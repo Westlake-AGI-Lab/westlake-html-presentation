@@ -2,6 +2,9 @@
 (() => {
   'use strict';
   const dictionary = {
+    '分享片段给老师':'Share excerpt with teacher',
+    '已保存到本机':'Saved on this device',
+    '仅本次会话；打开学习档案可启用本机保存。':'Session only; open Learning archive to enable local saving.',
     '问问这份 PPT':'Ask this PPT','打开 PPT 智能讲解（A）':'Open PPT assistant (A)',
     '关闭 PPT 智能讲解':'Close PPT assistant','关闭智能讲解':'Close assistant','PPT 智能讲解 Agent':'PPT assistant','PPT 智能讲解':'PPT assistant',
     '正在连接服务…':'Connecting…','整套 PPT 文字已就绪':'Presentation text is ready',
@@ -67,7 +70,7 @@
       .replace(/^上游接口 HTTP (\d+)，请检查密钥、额度及模型图片\/流式支持。$/, 'Provider HTTP $1. Check credentials, quota and model image/streaming support.')
       .split(' · ').map(part => dictionary[part] || part).join(' · ');
   }
-  const roots = '.utility-controls,.deck-controls,.keyboard-hint,.edit-toast,.agent-header,.agent-context-bar,.agent-welcome,.agent-composer,.agent-launcher,.agent-message-meta,.chat-expired,.chat-placeholder,.chat-image-dialog,.chat-action,#agentLatest';
+  const roots = '.utility-controls,.deck-controls,.keyboard-hint,.edit-toast,.agent-header,.agent-context-bar,.agent-welcome,.agent-composer,.agent-launcher,.agent-message-meta,.chat-expired,.chat-placeholder,.chat-image-dialog,.chat-action,.archive-status,#agentLatest';
   const originals = new WeakMap();
   function textNode(node) {
     let record = originals.get(node);

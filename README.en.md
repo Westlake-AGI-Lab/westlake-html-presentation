@@ -1,10 +1,48 @@
 # Westlake University HTML Presentation · PPT Q&A Agent
 
+## Interactive classrooms and local learning archives
+
+Open `/?mode=teacher`, sign in with the private teacher password, create a class and share the student link or QR code. Open “Projection or preview” separately for the projector. Students join anonymously with a class code, follow the teacher by default, pause following when navigating independently, and can return to the teacher's slide. The teacher dashboard is never projected. Classroom mode uses the original deck rather than solo-mode browser edits.
+
+- Each student's latest feedback per slide replaces their earlier choice and can be withdrawn. Questions allow 500 characters and are teacher-only. Private AI chats are not shared automatically; students can preview and confirm a single text excerpt to share.
+- Likes start enabled, allow one per member every 2 seconds, and count actions, not people, against the teacher's current slide. Danmaku starts disabled; when enabled it appears directly without moderation. Limits: 60 characters, one per member per 10 seconds and one per classroom per 2 seconds, with an additional two-post limit per 8 seconds for lane capacity. Plain text only; teachers can disable, clear, delete or mute. Closing, navigating and reconnecting never replay old animations.
+- State polls approximately every 2 seconds. Projection shows slides, edge likes and at most two danmaku lanes. Reduced-motion preferences are respected; overlays are excluded from print and thumbnails. Congestion rejects posts or skips excess animations instead of building a backlog. Target latency is under 3 seconds on a healthy network, not a hard real-time guarantee.
+- Open Learning archive in the AI panel. After initial consent, IndexedDB automatically saves text and compressed images, streamed text once per second and final state immediately. Full archives are no longer limited to 20 messages. Create, rename, restore and confirm deletion of conversations. Without consent, only the last 20 text messages are stored temporarily; old images cannot be recovered. AI context still uses the latest 12 messages and at most 6 images; start a new conversation when over the limit.
+- Download a complete current-conversation ZIP containing versioned manifest.json, conversations.json and attachments/. Markdown is readable but excludes image bytes. Imports create new conversations, never overwrite existing data, and validate paths, formats, images and compression with limits of 100 MiB and 1,000 entries. Different deck versions warn about slide references. Archives exclude API and teacher credentials.
+- Browser clearing, private browsing and storage quotas can cause loss or save failures. Watch the save status and download independent backups. Other users of the same browser may access records. Different origins, localhost addresses and ports do not synchronize automatically.
+
+### Teacher configuration, deployment and interfaces
+
+Initialize private files outside the repository, preserving existing API credentials, model and provider:
+
+```bash
+python3 configure_classroom.py --config /absolute/private/config.json --data-dir /absolute/private/classroom-data --access-file /absolute/private/teacher-access.txt
+PPT_CONFIG_PATH=/absolute/private/config.json python3 server.py
+```
+
+The script generates a random password only if absent, stores it in mode-600 private files and never prints it. Private JSON accepts TEACHER_PASSWORD and CLASSROOM_DATA_DIR; environment variables take precedence. Restart after changes. Never commit or distribute these files or include credentials in student links.
+
+SQLite in CLASSROOM_DATA_DIR stores classes, explicit feedback, danmaku and like statistics, not private AI conversations. Ended classes are retained for 30 days with request-time cleanup; teachers can delete early and export JSON/CSV. Restart preserves records but expires teacher sessions, disables danmaku and discards old animations. Allow writes only to that data directory in systemd ReadWritePaths and create it before restarting. Backups/rollbacks must preserve private configuration, data and previous code.
+
+New /api/classroom/ endpoints: POST login/logout/create/join/control/feedback/question/like/danmaku; GET rooms/state/export. Teachers use HttpOnly, SameSite=Strict cookies; students use random membership tokens validated against the classroom. POST requires same origin with a 16 KiB body limit; requestId provides submission deduplication. State accepts room, role, since and boot and returns versions, cursors and incremental events. teacher=1 requires a teacher session. Existing /api/chat remains compatible; classroom requests add X-Classroom-Room and X-Classroom-Token for per-member limits, while solo requests retain IP limits. Existing global defaults of 200 requests/day and 2 concurrent requests are unchanged.
+
+This is trusted-LAN HTTP, without transport encryption, real-name accounts or verified student identities. Anonymity is not untraceability. Teacher passwords protect management endpoints; hidden notes do not make static slide files confidential. Do not use on the public internet or with sensitive/exam-confidential content.
+
+New vendored dependencies: fflate 0.8.2 for ZIP and qrcode-generator 1.4.4 for QR codes; no runtime CDN. Run node tests/test_archive.cjs and backend tests covering permissions, deduplication, restart, retention and 50-member concurrent reads without paid AI calls.
+
+Deployment status (2026-09-17): the 4090 Diffusion example includes classrooms, likes/danmaku and learning archives. Teacher entry: http://10.21.3.45:8765/?mode=teacher ; the original presentation URL is unchanged. All 21 backend tests pass; live following, likes and image-archive restoration after reload were verified. Campus network or VPN is required. Actual mobile devices, real storage exhaustion and full print output remain untested. The teacher password is in the deployer's private access file, never in student links.
+
+## Slide thumbnail navigation
+
+Click the 44×44 bottom-left icon to open the slide thumbnails and jump to any slide. The current slide is highlighted in orange and stays synchronized with navigation. The panel stays open on desktop and closes after selection on narrow screens (≤600px). Arrow keys and Home / End move thumbnail focus; Enter / Space selects; Escape closes. Controls follow the Chinese/English setting without translating slide content.
+
+Previews scale the actual layout at the current viewport ratio and rebuild on opening or resizing; reopen after editing to refresh. They exclude speaker notes and chat context, do not upload or save screenshots, and are hidden when printing. Deploy shared `assets/thumbnails.js` and `assets/thumbnails.css` together and restart the backend to load the updated static-file allowlist.
+
 [中文](README.md) | English
 
 A lightweight browser-based slide template for teaching, research talks, and meetings in a Westlake University visual style, with an AI sidebar that answers questions about the presentation and the reader's current slide.
 
-## Current status (2026-09-17)
+## Current status (2026-09-18)
 
 ### One-click Chinese / English UI
 
@@ -15,18 +53,18 @@ Each question freezes `language: "zh" | "en"` (omitted legacy requests default t
 - **This GitHub repository** contains the reusable 10-slide Westlake template, shared chat components, Python backend, deployment example, and tests.
 - **Internal demo**: [Diffusion theory introduction](http://10.21.3.45:8765/) serves a 16-slide teaching example, not the blank template. It requires campus networking or a VPN that can reach the server; it is not a public-internet URL.
 - **Publication boundary**: the Diffusion deck is maintained outside this repository and deployed separately, excluded from the generic release bundle. Browser edits are not automatically published to other readers.
-- **Verified**: compact AI launcher, deployed streaming Q&A and math rendering, and corrective feedback on Diffusion slide 5. All 12 backend tests passed locally and on the server. See [verification coverage and remaining checks](tests/VERIFICATION.md).
-- **Security**: API credentials remain in a private server directory. LAN HTTP is unencrypted and has no account login; shared chat consumes the operator's API quota. Share only with trusted readers and avoid sensitive material.
+- **Verified**: thumbnails, bilingual controls, interactive classrooms and learning archives are deployed. All 21 backend tests, archive validation and bilingual tests pass. Live streaming Q&A and math rendering were verified previously. See [verification coverage and remaining checks](tests/VERIFICATION.md).
+- **Security**: API credentials remain in a private server directory. Teacher management requires a private password; students join anonymously. There are no real-name accounts or HTTPS. Shared chat consumes the operator's API quota. Share only with trusted readers and avoid sensitive material.
 
 ## 1. Background
 
 ### Internal-network sharing
 
-`deploy/westlake-ppt.service` runs an isolated Python virtual environment in `~/apps/westlake-ppt` as a systemd user service on port 8765. Deploy the chosen HTML deck, its assets, server.py and requirements.txt, keeping the entry filename `西湖大学专属HTML演示模板.html`. The server currently substitutes the separately maintained Diffusion deck; GitHub retains the reusable template. Do not commit the Diffusion deck, conversations or credentials. Set `PPT_CONFIG_PATH` to private credentials outside the source tree (the example uses `~/.config/westlake-ppt/config.json`, mode 600).
+`deploy/westlake-ppt.service` runs an isolated Python virtual environment in `~/apps/westlake-ppt` as a systemd user service on port 8765. Deploy the chosen HTML deck, its assets, server.py, classroom.py and requirements.txt (plus configure_classroom.py for initial setup), keeping the entry filename `西湖大学专属HTML演示模板.html`. The server currently substitutes the separately maintained Diffusion deck; GitHub retains the reusable template. Do not commit the Diffusion deck, conversations or credentials. Set `PPT_CONFIG_PATH` to private credentials outside the source tree (the example uses `~/.config/westlake-ppt/config.json`, mode 600).
 
 Install dependencies, place the service in `~/.config/systemd/user/`, adjust `ALLOWED_HOSTS` and `ALLOWED_NETWORKS`, then run `systemctl --user daemon-reload` and `systemctl --user enable --now westlake-ppt`. User linger is needed to keep it running after SSH logout. Restart with `systemctl --user restart westlake-ppt`; inspect logs with `journalctl --user -u westlake-ppt`. Other applications remain untouched.
 
-The default allows localhost only; the LAN example explicitly permits private networks and validates Host, without trusting client-supplied forwarding headers. Chat limits default to 30 requests per IP per hour, 200 requests globally per UTC day, and 2 concurrent requests. Configure `CHAT_REQUESTS_PER_HOUR`, `CHAT_REQUESTS_PER_DAY`, and `CHAT_MAX_CONCURRENT`. Counts are in memory, reset on restart, and include failed attempts. These are not monetary spending caps; set a provider-side budget separately.
+The default allows localhost only; the LAN example explicitly permits private networks and validates Host, without trusting client-supplied forwarding headers. Chat limits default to 30 requests per hour per IP in solo mode or per participant in classroom mode, 200 requests globally per UTC day, and 2 concurrent requests. Configure `CHAT_REQUESTS_PER_HOUR`, `CHAT_REQUESTS_PER_DAY`, and `CHAT_MAX_CONCURRENT`. Counts are in memory, reset on restart, and include failed attempts. These are not monetary spending caps; set a provider-side budget separately.
 
 LAN HTTP is unencrypted and has no account authentication. Use only within a trusted campus network/VPN, avoid sensitive uploads, and do not expose the port publicly. Screenshot paste is browser-permission-dependent; use the upload button if unavailable. Client IDs use `crypto.getRandomValues` for LAN HTTP compatibility. Public hosting requires HTTPS, authentication, and durable rate limiting.
 
@@ -134,7 +172,7 @@ On macOS, after configuring the key and installing dependencies, double-click `�
 | Export PDF | Select Print, then save as PDF in the browser dialog |
 | Deep-link to a slide | Append `#6`, e.g. `http://127.0.0.1:8765/#6` |
 
-Browser edits do not modify the HTML file and will not be included in a GitHub upload. Edit the HTML source to share lasting changes. Chat uses `sessionStorage` for the current browser tab session and can be removed with the clear-conversation button. There is no server-side conversation database.
+Browser edits do not modify the HTML file and will not be included in a GitHub upload. Edit the HTML source to share lasting changes. With learning archives enabled, text and images persist in IndexedDB; otherwise sessionStorage temporarily retains text only. The server does not archive AI chats; classroom feedback is stored separately in SQLite.
 
 Copy the project for a new presentation. Edit `.slide` elements and their `data-title`; editable text uses `data-editable`, and notes use `.presenter-notes`. Check hard-coded footer page numbers when adding or removing slides. Brand colors are in CSS `:root`; update both chart `--value` and displayed numbers when changing data.
 
@@ -149,11 +187,15 @@ For multiple decks on the same browser origin, give each deck distinct `storageK
 ├── AGENTS.md                       # Development and documentation rules
 ├── 西湖大学专属HTML演示模板.html       # Slides, styles, and browser logic
 ├── server.py                       # Static server and AI proxy
+├── classroom.py                    # Classroom authorization, SQLite and interaction events
+├── configure_classroom.py          # Initialize private teacher configuration outside the repo
+├── tests/                          # Backend, archive and bilingual regression tests
+├── deploy/                         # LAN systemd service example
 ├── 启动智能PPT.command               # macOS launcher
 ├── 使用说明.md                      # Short Chinese usage guide
 ├── .env.example                    # Placeholder configuration
 ├── .gitignore
-└── assets/                         # Logo and example images
+└── assets/                         # Brand images, chat, classroom, archives, thumbnails and vendored dependencies
 ```
 
 Frontend entry points: `collectDeckContext()` extracts content, `WestlakeChat.ask()` in `assets/chat.js` submits questions, `showSlide()` updates the active slide, and `saveEdits()` persists browser edits. Backend entry points: `AGENT_INSTRUCTIONS` defines response guidance, `build_deck_context()` / `build_request()` assemble context, `call_openai()` calls the provider, and `PresentationHandler` handles HTTP.
@@ -182,7 +224,10 @@ Current limits: 12 MiB request body; up to 80 slides; 10,000 text and 5,000 note
 ### Verification and troubleshooting
 
 ```bash
-python3 -m py_compile server.py
+python3 -m py_compile server.py classroom.py configure_classroom.py
+python3 -m unittest discover -s tests -v
+node tests/test_archive.cjs
+node tests/test_i18n.cjs
 curl http://127.0.0.1:8765/api/health
 ```
 
@@ -198,7 +243,7 @@ Manual regression checks: navigation, fullscreen, editing and restoration after 
 
 Each question sends extractable deck text, including speaker notes, the current slide, and recent chat to the configured API provider. Confirm that these materials may be shared externally. Requests set `store: false`; this does not guarantee that a provider keeps no logs or retains no data. Review its policies independently.
 
-The server is a local development tool, not a production public service. It lacks login, quotas, rate limiting, and robust multi-user isolation. Existing cross-site checks and GET / HEAD static-resource allowlists do not replace production security; do not expose it directly to the public internet. Public deployment requires authentication, rate limits, HTTPS, reverse-proxy adaptations including Origin validation, request validation, sanitized logging, and review of all HTTP methods.
+The server targets a trusted LAN, not the public internet. It includes teacher-password authentication, classroom membership isolation, rate limits, cross-site checks and static allowlists, but no HTTPS or real-name identity system. Public deployment still requires stronger authentication, HTTPS, proxy adaptation and security review.
 
 Before sharing:
 
@@ -218,7 +263,7 @@ Every change to features, APIs, configuration, startup steps, or known limitatio
 A compact 44×44 px circular AI icon near the bottom-right opens chat. Click it or press A; a hover tooltip replaces the large text button.
 
 - Add PNG/JPEG/WebP images with the file picker, drag/drop, or clipboard paste. Up to 3 images per message, originals ≤5 MiB each; the browser resizes to a maximum edge of 2048 pixels and ≤1 MiB per sent image. Preview or remove before sending. Image-only questions get a default explanation prompt.
-- The latest 12 context messages may contain up to 6 images total; clear the conversation when over the limit. Image bytes stay in page memory only and are not stored by the server. Reload restores text with explicit expired-image notices; expired attachments are not treated as available.
+- The latest 12 context messages may contain up to 6 images total; start or clear a conversation when over the limit. With archives enabled, images persist locally in IndexedDB and survive reload. Otherwise images remain in page memory and expire on reload. The server does not archive uploaded images.
 - Markdown headings, lists, quotes, tables, code, and `$…$`, `$$…$$`, `\\(...\\)`, `\\[...\\]` math are rendered locally. Wide content scrolls horizontally. Invalid math remains readable source. Raw HTML is escaped, remote Markdown images do not load, and unsafe links are removed.
 - Streaming supports Stop. Partial answers remain visibly incomplete after cancellation, timeouts, or failures. Retry regenerates only the latest failed/stopped request using its frozen page and attachments, without duplicating the user message. No automatic continuation or paid retries.
 - Copy raw Markdown or code, export the conversation without image bytes, expand the reading panel, pause automatic scrolling while reading older content, return to latest, and click valid slide citations. Citations are model-generated, not independently verified.

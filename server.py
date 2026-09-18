@@ -14,18 +14,21 @@ import threading
 import time
 from collections import deque
 import warnings
+from http.cookies import SimpleCookie
+from html.parser import HTMLParser
+from classroom import Classroom, ClassroomError
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib import request as urlrequest, error as urlerror
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote, urlsplit, parse_qsl
 from PIL import Image, UnidentifiedImageError
 
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = Path(os.environ.get("PPT_CONFIG_PATH", str(Path.home() / ".config" / "westlake-ppt-agent" / "config.json")))
 if CONFIG_PATH.exists():
     private_config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
-    for name in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_API_BASE"):
+    for name in ("OPENAI_API_KEY", "OPENAI_MODEL", "OPENAI_API_BASE", "TEACHER_PASSWORD", "CLASSROOM_DATA_DIR"):
         if private_config.get(name):
             os.environ.setdefault(name, str(private_config[name]))
 HOST = os.environ.get("HOST", "127.0.0.1")
@@ -77,6 +80,9 @@ REQUEST_LIMITS = RequestLimits(*(max(1, int(os.environ.get(name, default))) for 
     [("CHAT_REQUESTS_PER_HOUR", "30"), ("CHAT_REQUESTS_PER_DAY", "200"), ("CHAT_MAX_CONCURRENT", "2")]))
 # A deployment-time inventory, never a directory listing or extension-only permission.
 PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js",
+    "assets/thumbnails.js", "assets/thumbnails.css",
+    "assets/classroom.js", "assets/classroom.css", "assets/archive.js",
+    "assets/vendor/fflate/fflate.js", "assets/vendor/qrcode/qrcode.js",
     "assets/vendor/marked/lib/marked.umd.js",
     "assets/vendor/dompurify/dist/purify.min.js",
     "assets/vendor/mathjax/es5/tex-chtml.js"}
@@ -84,6 +90,24 @@ PUBLIC_FILES.update(str(p.relative_to(BASE_DIR)) for p in (BASE_DIR / "assets").
                     if p.is_file() and p.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"})
 PUBLIC_FILES.update(str(p.relative_to(BASE_DIR)) for p in
     (BASE_DIR / "assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2").glob("*.woff"))
+
+CLASSROOM = None
+CLASSROOM_LOCK = threading.Lock()
+def classroom():
+    global CLASSROOM
+    with CLASSROOM_LOCK:
+        if CLASSROOM is None:
+            class Slides(HTMLParser):
+                def __init__(self):
+                    super().__init__(); self.titles = []
+                def handle_starttag(self, tag, attrs):
+                    attrs = dict(attrs)
+                    if tag == 'section' and 'slide' in attrs.get('class','').split():
+                        self.titles.append(attrs.get('data-title', str(len(self.titles)+1)))
+            parser = Slides(); parser.feed((BASE_DIR / HTML_NAME).read_text())
+            CLASSROOM = Classroom(os.environ.get('CLASSROOM_DATA_DIR', str(Path.home()/'.local/share/westlake-ppt'/BASE_DIR.name)),
+                os.environ.get('TEACHER_PASSWORD',''), BASE_DIR.name, parser.titles)
+        return CLASSROOM
 
 AGENT_INSTRUCTIONS = r"""你是西湖大学网页演示文稿的智能讲解 Agent。
 结合提供的整套逐页文字、讲稿和提问时所在页回答，优先解释当前页。
@@ -326,6 +350,27 @@ def stream_response(body, emit):
         thread.join(timeout=.2)
 
 class PresentationHandler(SimpleHTTPRequestHandler):
+    def log_request(self, code='-', size='-'):
+        # Successful 2-second polls are intentionally omitted; no message bodies or tokens are logged.
+        if self.path.startswith('/api/classroom/state?') and str(code) == '200':
+            return
+        super().log_request(code, size)
+    def credentials(self):
+        cookie = SimpleCookie()
+        try: cookie.load(self.headers.get('Cookie',''))
+        except Exception: pass
+        teacher = cookie['ppt_teacher'].value if 'ppt_teacher' in cookie else ''
+        return teacher, self.headers.get('X-Classroom-Token','')
+
+    def classroom_response(self, data):
+        token = data.pop('_cookie', None)
+        body = json.dumps(data, ensure_ascii=False).encode()
+        self.send_response(200)
+        if token is not None:
+            self.send_header('Set-Cookie', f'ppt_teacher={token}; Path=/api/classroom/; HttpOnly; SameSite=Strict; Max-Age={43200 if token else 0}')
+        self.send_header('Content-Type','application/json; charset=utf-8')
+        self.send_header('Content-Length',str(len(body)))
+        self.end_headers(); self.wfile.write(body)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
@@ -360,6 +405,16 @@ class PresentationHandler(SimpleHTTPRequestHandler):
         if not self.allowed_client(head):
             return
         name = unquote(urlsplit(self.path).path).lstrip("/") or HTML_NAME
+        if name.startswith('api/classroom/'):
+            if head:
+                self.json_response(405, {'error':'GET required'}, True); return
+            try:
+                teacher, member = self.credentials()
+                result = classroom().get(name.rsplit('/',1)[-1], dict(parse_qsl(urlsplit(self.path).query)), teacher, member)
+                self.json_response(200,result)
+            except ClassroomError as exc: self.json_response(exc.code,{'error':exc.message})
+            except Exception: self.json_response(500,{'error':'Classroom unavailable / 课堂暂不可用'})
+            return
         if name == "api/health":
             self.json_response(200, {"ok": True, "configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
                 "model": OPENAI_MODEL, "stream": True, "images": True}, head)
@@ -390,6 +445,18 @@ class PresentationHandler(SimpleHTTPRequestHandler):
             if origin and origin != f"http://{self.headers.get('Host')}":
                 self.json_response(403, {"error": "不接受跨站请求。"})
                 return
+            if urlsplit(self.path).path.startswith('/api/classroom/'):
+                if origin != f"http://{self.headers.get('Host')}":
+                    self.json_response(403,{'error':'Same-origin request required'}); return
+                length = int(self.headers.get('Content-Length','0'))
+                if not 0 < length <= 16384:
+                    self.json_response(413,{'error':'Classroom request too large'}); return
+                self.connection.settimeout(15)
+                data = json.loads(self.rfile.read(length))
+                if not isinstance(data,dict): raise ValueError('Invalid object')
+                teacher, member = self.credentials()
+                self.classroom_response(classroom().post(urlsplit(self.path).path.rsplit('/',1)[-1],data,teacher,member,self.client_address[0]))
+                return
             if urlsplit(self.path).path != "/api/chat":
                 self.json_response(404, {"error": "接口不存在。"})
                 return
@@ -397,7 +464,10 @@ class PresentationHandler(SimpleHTTPRequestHandler):
             if length <= 0 or length > MAX_REQUEST_BYTES:
                 self.json_response(413, {"error": "请求为空或超过 12 MiB。"})
                 return
-            limited = REQUEST_LIMITS.acquire(self.client_address[0])
+            identity = self.client_address[0]
+            if self.headers.get('X-Classroom-Room'):
+                identity = classroom().ai_identity(self.headers['X-Classroom-Room'], self.headers.get('X-Classroom-Token',''))
+            limited = REQUEST_LIMITS.acquire(identity)
             if limited:
                 self.close_connection = True
                 self.json_response(429, {"error": limited})
@@ -422,6 +492,8 @@ class PresentationHandler(SimpleHTTPRequestHandler):
                 self.json_response(200, {"answer": answer, "model": model})
         except (BrokenPipeError, ConnectionResetError):
             return
+        except ClassroomError as exc:
+            self.json_response(exc.code, {'error':exc.message})
         except Exception as exc:
             message = str(exc) if isinstance(exc, (ValueError, RuntimeError)) else "服务请求失败或超时。"
             try:
@@ -440,6 +512,8 @@ class PresentationHandler(SimpleHTTPRequestHandler):
         self.wfile.flush()
 
 def main():
+    classroom()
+    ThreadingHTTPServer.request_queue_size = 128
     server = ThreadingHTTPServer((HOST, PORT), PresentationHandler)
     print(f"Westlake HTML presentation: http://{HOST}:{PORT}", flush=True)
     try:

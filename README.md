@@ -1,10 +1,48 @@
 # 西湖大学 HTML 演示模板 · PPT 智能讲解 Agent
 
+## 互动课堂与本机学习档案
+
+教师入口为 `/?mode=teacher`。使用私有教师口令登录，创建课堂后将学生链接或二维码发给学生，另开“投影或预览”窗口用于投影。学生用课堂码匿名加入，默认跟随老师，主动翻页后暂停跟随，可点击“回到老师当前页”。教师看板不会投影。课堂模式使用原始稿件，不加载独立模式下的本机编辑。
+
+- 学生的快捷反馈每人每页保留最新值，可撤回；问题最多 500 字，只有教师能读。AI 私聊默认不分享，只能由学生预览、确认后分享单条文字片段。
+- 点赞默认开启，每人 2 秒一次，统计的是次数不是人数，按老师当前页归属。弹幕默认关闭，教师一键开启后直接上屏；每条 60 字、每人 10 秒一次、全课 2 秒一条，另有每 8 秒最多 2 条的轨道容量限制。弹幕仅纯文本，不自动审核；教师可关闭、清屏、删除及禁言。关闭、翻页、断线恢复均不重播旧动画。
+- 状态约每 2 秒同步。投影仅显示 PPT、边缘点赞和最多两条弹幕；支持减少动态效果，不进入打印或缩略图。拥挤时拒绝或不播放过多动画，不积压。网络正常时目标延迟为 3 秒内，并非硬实时保证。
+- 学习档案入口在 AI 面板顶部。首次同意后自动保存文字与压缩图片至 IndexedDB，每秒保存流式内容，结束立即保存；不再限制归档为最近 20 条。可新建、重命名、恢复或确认删除会话。未启用时仅临时保存最近 20 条文字，旧图片无法恢复。AI 发送上下文仍限最近 12 条及最多 6 张图片，超限需新建对话。
+- 下载当前完整 ZIP 包含版本化 manifest.json、conversations.json、attachments/；Markdown 用于阅读但不含图片。导入作为新会话，不覆盖旧数据；限制 100 MiB、1,000 条目，校验路径、格式、图片与压缩，版本不同提示页码可能不匹配。完整备份不含 API 或教师凭证。
+- 浏览器清理、隐私模式、配额不足可能影响保存；保存状态会提示失败，请下载独立备份。同一浏览器的其他使用者可能读到记录，HTTP/localhost/不同端口的本机档案不自动同步。
+
+### 教师配置、部署与接口
+
+在仓库外初始化配置，不会修改已有 API Key、模型或供应商：
+
+```bash
+python3 configure_classroom.py --config /absolute/private/config.json --data-dir /absolute/private/classroom-data --access-file /absolute/private/teacher-access.txt
+PPT_CONFIG_PATH=/absolute/private/config.json python3 server.py
+```
+
+脚本仅在口令不存在时生成随机教师口令，保存在权限 600 的私有文件中，不打印口令。可通过私有 JSON 配置 `TEACHER_PASSWORD`、`CLASSROOM_DATA_DIR`，环境变量优先。更改后重启。不要将口令或数据库提交、打包或通过学生链接传播。
+
+课堂数据库位于 CLASSROOM_DATA_DIR，服务器不归档 AI 私聊；仅保存课堂、显式反馈、弹幕和点赞统计。结束课堂默认保留 30 天（请求时清理），教师可提前删除并导出 JSON/CSV。重启保留数据库，但教师会话失效、弹幕关闭、旧动画不重播。systemd 必须仅为该数据目录设置 ReadWritePaths；创建目录后再重启。备份/回滚应同时保留私有配置、数据库与旧代码。
+
+新增 `/api/classroom/` 路由：POST login/logout/create/join/control/feedback/question/like/danmaku；GET rooms/state/export。教师使用 HttpOnly、SameSite=Strict Cookie；学生使用随机成员令牌，room 与令牌归属由服务器验证。POST 必须同源，正文上限 16 KiB；投稿带 requestId 防重。state 接收 room、role、since、boot，返回版本、游标及增量事件；teacher=1 只有教师会话才能读取看板。原 /api/chat 兼容；课堂请求使用 X-Classroom-Room 与 X-Classroom-Token，按成员限流，独立模式按 IP 限流，仍保留每日 200 次、2 并发等原有总限额。
+
+当前为可信内网 HTTP：没有传输加密、实名体系或学生身份验证，不承诺匿名不可追踪。教师口令保护管理接口，但隐藏讲稿不等于静态文件保密。不要用于公网、考试保密材料或敏感数据。
+
+本地依赖新增 fflate 0.8.2（ZIP）与 qrcode-generator 1.4.4（二维码），随 assets/vendor 提供，无运行时 CDN。新增测试：`node tests/test_archive.cjs`；后端测试包含权限、幂等、重启、保留期限以及 50 个成员并发读取，不调用付费 AI。
+
+部署状态（2026-09-17）：4090 的 Diffusion 示例已更新互动课堂、点赞/弹幕和学习档案；教师入口 http://10.21.3.45:8765/?mode=teacher ，原演示地址不变。21 项后端测试通过，线上跟随翻页、点赞及带图片档案刷新恢复已验证；仅校内网或相应 VPN 可访问。实际手机、真实存储耗尽和完整打印尚未实测。教师口令在部署者私有 access 文件中，不能发给学生。
+
+## 缩略图导航
+
+点击左下角 44×44 图标展开左侧缩略图栏，查看各页实际排版并直接跳页；当前页橙色高亮，翻页时同步更新。桌面端跳页后保持展开，手机窄屏（≤600px）选页后自动收起。可用方向键、Home / End 选择缩略图，Enter / 空格跳转，Esc 关闭。界面跟随中英文切换，幻灯片内容不翻译。
+
+预览按当前窗口比例缩放，在打开面板及窗口尺寸变化时重建；编辑后重新打开即可刷新。预览不显示讲稿、不进入聊天上下文、不上传或保存截图，打印时隐藏导航。共用资源 `assets/thumbnails.js` 与 `assets/thumbnails.css` 需一同部署，并重启后端以加载新的静态资源白名单。
+
 中文 | [English](README.en.md)
 
 面向西湖大学教学、科研汇报与会议演示的轻量级网页 PPT 模板：用浏览器演示、编辑和打印幻灯片，并通过右侧 AI 对话面板随时提问。
 
-## 当前项目状态（2026-09-17）
+## 当前项目状态（2026-09-18）
 
 ### 一键中英文界面
 
@@ -15,18 +53,18 @@
 - **此 GitHub 仓库**：通用 10 页西湖大学模板、共享聊天组件、Python 后端、部署示例与测试。
 - **内网演示**：[Diffusion 理论入门](http://10.21.3.45:8765/) 已部署为 16 页教学示例，不是空白模板；仅校内网络或能够访问该服务器的 VPN 可用，不是公网地址。
 - **分享范围**：Diffusion 稿件保存在独立目录并单独部署，不进入此仓库或通用模板发布包。浏览器中的编辑不会自动发布给其他读者。
-- **已验证**：小圆形 AI 入口、线上流式问答与公式渲染、Diffusion 第 5 页数值纠错；主项目及服务器的 12 项后端测试通过。完整记录与未覆盖项见 [验证记录](tests/VERIFICATION.md)。
-- **安全边界**：API Key 保存在服务器私有目录。内网 HTTP 无加密、无账号登录；共享问答使用部署者的 API 额度，请仅向可信读者分享并避免敏感材料。
+- **已验证**：缩略图、双语界面、互动课堂与学习档案已部署；21 项后端测试、档案校验及双语测试通过。线上流式问答与公式渲染已在此前验证。完整记录与未覆盖项见 [验证记录](tests/VERIFICATION.md)。
+- **安全边界**：API Key 保存在服务器私有目录。教师管理使用私有口令，学生匿名加入；没有实名账号或 HTTPS。共享问答使用部署者的 API 额度，请仅向可信读者分享并避免敏感材料。
 
 ## 1. 项目背景
 
 ### 内网分享部署
 
-部署示例见 `deploy/westlake-ppt.service`：独立目录 `~/apps/westlake-ppt`、虚拟环境、systemd 用户服务，端口 8765。部署时复制要分享的 HTML 稿件、配套 assets、server.py 和 requirements.txt；后端入口文件名保持为 `西湖大学专属HTML演示模板.html`。当前服务器用独立 Diffusion 稿件替换了默认模板，但 GitHub 仍保留通用模板。不上传 Diffusion 稿件、聊天或密钥到代码仓库。私有配置使用 `PPT_CONFIG_PATH` 指定，服务示例指向 `~/.config/westlake-ppt/config.json`，权限设为 600。
+部署示例见 `deploy/westlake-ppt.service`：独立目录 `~/apps/westlake-ppt`、虚拟环境、systemd 用户服务，端口 8765。部署时复制要分享的 HTML 稿件、配套 assets、server.py、classroom.py 和 requirements.txt（首次配置另需 configure_classroom.py）；后端入口文件名保持为 `西湖大学专属HTML演示模板.html`。当前服务器用独立 Diffusion 稿件替换了默认模板，但 GitHub 仍保留通用模板。不上传 Diffusion 稿件、聊天或密钥到代码仓库。私有配置使用 `PPT_CONFIG_PATH` 指定，服务示例指向 `~/.config/westlake-ppt/config.json`，权限设为 600。
 
 安装依赖后，将 service 文件放入 `~/.config/systemd/user/`，按实际主机修改 `ALLOWED_HOSTS` 和 `ALLOWED_NETWORKS`，运行 `systemctl --user daemon-reload`、`systemctl --user enable --now westlake-ppt`。退出 SSH 后保持运行需启用用户 linger。重启：`systemctl --user restart westlake-ppt`；日志：`journalctl --user -u westlake-ppt`。这些命令只管理本应用，不影响其他服务。
 
-服务默认只允许本机；内网示例明确允许私有网段并校验 Host，忽略客户端伪造的转发 IP 头。聊天默认每 IP 每小时 30 次、全站每天 200 次、最多同时 2 个请求；分别由 `CHAT_REQUESTS_PER_HOUR`、`CHAT_REQUESTS_PER_DAY`、`CHAT_MAX_CONCURRENT` 调整。每日额度按 UTC 重置，全部计数在内存中，重启会清零，失败尝试也计数；这不是金额预算，请另外设置 API 服务商的消费上限。
+服务默认只允许本机；内网示例明确允许私有网段并校验 Host，忽略客户端伪造的转发 IP 头。聊天默认独立模式每 IP、课堂模式每参与者每小时 30 次、全站每天 200 次、最多同时 2 个请求；分别由 `CHAT_REQUESTS_PER_HOUR`、`CHAT_REQUESTS_PER_DAY`、`CHAT_MAX_CONCURRENT` 调整。每日额度按 UTC 重置，全部计数在内存中，重启会清零，失败尝试也计数；这不是金额预算，请另外设置 API 服务商的消费上限。
 
 内网 HTTP 没有传输加密，也没有账号鉴权，仅供可信校内网络/VPN使用，不要提交敏感资料或转发到公网。截图粘贴等能力还受浏览器权限限制，上传按钮可作为替代。客户端 ID 使用 `crypto.getRandomValues`，兼容普通内网 HTTP 地址。公网部署必须另行配置 HTTPS、认证及可靠限流。
 
@@ -134,7 +172,7 @@ macOS 配置好密钥并安装依赖后，可双击 `启动智能PPT.command`。
 | 导出 PDF | 点击“打印”，在浏览器打印窗口选择保存为 PDF |
 | 直接进入某页 | URL 添加 `#6`，例如 `http://127.0.0.1:8765/#6` |
 
-编辑内容只保存在当前浏览器，不会写回 HTML，也不会随项目上传 GitHub。要向别人分享修改后的内容，请编辑 HTML 源文件。聊天使用 `sessionStorage`，仅用于当前浏览器标签页会话，可用“清空对话”移除；无服务端会话数据库。
+编辑内容只保存在当前浏览器，不会写回 HTML，也不会随项目上传 GitHub。要向别人分享修改后的内容，请编辑 HTML 源文件。启用学习档案后，聊天文字与图片保存在 IndexedDB；未启用时仅使用 sessionStorage 临时保留文字。服务器不归档 AI 私聊，课堂反馈则独立保存在 SQLite。
 
 建议复制项目作为新演示稿，修改 `.slide` 节点及 `data-title`；正文可编辑区域带 `data-editable`，讲稿位于 `.presenter-notes`。新增 / 删除页面时检查静态页脚页码。品牌颜色在 CSS `:root` 中；数据页需同时修改条形 `--value` 与显示数值。
 
@@ -149,11 +187,15 @@ macOS 配置好密钥并安装依赖后，可双击 `启动智能PPT.command`。
 ├── AGENTS.md                       # 后续开发与双语文档维护约定
 ├── 西湖大学专属HTML演示模板.html       # 幻灯片、样式与交互逻辑
 ├── server.py                       # 静态页面服务及 AI 代理接口
+├── classroom.py                    # 课堂权限、SQLite、反馈和互动事件
+├── configure_classroom.py          # 初始化仓库外教师配置
+├── tests/                          # 后端、档案和双语回归测试
+├── deploy/                         # 内网 systemd 服务示例
 ├── 启动智能PPT.command               # macOS 快捷启动
 ├── 使用说明.md                      # 简短操作说明
 ├── .env.example                    # 无真实密钥的配置示例
 ├── .gitignore
-└── assets/                         # 校徽及示例图片
+└── assets/                         # 品牌图片、聊天、课堂、档案、缩略图及本地依赖
 ```
 
 前端主要入口：`collectDeckContext()` 提取页面内容，`assets/chat.js` 中的 `WestlakeChat.ask()` 发起问答，`showSlide()` 更新当前页，`saveEdits()` 保存浏览器编辑。后端主要入口：`AGENT_INSTRUCTIONS` 定义回答规则，`build_deck_context()` / `build_request()` 组装上下文，`call_openai()` / `stream_response()` 调用模型，`PresentationHandler` 处理 HTTP。
@@ -182,7 +224,10 @@ macOS 配置好密钥并安装依赖后，可双击 `启动智能PPT.command`。
 ### 验证与排障
 
 ```bash
-python3 -m py_compile server.py
+python3 -m py_compile server.py classroom.py configure_classroom.py
+python3 -m unittest discover -s tests -v
+node tests/test_archive.cjs
+node tests/test_i18n.cjs
 curl http://127.0.0.1:8765/api/health
 ```
 
@@ -198,7 +243,7 @@ curl http://127.0.0.1:8765/api/health
 
 每次提问会把整套可提取文字、包括演讲者讲稿、当前页和最近聊天发送给配置的 API 服务商。请先确认材料可以外发。请求使用 `store: false`，这不等同于服务商不记录日志或不保留数据；请自行确认其政策。
 
-当前服务器是本地开发工具，不是生产级公网服务。没有用户登录、额度控制、速率限制或完善的多用户隔离。已有跨站请求检查和 GET / HEAD 静态资源白名单不能替代生产安全措施；不要直接把它暴露到公网。公开部署需要补充认证、限流、HTTPS、反向代理适配（包括 Origin 校验）、请求校验与日志脱敏，并审查所有 HTTP 方法。
+当前服务器面向可信内网，不是生产级公网服务。已有教师口令、课堂成员隔离、限流、跨站检查和 GET / HEAD 静态白名单，但没有 HTTPS 或实名账号体系；不要直接暴露到公网。公开部署仍需完善认证、HTTPS、反向代理适配和安全审查。
 
 分享前：
 
@@ -218,7 +263,7 @@ curl http://127.0.0.1:8765/api/health
 右下角使用 44×44 像素的圆形 AI 图标作为聊天入口，点击或按 A 打开；悬停显示说明，不再展示大型文字按钮。
 
 - 图片：点击“＋ 图片”、拖到侧栏或在输入框粘贴截图。PNG/JPEG/WebP，每次最多 3 张、原文件每张 ≤5 MiB；发送前缩至最长边 ≤2048 像素、每张 ≤1 MiB，预览可放大或移除。只发图片时会自动补上解释问题。
-- 最近 12 条上下文可携带累计最多 6 张图片，超过时提示清空。图片只存当前页面内存，服务器不保存上传；刷新后仅恢复文字并显示图片已失效。恢复后的旧图片不会冒充仍可见。
+- 最近 12 条上下文可携带累计最多 6 张图片，超过时需新建或清空对话。启用学习档案后图片随文字保存在本机 IndexedDB，刷新可恢复；未启用时图片只在页面内存中，刷新显示失效。服务器不归档上传图片。
 - 回复支持 Markdown 标题、列表、引用、表格、代码块，以及 `$…$`、`$$…$$`、`\\(...\\)`、`\\[...\\]` 公式；代码、宽表格和公式可横向滚动。异常公式保留源码。Markdown 原始 HTML 被转义，远程图片不自动加载，危险链接被移除。
 - 流式回答支持“停止”。停止、超时或失败会保留部分回答并标为未完成；“重试”仅重新生成最近失败/停止的请求，保留当时页码及附件，不重复用户消息。不会自动续写或自动重试付费请求。
 - 复制单条原始 Markdown、复制代码、导出整个对话（不包含图片字节）。支持宽屏阅读、向上阅读时暂停自动滚动、“回到最新”，以及可点击的有效页码。模型页码引用未自动核验。

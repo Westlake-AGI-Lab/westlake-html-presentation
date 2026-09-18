@@ -97,6 +97,7 @@
       this.messages = []; this.pending = []; this.busy = false; this.processing = false; this.follow = true;
       this.panel = $('agentPanel'); this.log = $('agentConversation'); this.input = $('agentInput');
       this.mount(); this.restore(); this.health(); this.update();
+      this.archive = new LearningArchive(this); this.archiveReady = this.archive.init();
       window.addEventListener('ppt-math-ready', () => this.messages.forEach(m => this.paint(m)), {once:true});
       window.addEventListener('ppt-language-change', () => { this.messages.filter(m=>!m.text).forEach(m=>this.paint(m)); });
     }
@@ -217,7 +218,8 @@
       this.retry.hidden=this.busy||!this.lastRequest||!['error','stopped'].includes(this.messages.at(-1)?.status);
       this.panel.querySelectorAll('.agent-suggestion').forEach(b=>b.disabled=this.busy||this.processing);
     }
-    persist() {
+    persist(force=false) {
+      if(this.archive?.enabled) return this.archive.save(force);
       const safe=this.messages.slice(-20).map(({role,text,meta,status,images,imageCount})=>({role,text,meta,status:status==='streaming'?'stopped':status,imageCount:images?.length||imageCount||0}));
       try {sessionStorage.setItem(this.storageKey,JSON.stringify(safe));} catch (_) {this.notice.textContent='浏览器存储已满，本次聊天仅保留在当前页面。';}
     }
@@ -230,9 +232,11 @@
       } catch (_) {}
     }
     addRow(message) {
+      message.id ||= uniqueId(); message.time ||= new Date().toISOString();
       const row=make('div','agent-message '+message.role), bubble=make('div','agent-message-bubble');
       message.row=row; message.body=make('div');message.metaNode=make('div','agent-message-meta');
       bubble.append(message.body,message.metaNode);row.append(bubble);this.log.append(row);
+      if(window.PPTClassroom?.role==='student') this.button(PPTI18n.language==='en'?'Share excerpt with teacher':'分享片段给老师',()=>PPTClassroom.share(message).catch(e=>{this.notice.textContent=e.message;}),bubble);
       if(message.role==='assistant') this.button('复制 Markdown',async()=>{try{await copyText(message.text);this.notice.textContent='已复制原始 Markdown。';}catch(e){this.notice.textContent=e.message;}},bubble);
       this.paint(message);return row;
     }
@@ -268,21 +272,21 @@
       const context=this.getContext();
       const request={...context,language:PPTI18n.language,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
       this.lastRequest=JSON.parse(JSON.stringify(request));this.pending=[];this.drawPending();this.input.value='';this.input.style.height='auto';this.notice.textContent='';this.follow=true;
-      const user={role:'user',text:question,images:request.images,status:'complete',meta:`提问时位于第 ${context.currentSlide.number} 页 · ${context.currentSlide.title}`};
-      this.messages.push(user);this.addRow(user);await this.run(this.lastRequest,false);
+      const user={role:'user',text:question,images:request.images,status:'complete',page:{...context.currentSlide},language:request.language,meta:`提问时位于第 ${context.currentSlide.number} 页 · ${context.currentSlide.title}`};
+      this.messages.push(user);this.addRow(user);this.processing=true;this.controls();await this.persist(true);this.processing=false;await this.run(this.lastRequest,false);
     }
     async run(request,retry) {
       if(this.busy||this.processing||!request)return;
       this.busy=true;this.stopReason='已停止，回答未完成';this.controller=new AbortController();this.open();this.status('正在结合 PPT 思考…');
       let message;
       if(retry){message=this.messages.at(-1);message.text='';message.error='';message.status='streaming';}
-      else{message={role:'assistant',text:'',status:'streaming',images:[],meta:`提问时位于第 ${request.currentSlide.number} 页`};this.messages.push(message);this.addRow(message);}
+      else{message={role:'assistant',text:'',status:'streaming',images:[],page:{...request.currentSlide},language:request.language,meta:`提问时位于第 ${request.currentSlide.number} 页`};this.messages.push(message);this.addRow(message);}
       this.controls();this.persist();this.paint(message);
       let timer=null,done=false;
       const schedule=()=>{if(timer===null)timer=setTimeout(()=>{timer=null;this.paint(message);this.persist();},180);};
       const deadline=setTimeout(()=>{this.stopReason='请求超时，回答未完成';this.controller.abort();},180000);
       try {
-        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson'},body:JSON.stringify(request),signal:this.controller.signal});
+        const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',...window.PPTClassroom?.headers()},body:JSON.stringify(request),signal:this.controller.signal});
         if(!response.ok){const e=await response.json().catch(()=>({}));throw Error(e.error||`请求失败（${response.status}）`);}
         if(!response.headers.get('content-type')?.includes('application/x-ndjson'))throw Error('服务端不支持流式协议，请重启新版 server.py。');
         const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
@@ -293,11 +297,11 @@
         if(!message.text.trim())throw Error('未收到有效回答。');
         message.status='complete';this.status('回答完成');
       }catch(e){message.status=this.controller.signal.aborted?'stopped':'error';message.error=this.controller.signal.aborted?this.stopReason:e.message;this.status(message.status==='stopped'?'已停止':'回答未完成',true);}
-      finally{clearTimeout(deadline);if(timer!==null)clearTimeout(timer);this.busy=false;this.controller=null;this.paint(message);this.persist();this.controls();}
+      finally{clearTimeout(deadline);if(timer!==null)clearTimeout(timer);this.busy=false;this.controller=null;this.paint(message);this.persist(true);this.controls();}
     }
-    clear() {if(this.busy||this.processing)return;this.messages=[];this.pending=[];this.lastRequest=null;this.preview.close();this.previewImage.removeAttribute('src');this.log.querySelectorAll('.agent-message').forEach(n=>n.remove());this.drawPending();this.persist();this.controls();this.notice.textContent='文字和内存附件已清空。';}
+    clear() {if(this.busy||this.processing)return;if(!confirm(PPTI18n.language==='en'?'Delete all messages and images in this conversation?':'删除当前会话的文字及图片？'))return;this.messages=[];this.pending=[];this.lastRequest=null;this.preview.close();this.previewImage.removeAttribute('src');this.log.querySelectorAll('.agent-message').forEach(n=>n.remove());this.drawPending();this.persist(true);this.controls();this.notice.textContent='文字和内存附件已清空。';}
     export() {
-      const text='# '+t('PPT 问答记录')+'\n\n'+this.messages.map(m=>`## ${t(m.role==='user'?'读者':'助手')}\n\n${t(m.meta||'')}\n\n${m.text}\n\n${m.status==='complete'?'':t('[未完成]')}${(m.images?.length||m.imageCount)?'\n'+t('[图片未包含在导出文件中]'):''}`).join('\n\n');
+      const text='# '+t('PPT 问答记录')+'\n\n'+this.messages.map(m=>`## ${t(m.role==='user'?'读者':'助手')}\n\n${m.time||''}\n\n${t(m.meta||'')}${m.page?'\nSlide '+m.page.number+' · '+m.page.title:''}\n\n${m.text}\n\n${m.status==='complete'?'':t('[未完成]')}${(m.images?.length||m.imageCount)?'\n'+t('[图片未包含在导出文件中]'):''}`).join('\n\n');
       const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'}));const a=make('a');a.href=url;a.download='ppt-chat.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
   }

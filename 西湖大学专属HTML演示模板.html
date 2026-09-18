@@ -1040,6 +1040,13 @@
   <script async src="assets/vendor/mathjax/es5/tex-chtml.js" onload="window.dispatchEvent(new Event('ppt-math-ready'))"></script>
   <script src="assets/i18n.js"></script>
   <script src="assets/chat.js"></script>
+  <script src="assets/vendor/fflate/fflate.js"></script>
+  <script src="assets/vendor/qrcode/qrcode.js"></script>
+  <script src="assets/archive.js"></script>
+  <script src="assets/classroom.js"></script>
+  <link rel="stylesheet" href="assets/classroom.css">
+  <link rel="stylesheet" href="assets/thumbnails.css">
+  <script src="assets/thumbnails.js"></script>
   <script>
     (() => {
       const slides = Array.from(document.querySelectorAll('.slide'));
@@ -1059,6 +1066,7 @@
       let touchStartY = 0;
       let editMode = false;
       let chat;
+      let thumbnails;
 
       const pad = (value) => String(value).padStart(2, '0');
 
@@ -1103,6 +1111,8 @@
         prevButton.disabled = current === 0;
         nextButton.disabled = current === slides.length - 1;
         updateAgentPageContext();
+        thumbnails?.update(current);
+        window.dispatchEvent(new CustomEvent('ppt-slide-change',{detail:{index:current}}));
         if (updateHash) history.replaceState(null, '', `#${current + 1}`);
       }
 
@@ -1110,6 +1120,7 @@
       function previous() { if (!editMode) showSlide(current - 1); }
 
       function toggleEdit() {
+        if(PPTClassroom.role!=='solo') return;
         editMode = !editMode;
         document.body.classList.toggle('edit-mode', editMode);
         editButton.classList.toggle('active', editMode);
@@ -1118,18 +1129,20 @@
         if (!editMode) saveEdits();
       }
 
-      loadEdits();
+      if(PPTClassroom.role==='solo') loadEdits();
       chat = new WestlakeChat({
         storageKey: agentSessionKey,
         getContext: () => ({slides:collectDeckContext(),currentSlide:{number:current+1,title:slides[current].dataset.title}}),
         navigate: index => showSlide(index)
       });
       showSlide(0, false);
+      thumbnails = new WestlakeThumbnails({slides, navigate: index => showSlide(index), current: () => current});
 
       prevButton.addEventListener('click', previous);
       nextButton.addEventListener('click', next);
       editButton.addEventListener('click', toggleEdit);
       notesButton.addEventListener('click', () => {
+        if(PPTClassroom.role!=='solo') return;
         document.body.classList.toggle('show-notes');
         notesButton.classList.toggle('active', document.body.classList.contains('show-notes'));
         notesButton.textContent = document.body.classList.contains('show-notes') ? '隐藏讲稿 N' : '讲稿 N';
@@ -1143,6 +1156,9 @@
       printButton.addEventListener('click', () => window.print());
       editables.forEach((element) => element.addEventListener('input', saveEdits));
       document.addEventListener('keydown', (event) => {
+        if(PPTClassroom.role==='project'||PPTClassroom.role==='teacher') return;
+        if(event.target.closest('.class-app,.archive-dialog,.class-launcher')) return;
+        if (event.target.closest('#thumbnailPanel, .thumb-launcher')) return;
         if (event.target.closest('#agentPanel, .chat-image-dialog') && event.key !== 'Escape') return;
         const typingTarget = event.target.closest('input, textarea, [contenteditable="true"]');
         if (typingTarget) return;
@@ -1181,7 +1197,8 @@
       }, { passive: true });
 
       document.addEventListener('touchend', (event) => {
-        if (editMode || event.target.closest('#agentPanel, .chat-image-dialog')) return;
+        if(PPTClassroom.role==='project'||PPTClassroom.role==='teacher'||event.target.closest('.class-app,.archive-dialog')) return;
+        if (editMode || event.target.closest('#agentPanel, .chat-image-dialog, #thumbnailPanel, .thumb-launcher')) return;
         const touch = event.changedTouches[0];
         const dx = touch.clientX - touchStartX;
         const dy = touch.clientY - touchStartY;
@@ -1194,6 +1211,7 @@
       });
 
       const hashIndex = Number.parseInt(location.hash.replace('#', ''), 10) - 1;
+      window.PPTDeck={current:()=>current,navigate:index=>showSlide(index)};
       showSlide(Number.isFinite(hashIndex) ? hashIndex : 0, false);
     })();
   </script>
