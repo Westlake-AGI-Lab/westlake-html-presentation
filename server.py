@@ -79,7 +79,7 @@ class RequestLimits:
 REQUEST_LIMITS = RequestLimits(*(max(1, int(os.environ.get(name, default))) for name, default in
     [("CHAT_REQUESTS_PER_HOUR", "30"), ("CHAT_REQUESTS_PER_DAY", "200"), ("CHAT_MAX_CONCURRENT", "2")]))
 # A deployment-time inventory, never a directory listing or extension-only permission.
-PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js",
+PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js", "assets/pet.js", "assets/pet.css",
     "assets/thumbnails.js", "assets/thumbnails.css",
     "assets/classroom.js", "assets/classroom.css", "assets/archive.js",
     "assets/vendor/fflate/fflate.js", "assets/vendor/qrcode/qrcode.js",

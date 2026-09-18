@@ -1,0 +1,45 @@
+    .agent-launcher {
+      top: auto; bottom: 82px; right: 20px;
+      width: 112px; height: 158px; padding: 0;
+      flex-direction: column; gap: 5px;
+      border: 0; border-radius: 0; background: none; box-shadow: none;
+      transform: none;
+    }
+    .agent-launcher:hover { transform: none; box-shadow: none; }
+    .agent-launcher { touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+    .agent-launcher.pet-dragging { cursor: grabbing; }
+    .pet-greeting {
+      position: absolute; bottom: calc(100% + 12px); right: 0;
+      width: min(224px, calc(100vw - 16px)); box-sizing: border-box;
+      padding: 12px 14px; border: 1px solid #dce3eb; border-radius: 8px;
+      background: #fff; color: #173e60; box-shadow: 0 5px 20px rgba(8,23,52,.13);
+      text-align: left; white-space: normal; pointer-events: none;
+      font-size: 13px; line-height: 1.5; letter-spacing: 0; font-weight: 400;
+    }
+    .pet-greeting strong { display: block; font-size: 14px; font-weight: 700; }
+    .agent-launcher.pet-dragging .agent-pet { animation: none; transform: rotate(6deg); }
+    .agent-launcher:focus-visible { outline: 3px solid var(--westlake-orange); outline-offset: 5px; }
+    .agent-launcher-copy { color: var(--westlake-navy); background: #fff; padding: 3px 6px; border-radius: 4px; }
+    .agent-pet { position: relative; display: block; width: 106px; height: 132px; flex: none; animation: petSway 4s ease-in-out infinite; transform-origin: 50% 95%; }
+    .agent-pet img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+    .pet-blink { animation: petBlink 12s step-end infinite; }
+    .pet-walk { animation: petWalk 12s step-end infinite; }
+    .agent-pet .pet-inspect { opacity: 0; }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet { animation: none; transform: rotate(-4deg); }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet img { opacity: 0; animation: none; }
+    .agent-launcher:is(:hover, :focus-visible) .agent-pet .pet-inspect { opacity: 1; }
+    @keyframes petSway { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-5px) rotate(2deg); } }
+    @keyframes petBlink { 0%, 21%, 46%, 100% { opacity: 0; } 20%, 45% { opacity: 1; } }
+    @keyframes petWalk { 0%, 80%, 90%, 100% { opacity: 0; } 82%, 88% { opacity: 1; } }
+    .agent-pet:has(.pet-walk) .pet-idle { animation: petIdle 12s step-end infinite; }
+    @keyframes petIdle { 0%, 80%, 90%, 100% { opacity: 1; } 82%, 88% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .agent-launcher .agent-pet, .agent-launcher .agent-pet img { animation: none; transition: none; }
+      .agent-pet .pet-blink, .agent-pet .pet-walk { opacity: 0; }
+    }
+
+.agent-launcher { max-width: none; max-height: none; justify-content: flex-start; }
+.agent-launcher-copy { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none; }
+.agent-avatar { background: transparent; }
+.agent-avatar img { width: 42px; height: 52px; object-fit: contain; }
+@media(max-width: 600px) { .agent-launcher { width: 72px; height: 96px; } .agent-launcher .agent-pet { width: 72px; height: 96px; } .agent-launcher-copy { display: none; } }

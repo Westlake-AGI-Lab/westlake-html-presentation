@@ -79,6 +79,7 @@ This is a custom project based on supplied materials, not an official university
 - 16:9 slides, navigation, progress indicator, fullscreen, speaker notes, and browser printing / PDF.
 - In-page text editing saved in the current browser's `localStorage`.
 - AI sidebar for slide summaries, concept explanations, cross-slide connections, and follow-up questions.
+- A pet launcher uses the supplied character artwork: it gently moves, blinks, and briefly switches to a walking pose. Hover or keyboard focus shows its magnifying glass; clicking or tapping opens Q&A, and `A` still toggles the panel. System reduced-motion settings disable idle animations. Pet assets work offline and are hidden when printing.
 - Each question includes slide text, speaker notes, the current slide number and title, and recent conversation.
 - A server-side proxy calls the OpenAI Responses API or a compatible endpoint; the browser never receives the API key.
 
@@ -161,6 +162,10 @@ On macOS, after configuring the key and installing dependencies, double-click `�
 `.env.example` is a reference only. The application does not automatically load `.env`; use environment variables or the private JSON file.
 
 ## 4. Presenting and editing
+
+Xiaoxi displays one greeting in the language selected by the existing English / Chinese UI toggle. The pet label and tooltip follow the same setting; slide content is not translated. The speech bubble follows dragging, stays within the window, and hides with the pet when Q&A opens or the deck is printed. It is a local greeting, not an AI-generated reply.
+
+Drag the pet with a mouse or finger to reposition it within the browser window. Its position is saved in this browser's `localStorage` and kept within the visible window after resizing. A drag does not open Q&A; a normal click or tap still does. This is a webpage pet, not a desktop-wide companion.
 
 | Action | Control |
 | --- | --- |
@@ -260,7 +265,7 @@ Every change to features, APIs, configuration, startup steps, or known limitatio
 
 ## Enhanced chat
 
-A compact 44×44 px circular AI icon near the bottom-right opens chat. Click it or press A; a hover tooltip replaces the large text button.
+The draggable Xiaoxi pet opens chat. Click it or press A. Its animation, greeting, and drag behavior are shared through `assets/pet.css` and `assets/pet.js`.
 
 - Add PNG/JPEG/WebP images with the file picker, drag/drop, or clipboard paste. Up to 3 images per message, originals ≤5 MiB each; the browser resizes to a maximum edge of 2048 pixels and ≤1 MiB per sent image. Preview or remove before sending. Image-only questions get a default explanation prompt.
 - The latest 12 context messages may contain up to 6 images total; start or clear a conversation when over the limit. With archives enabled, images persist locally in IndexedDB and survive reload. Otherwise images remain in page memory and expire on reload. The server does not archive uploaded images.
