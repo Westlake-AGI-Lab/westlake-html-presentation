@@ -83,6 +83,7 @@
     if(changed||disconnected)clearAnimations();
     const play=!changed&&!disconnected;
     state=next;cursor=next.cursor;boot=next.boot;disconnected=false;
+    window.dispatchEvent(new CustomEvent('classroom-state',{detail:{room,ended:!!state.ended}}));
     if(role==='teacher')renderTeacher();else{
       applyPage();
       notice(state.ended?L('课堂已结束；学习记录仍在本机。','Class ended; local learning records remain available.'):
@@ -119,6 +120,7 @@
     summary=el('div','class-summary');app.append(summary);
     filters=el('select');filters.setAttribute('aria-label','按页筛选 / Filter slides');filters.onchange=renderTeacher;app.append(filters);
     posts=el('div','class-posts');app.append(posts);
+    window.PPTImprovements?.mount(app);
     loadRooms().then(()=>{login.hidden=true;teacher.started=true;poll();}).catch(()=>notice(L('请使用教师口令登录；仅可信内网使用。','Sign in with the teacher password; trusted LAN only.')));
     // Start polling after a login as well, without creating duplicate timers.
     login.addEventListener('submit',()=>{if(!teacher.started){teacher.started=true;setTimeout(poll,2000);}});
@@ -164,7 +166,7 @@
     const safe=v=>'"'+String(v??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"';
     showDataDownload('\ufeff'+rows.map(r=>r.map(safe).join(',')).join('\r\n'),`class-${room}.csv`,'text/csv');
   }
-  window.PPTClassroom={role, get room(){return room;},headers, async share(message){
+  window.PPTClassroom={role, get room(){return room;},headers, async selectRoom(code){room=code;state=null;await loadRooms();await refresh();}, async share(message){
     if(role!=='student'||!token)throw Error(L('请先加入学生课堂','Join a class as a student first'));
     const text=prompt(L('仅发送以下片段给老师（最多 500 字），确认后提交：','Only this excerpt will be shared with the teacher (500 characters):'),message.text.slice(0,500));
     if(text!==null)await submit('question',{text,page:message.page?.number||PPTDeck.current()+1});

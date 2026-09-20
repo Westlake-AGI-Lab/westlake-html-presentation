@@ -1,5 +1,12 @@
 # Local verification / 本地验证记录
 
+## 课程改进 / Lecture improvements (2026-09-20)
+
+- 29 项 Python 测试通过，包括同意采集、HTTP 问答联动、教师权限、同源校验、重试去重、分组依据及人数计算、真实生成路径的模拟接口、草稿编辑/拒绝/批准、HTML 转义、版本冲突及课堂删除清理。 / 29 Python tests passed, including opt-in capture through HTTP chat, teacher authorization, same-origin checks, retry deduplication, grouping evidence and participant counts, mocked real-generation path, draft editing/rejection/approval, HTML escaping, revision conflicts and room deletion cleanup.
+- Chrome 在 1440×1000 桌面与 390×844 触屏视口验证示例主题、编辑/预览、批准后的 11 页 HTML、源稿不变、下载、学生同意默认关闭及刷新重置；截图人工检查。补充页内容轨道高度加入回归断言。 / Chrome covered sample themes, editing/preview, approved 11-slide HTML, unchanged source, download and default-off/reset-on-reload student consent at desktop and touch viewports. Screenshots were inspected; a content-track height assertion guards the export layout.
+- 原有桌面/触屏框选回归、i18n、ZIP 及学习档案检查、Python 与 JavaScript 语法检查通过。没有配置独立构建或 lint 命令。 / Existing desktop/touch region regression, i18n, ZIP and learning-archive checks, and Python/JavaScript syntax checks passed. No separate build or lint command is configured.
+- 示例使用明确标注的虚构数据，不调用模型；真实模型输出质量及真实手机设备未验证。所有者已授权将通用课程改进功能发布到 GitHub，私有数据和独立 Diffusion 稿件不在发布范围。SSH 首次连接被关闭，发布前重试超时，内网部署待完成，远端文件和凭据未修改。 / The sample uses labeled synthetic data without model calls; real model quality and physical mobile devices were not tested. The owner authorized GitHub publication of the reusable lecture-improvement feature, excluding private data and the independent Diffusion deck. SSH was initially closed and the pre-publication retry timed out; internal deployment remains pending, with no remote file or credential changes.
+
 ## 发布前回归 / Pre-release regression (2026-09-18)
 
 中英文 README 已对齐当前课堂、档案、部署依赖及安全边界。重新运行 21 项 Python 测试、ZIP/本机保存及配额失败模拟测试、双语字典测试，全部通过；未新增付费 AI 调用。此前记录中的“未推送”仅描述当时的实现验证阶段，本次按用户要求发布到 GitHub。Diffusion 稿件及私有数据仍排除在仓库外。

@@ -1,4 +1,4 @@
-"""LAN classroom state. No AI conversation bodies are stored here."""
+"""LAN classroom state. Only explicitly shared AI questions are retained."""
 import collections
 import contextlib
 import hashlib
@@ -39,6 +39,14 @@ class Classroom:
             CREATE TABLE IF NOT EXISTS likes(room TEXT, page INTEGER, count INTEGER, PRIMARY KEY(room,page));
             CREATE TABLE IF NOT EXISTS requests(room TEXT, member TEXT, id TEXT, at REAL,
                 PRIMARY KEY(room,member,id));
+            CREATE TABLE IF NOT EXISTS improvement_questions(id TEXT PRIMARY KEY, room TEXT,
+                member TEXT, request TEXT, page INTEGER, revision TEXT, text TEXT, at REAL,
+                UNIQUE(room,member,request));
+            CREATE TABLE IF NOT EXISTS improvement_reports(id TEXT PRIMARY KEY, room TEXT,
+                revision TEXT, payload TEXT, created REAL, sample INTEGER);
+            CREATE TABLE IF NOT EXISTS improvement_drafts(id TEXT PRIMARY KEY, room TEXT,
+                revision TEXT, report TEXT, payload TEXT, status TEXT, html TEXT, created REAL);
+            CREATE INDEX IF NOT EXISTS improvement_question_room ON improvement_questions(room,revision,at);
             ''')
             db.execute('UPDATE rooms SET danmaku=0,epoch=epoch+1,version=version+1 WHERE deck=?',(self.deck_id,))
             self.cleanup(db)
@@ -61,7 +69,8 @@ class Classroom:
         db.execute('DELETE FROM requests WHERE at<?', (time.time()-86400,))
 
     def delete(self, db, code):
-        for table in ('feedback','posts','likes','requests','members'):
+        for table in ('feedback','posts','likes','requests','members',
+                      'improvement_questions','improvement_reports','improvement_drafts'):
             db.execute(f'DELETE FROM {table} WHERE room=?', (code,))
         db.execute('DELETE FROM rooms WHERE code=?', (code,))
         self.events.pop(code, None)

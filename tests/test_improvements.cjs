@@ -1,0 +1,92 @@
+/* Run against an isolated local server with a test teacher password. No real AI calls. */
+const {chromium} = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const base = process.env.IMPROVEMENT_TEST_URL || 'http://127.0.0.1:8772';
+const password = process.env.IMPROVEMENT_TEST_PASSWORD;
+if (!password) throw Error('Set IMPROVEMENT_TEST_PASSWORD for an isolated test server');
+const output = process.env.IMPROVEMENT_TEST_OUTPUT || '/tmp/westlake-improvement-checks';
+fs.mkdirSync(output, {recursive:true});
+
+(async () => {
+  const browser = await chromium.launch({channel:'chrome',headless:true});
+  const errors = [];
+  try {
+    for (const mobile of [false,true]) {
+      const context = await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},hasTouch:mobile});
+      const page = await context.newPage();
+      page.on('pageerror', e => errors.push(e.message));
+      await page.goto(base+'/?mode=teacher');
+      await page.evaluate(() => PPTI18n.setLanguage('en'));
+      await page.locator('input[type=password]').fill(password);
+      await page.getByRole('button',{name:'Sign in',exact:true}).click();
+      await page.waitForFunction(() => document.querySelector('.class-app form').hidden);
+      await page.getByRole('button',{name:'Open sample class',exact:true}).click();
+      await page.waitForFunction(() => document.querySelector('.improvement-status').textContent.includes('Sample data'));
+      assert.equal(await page.locator('.improvement-topic').count(),3);
+      assert.equal(await page.locator('.improvement-stats strong').nth(0).textContent(),'8');
+      assert.equal(await page.locator('.improvement-stats strong').nth(1).textContent(),'18');
+      assert(await page.locator('.class-app').evaluate(n=>n.scrollWidth<=n.clientWidth+1),'teacher view must not overflow');
+      await page.locator('#lectureImprovements').scrollIntoViewIfNeeded();
+      await page.screenshot({path:output+(mobile?'/mobile-topics.png':'/desktop-topics.png')});
+      await page.getByRole('button',{name:'Prepare slides',exact:true}).first().click();
+      await page.locator('.improvement-dialog').waitFor();
+      await page.getByRole('textbox',{name:'Title 1',exact:true}).fill('A teacher-reviewed worked example');
+      await page.getByRole('button',{name:'Preview',exact:true}).click();
+      assert.equal(await page.locator('.improvement-slide-preview h3').textContent(),'A teacher-reviewed worked example');
+      const bounds = await page.locator('.improvement-dialog').boundingBox();
+      assert(bounds.x>=0 && bounds.x+bounds.width<=page.viewportSize().width+1);
+      assert(await page.locator('.improvement-preview-brand img').evaluate(n=>n.complete&&n.naturalWidth>0));
+      await page.screenshot({path:output+(mobile?'/mobile-review.png':'/desktop-review.png')});
+      await page.getByRole('button',{name:'Approve & create version',exact:true}).click();
+      await page.locator('.improvement-dialog').waitFor({state:'detached'});
+      await page.getByRole('link',{name:'Open new version',exact:true}).waitFor();
+      const artifact = await page.getByRole('link',{name:'Open new version',exact:true}).getAttribute('href');
+      const preview = await context.newPage();
+      preview.on('pageerror', e => errors.push(e.message));
+      await preview.goto(base+artifact+'#11');
+      assert.equal(await preview.locator('.slide').count(),11);
+      await preview.waitForFunction(() => document.querySelector('.slide.active')?.dataset.title === 'A teacher-reviewed worked example');
+      await preview.waitForFunction(() => getComputedStyle(document.querySelector('.slide.active')).opacity === '1');
+      assert((await preview.locator('.improvement-slide .slide-body').boundingBox()).height > 200, 'supplement must occupy the content track, not the header');
+      assert.equal(await preview.locator('.improvement-slide li').count(), 4);
+      await preview.screenshot({path:output+(mobile?'/mobile-approved.png':'/desktop-approved.png')});
+      const exported = await context.request.get(base+artifact+'&download=1');
+      assert.match(exported.headers()['content-disposition'],/attachment/);
+      const source = await exported.text();
+      assert(!source.includes('<base href="/">'));
+      assert(source.includes('A teacher-reviewed worked example'));
+      const original = await context.request.get(base+'/');
+      assert(!(await original.text()).includes('A teacher-reviewed worked example'));
+      await preview.close();
+      await page.locator('input[placeholder="课堂名称 / Class title"]').fill('Consent check');
+      await page.getByRole('button',{name:'Create class',exact:true}).click();
+      await page.waitForFunction(() => document.querySelector('.class-status').textContent.includes('Consent check'));
+      const studentHref = await page.locator('#classLinks a').first().getAttribute('href');
+      const student = await context.newPage();
+      student.on('pageerror', e => errors.push(e.message));
+      const requests = [];
+      await student.route('**/api/chat', async route => {
+        requests.push(route.request().postDataJSON());
+        await route.fulfill({contentType:'application/x-ndjson',body:'{"type":"delta","text":"Mock answer"}\n{"type":"done"}\n'});
+      });
+      await student.goto(base+studentHref);
+      await student.waitForFunction(() => !!PPTClassroom.headers()['X-Classroom-Token']);
+      await student.locator('#agentLauncher').click();
+      assert(!(await student.locator('#improvementConsent').isChecked()));
+      await student.locator('#agentInput').fill('Private question'); await student.locator('#agentSend').click();
+      await student.waitForFunction(() => document.querySelectorAll('.agent-message.assistant').length===1 && !document.querySelector('#agentSend').disabled);
+      assert.equal(requests[0].shareForImprovement,undefined);
+      await student.locator('#improvementConsent').check();
+      await student.locator('#agentInput').fill('Shared question'); await student.locator('#agentSend').click();
+      await student.waitForFunction(() => document.querySelectorAll('.agent-message.assistant').length===2);
+      assert.equal(requests[1].shareForImprovement,true);
+      assert.match(requests[1].improvementRequestId,/^[a-f0-9-]+$/);
+      await student.reload();
+      assert(!(await student.locator('#improvementConsent').isChecked()),'consent must reset on page load');
+      await context.close();
+      console.log(mobile?'Mobile review, export and consent passed':'Desktop review, export and consent passed');
+    }
+    assert.deepEqual(errors,[]);
+  } finally { await browser.close(); }
+})().catch(error => {console.error(error);process.exitCode=1;});

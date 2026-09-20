@@ -110,7 +110,8 @@ class HTTPTests(unittest.TestCase):
                 with self.assertRaises(HTTPError) as error: urlopen(Request(self.base+path,method=method))
                 self.assertEqual(error.exception.code,404)
             for path in ['/','/assets/chat.js','/assets/chat.css','/assets/i18n.js','/assets/thumbnails.js','/assets/thumbnails.css','/assets/classroom.js','/assets/classroom.css','/assets/archive.js','/assets/vendor/fflate/fflate.js','/assets/vendor/qrcode/qrcode.js','/assets/vendor/mathjax/es5/tex-chtml.js',
-                         '/assets/region.js','/assets/region.css','/assets/vendor/html2canvas/html2canvas.min.js','/assets/vendor/lucide/scan.svg']:
+                         '/assets/region.js','/assets/region.css','/assets/vendor/html2canvas/html2canvas.min.js','/assets/vendor/lucide/scan.svg',
+                         '/assets/improvements.js','/assets/improvements.css']:
                 with urlopen(Request(self.base+path,method=method)) as response:
                     self.assertEqual(response.status,200)
                     response.read()

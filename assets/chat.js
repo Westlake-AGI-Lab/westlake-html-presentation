@@ -271,7 +271,7 @@
       const previous=this.messages.slice(-12);
       if(previous.reduce((sum,m)=>sum+(m.images?.length||0),0)+this.pending.length>6){this.notice.textContent='上下文累计超过 6 张图片，请清空对话后继续。';return;}
       const context=selectedContext||this.getContext();
-      const request={...context,language:PPTI18n.language,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
+      const request={...context,...window.PPTImprovements?.questionConsent(),language:PPTI18n.language,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
       this.lastRequest=JSON.parse(JSON.stringify(request));this.pending=[];this.drawPending();this.input.value='';this.input.style.height='auto';this.notice.textContent='';this.follow=true;
       const user={role:'user',text:question,images:request.images,status:'complete',page:{...context.currentSlide},language:request.language,meta:`提问时位于第 ${context.currentSlide.number} 页 · ${context.currentSlide.title}`};
       this.messages.push(user);this.addRow(user);this.processing=true;this.controls();await this.persist(true);this.processing=false;await this.run(this.lastRequest,false);
