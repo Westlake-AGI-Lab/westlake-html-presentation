@@ -98,6 +98,7 @@
       this.panel = $('agentPanel'); this.log = $('agentConversation'); this.input = $('agentInput');
       this.mount(); this.restore(); this.health(); this.update();
       this.archive = new LearningArchive(this); this.archiveReady = this.archive.init();
+      if (window.WestlakeRegion) this.region = new WestlakeRegion(this);
       window.addEventListener('ppt-math-ready', () => this.messages.forEach(m => this.paint(m)), {once:true});
       window.addEventListener('ppt-language-change', () => { this.messages.filter(m=>!m.text).forEach(m=>this.paint(m)); });
     }
@@ -264,12 +265,12 @@
         frag.append(node.textContent.slice(pos));node.replaceWith(frag);
       }
     }
-    async ask(override='') {
+    async ask(override='', selectedContext=null) {
       if(this.busy||this.processing)return;
       const question=(override||this.input.value).trim()||(this.pending.length?t('请结合当前 PPT 解释这张图片'):'');if(!question)return;
       const previous=this.messages.slice(-12);
       if(previous.reduce((sum,m)=>sum+(m.images?.length||0),0)+this.pending.length>6){this.notice.textContent='上下文累计超过 6 张图片，请清空对话后继续。';return;}
-      const context=this.getContext();
+      const context=selectedContext||this.getContext();
       const request={...context,language:PPTI18n.language,question,images:this.pending.map(i=>({...i})),stream:true,history:previous.map(m=>({role:m.role,text:m.text,status:m.status,images:m.images||[],imageCount:m.imageCount||0}))};
       this.lastRequest=JSON.parse(JSON.stringify(request));this.pending=[];this.drawPending();this.input.value='';this.input.style.height='auto';this.notice.textContent='';this.follow=true;
       const user={role:'user',text:question,images:request.images,status:'complete',page:{...context.currentSlide},language:request.language,meta:`提问时位于第 ${context.currentSlide.number} 页 · ${context.currentSlide.title}`};

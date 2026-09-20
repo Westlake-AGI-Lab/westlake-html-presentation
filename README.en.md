@@ -44,6 +44,18 @@ A lightweight browser-based slide template for teaching, research talks, and mee
 
 ## Current status (2026-09-18)
 
+### Area selection and Q&A
+
+The blue scan icon in the presentation toolbar starts a rectangular selection with a mouse or finger. A local crop preview offers **Explain formula**, **Identify method**, **Explain this**, and a custom question. Controls and preset questions follow English / Chinese UI selection; typed questions are preserved. Selecting alone makes no AI request. Choosing a preset or sending a custom question submits the cropped image and the frozen slide context through the existing chat API, with the answer shown in the sidebar.
+
+Cancel with Escape or Cancel, or use Select again. Keyboard users can activate the tool, use arrows to position the initial rectangle, Shift+arrows to resize it, and Enter to capture. Navigation and window resizing dismiss an unsent selection. Finish text editing and send or clear an existing chat draft before starting. Existing image-count limits apply; no automatic retry or extra API endpoint is added.
+
+`assets/region.js` / `assets/region.css` use locally bundled html2canvas 1.4.1 and a Lucide scan icon. Captures are DOM renderings, not a guaranteed pixel-exact screenshot or an OCR transcription. Check the preview, especially for complex formulas/charts. Selected video, iframe, unloaded or cross-origin image elements are rejected; use an uploaded screenshot instead. Other unsupported CSS/media may render differently. Only the current visible rectangular area is attached, up to 2048 px / 1 MiB after compression. The temporary preview stays in memory; after sending, the image follows the existing chat attachment/storage behavior. No API credentials reach the browser; sharing and privacy rules below still apply.
+
+Area selection is included in the reusable GitHub template. AI answers require the local server and a configured image-capable provider. The independent Diffusion deck stays outside this repository and release bundles. Internal deployment is pending: the server SSH connection timed out on 2026-09-20; deployed files and settings were not changed.
+
+Browser regression: with Playwright and Chrome installed, start the local server, then run `REGION_TEST_URL=http://127.0.0.1:8765/ node tests/test_region.cjs`. It mocks AI responses and checks desktop/touch selection, nonblank crops, bilingual requests, cancellation, navigation, and draft preservation. Automated tests do not establish real AI response quality.
+
 ### One-click Chinese / English UI
 
 Use `English / 中文` in the presentation toolbar or chat header. Chat controls, statuses, errors, upload/preview notices, copy/export, editing, notes, fullscreen, print, navigation and quick questions switch together. The choice is saved in this site's browser storage and survives reloads. Slide content, speaker notes, slide titles and existing messages are not automatically translated; switching does not incur a translation API call.

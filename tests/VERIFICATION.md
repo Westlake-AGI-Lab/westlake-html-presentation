@@ -8,6 +8,14 @@ Both READMEs now reflect classroom/archive features, deployment dependencies and
 
 日期 / Date: 2026-09-17。涵盖本地验证和授权内网部署；Diffusion 稿件不在 GitHub 发布范围内。 / Covers local verification and authorized LAN deployment; the Diffusion deck is excluded from GitHub publication.
 
+## 框选演示 / Area selection demo
+
+- 2026-09-20 发布检查：合并最新课堂、档案及缩略图功能后，通用模板通过 21 项 Python 测试、Python 语法检查、i18n 检查，以及桌面和触屏框选浏览器回归。AI 回答使用模拟接口，未测试真实服务商。 / Publication checks on 2026-09-20: after integrating the latest classroom, archive and thumbnail features, the generic template passed 21 Python tests, Python syntax and i18n checks, plus desktop and touch area-selection browser regression. AI responses were mocked; no real provider was tested.
+- 2026-09-20：所有者授权将框选功能发布到 GitHub；内网 SSH 连接超时，部署待完成。 / On 2026-09-20 the owner authorized GitHub publication of area selection; internal SSH timed out and deployment remains pending.
+- Playwright 在独立 Diffusion 演示上验证 1440×900 桌面与 390×844 触屏：框选、非空截图及尺寸、英文公式请求、中文自定义 Enter 发送、截图与页码对应、取消、键盘选区、重选、翻页取消以及聊天草稿保留。截图已人工检查。 / Playwright verified desktop and touch capture, nonblank bounded crops, English formula questions, Chinese custom Enter submission, image/page correspondence, cancellation, keyboard selection, reselection, navigation cancellation and draft preservation on the independent Diffusion demo. Screenshots were visually inspected.
+- 浏览器自动测试拦截 AI 请求；不以模拟回答证明真实模型质量。 / Browser automation mocks AI requests; mock replies do not establish real model quality.
+- 原有 13 项后端测试及 i18n 检查通过。系统代理影响本地测试连接，设置 `NO_PROXY=127.0.0.1,localhost` 后通过。 / Existing 13 backend tests and i18n checks passed. Local test connections required `NO_PROXY=127.0.0.1,localhost` to bypass the system proxy.
+
 ## 内网部署追加验证 / LAN deployment verification
 
 ### 互动课堂与学习档案（2026-09-17）/ Classrooms and learning archives

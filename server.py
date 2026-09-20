@@ -83,6 +83,7 @@ PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js"
     "assets/thumbnails.js", "assets/thumbnails.css",
     "assets/classroom.js", "assets/classroom.css", "assets/archive.js",
     "assets/vendor/fflate/fflate.js", "assets/vendor/qrcode/qrcode.js",
+    "assets/region.js", "assets/region.css", "assets/vendor/html2canvas/html2canvas.min.js", "assets/vendor/lucide/scan.svg",
     "assets/vendor/marked/lib/marked.umd.js",
     "assets/vendor/dompurify/dist/purify.min.js",
     "assets/vendor/mathjax/es5/tex-chtml.js"}
