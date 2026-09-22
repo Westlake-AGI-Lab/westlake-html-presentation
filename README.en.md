@@ -1,5 +1,19 @@
 # Westlake University HTML Presentation · PPT Q&A Agent
 
+## Personal explanatory slides from a question
+
+The classroom entry controls hide while the AI panel is open so they do not cover the composer on mobile; closing the panel restores them.
+
+Enter a question in the AI composer and select **Create slides**. It generates 1–3 personal draft slides using the question, current HTML slide and all preceding slides including speaker notes. Later slides and chat history are excluded; context and language are frozen on click. Only explicitly attached images are sent for vision; embedded slide images are not automatically read. No PDF upload is required. **My slides** reopens the latest result; source buttons return to lecture pages. Notes identify uncertainties and extra reasoning. Citation numbers are range-validated, not independently fact-checked.
+
+The preview lives in page memory and disappears on reload. **Download HTML** saves a separate self-contained text presentation with notes and source links; formulas remain LaTeX text in the download, while the online preview renders math. Links require the original server and may point to content changed later. A new result replaces the previous preview; download first to retain it. Questions and attachments remain in the composer for revision/retry. These drafts do not modify the lecture or enter classroom analytics, learning archives or teacher-approved versions.
+
+POST `/api/personal-slides` accepts `question`, `slides`, `currentSlide`, `language` (`zh`/`en`) and optional `images`; it returns `slides` with `title`, `bullets`, `notes`, `sources`, plus `model` and `currentSlide`. It reuses the configured server-side Responses provider and existing network/origin, participant/IP, global request and concurrency limits. Limits: 4,000 question characters, 80 source slides, 80,000 context characters including framing; per-slide title/content/notes limits 200/10,000/5,000. Oversized context is rejected instead of silently omitting earlier pages. Output: 1–3 slides, 1–4 bullets each. Existing image limits apply. One model call generates and performs a prompted source check; there is no independent verifier or retrieval. No new configuration is needed.
+
+Methodological inspiration: Yuheng Yang, Wenjia Jiang, Yang Wang, Yi Song, Yiwei Wang, and Chi Zhang. *Auto-Slides: An Interactive Multi-Agent System for Creating and Customizing Research Presentations*. arXiv:2509.11062v3 (2026), https://arxiv.org/abs/2509.11062v3. We adapt interactive refinement and source-checking ideas to question-driven HTML supplements; this does not reproduce its full PDF/Beamer multi-agent pipeline or establish its reported results for this project.
+
+Verification: backend mock tests in `tests/test_server.py`; desktop/mobile browser tests in `tests/test_personal_slides.cjs`. Real provider output quality needs review. Internal deployment pending (2026-09-22): SSH timed out during banner exchange and HTTP returned an empty reply; no remote files or settings were changed.
+
 ## Teacher-reviewed lecture improvements
 
 GitHub package: the reusable template includes this workflow and its synthetic sample. Private classroom databases, local demo credentials, generated versions and the independent Diffusion deck are not included. Publication of this feature does not automatically publish teacher-approved presentations.

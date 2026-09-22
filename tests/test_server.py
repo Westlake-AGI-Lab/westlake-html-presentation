@@ -26,6 +26,29 @@ class FakeResponse(io.BytesIO):
     headers = {'Content-Type':'text/event-stream'}
 
 class ValidationTests(unittest.TestCase):
+    def test_personal_context_excludes_future_and_history(self):
+        p = dict(payload(), slides=[{'title':'first','content':'known'}, {'title':'future','content':'SECRET'}],
+                 history=[{'role':'user','text':'HISTORY_SECRET'}], images=[picture()])
+        clean, body = server.personal_slide_request(p)
+        text = json.dumps(body, ensure_ascii=False)
+        self.assertNotIn('SECRET', text)
+        self.assertEqual(len(clean['slides']), 1)
+        self.assertIn('input_image', text)
+        self.assertIn('known', text)
+        for change in [{'currentSlide':{'number':True}}, {'question':''},
+                       {'slides':[{'content':'x'*10001}]}]:
+            with self.assertRaises(ValueError):
+                server.personal_slide_request(dict(p, **change))
+
+    def test_personal_citations_validated(self):
+        result = {'slides':[{'title':'Explanation','bullets':['A step'], 'notes':'Check this.', 'sources':[1]}]}
+        with patch.object(server, 'call_openai', return_value=(json.dumps(result), 'mock')):
+            self.assertEqual(server.personal_slides(payload())['slides'][0]['sources'], [1])
+        for sources in [[2], [True], [], [1,1], ['1']]:
+            result['slides'][0]['sources'] = sources
+            with patch.object(server, 'call_openai', return_value=(json.dumps(result), 'mock')):
+                with self.assertRaises(RuntimeError): server.personal_slides(payload())
+
     def test_response_language(self):
         self.assertIn('默认用清晰中文', server.build_request(payload())['instructions'])
         english = server.build_request(dict(payload(), language='en'))
@@ -135,5 +158,11 @@ class HTTPTests(unittest.TestCase):
         with patch.object(server,'open_upstream',return_value=FakeResponse(b'{"output_text":"legacy answer"}')):
             with urlopen(Request(self.base+'/api/chat',data=json.dumps(payload()).encode())) as response:
                 self.assertEqual(json.load(response)['answer'],'legacy answer')
+
+    def test_personal_endpoint(self):
+        answer = json.dumps({'slides':[{'title':'Example','bullets':['Step'], 'notes':'Draft', 'sources':[1]}]})
+        with patch.object(server,'call_openai',return_value=(answer,'mock')):
+            with urlopen(Request(self.base+'/api/personal-slides',data=json.dumps(payload()).encode())) as response:
+                self.assertEqual(json.load(response)['slides'][0]['title'],'Example')
 
 if __name__=='__main__': unittest.main()

@@ -97,6 +97,10 @@
       this.messages = []; this.pending = []; this.busy = false; this.processing = false; this.follow = true;
       this.panel = $('agentPanel'); this.log = $('agentConversation'); this.input = $('agentInput');
       this.mount(); this.restore(); this.health(); this.update();
+      window.addEventListener('keydown', event => {
+        // Disabling the last navigation button can move focus to the body.
+        if(this.personalPreview?.open && !this.personalPreview.contains(event.target)) event.stopPropagation();
+      }, true);
       this.archive = new LearningArchive(this); this.archiveReady = this.archive.init();
       if (window.WestlakeRegion) this.region = new WestlakeRegion(this);
       window.addEventListener('ppt-math-ready', () => this.messages.forEach(m => this.paint(m)), {once:true});
@@ -122,6 +126,14 @@
       this.fileInput.accept = 'image/png,image/jpeg,image/webp'; this.fileInput.id = 'agentImages'; this.fileInput.hidden = true;
       actions.append(this.fileInput);
       this.upload = this.button('＋ 图片', () => this.fileInput.click(), actions, 'agentUpload');
+      this.createSlides = this.button('', () => this.generateSlides(), actions, 'agentCreateSlides');
+      this.viewSlides = this.button('', () => this.personalPreview?.showModal(), actions, 'agentViewSlides');
+      this.viewSlides.hidden = true;
+      const slideLabels = () => {
+        this.createSlides.textContent = PPTI18n.language === 'en' ? 'Create slides' : '生成讲解页';
+        this.viewSlides.textContent = PPTI18n.language === 'en' ? 'My slides' : '我的讲解页';
+      };
+      slideLabels(); window.addEventListener('ppt-language-change', slideLabels);
       this.stop = this.button('停止', () => { this.stopReason = '已停止，回答未完成'; this.controller?.abort(); }, actions, 'agentStop');
       this.retry = this.button('重试', () => this.run(this.lastRequest, true), actions, 'agentRetry');
       this.stop.hidden = true; this.retry.hidden = true;
@@ -214,6 +226,7 @@
       }
     }
     controls() {
+      this.createSlides.disabled=this.busy||this.processing;
       $('agentSend').disabled=this.busy||this.processing; this.upload.disabled=this.busy||this.processing;
       $('agentClear').disabled=this.busy||this.processing; this.stop.hidden=!this.busy;
       this.retry.hidden=this.busy||!this.lastRequest||!['error','stopped'].includes(this.messages.at(-1)?.status);
@@ -264,6 +277,69 @@
         for(const match of matches){frag.append(node.textContent.slice(pos,match.index));const n=Number(match[1]||match[2]);if(n>=1&&n<=count){const b=make('button','chat-page-link',match[0]);b.type='button';b.title='跳转到模型引用的页面（未自动核验引用）';b.onclick=()=>{this.navigate(n-1);this.update();};frag.append(b);}else frag.append(match[0]);pos=match.index+match[0].length;}
         frag.append(node.textContent.slice(pos));node.replaceWith(frag);
       }
+    }
+    async generateSlides() {
+      if(this.busy||this.processing)return;
+      const en=PPTI18n.language==='en', question=this.input.value.trim();
+      if(!question){this.notice.textContent=en?'Enter your question first.':'请先输入问题。';this.input.focus();return;}
+      const context=JSON.parse(JSON.stringify(this.getContext()));
+      context.slides=context.slides.slice(0,context.currentSlide.number);
+      const request={...context,question,language:PPTI18n.language,images:this.pending.map(i=>({...i}))};
+      this.busy=true;this.controller=new AbortController();this.stopReason=en?'Generation stopped.':'生成已停止。';this.controls();
+      this.notice.textContent=en?'Preparing explanatory slides…':'正在生成讲解页…';
+      const deadline=setTimeout(()=>this.controller?.abort(),120000);
+      try {
+        const response=await fetch('/api/personal-slides',{method:'POST',headers:{'Content-Type':'application/json',...window.PPTClassroom?.headers()},body:JSON.stringify(request),signal:this.controller.signal});
+        const result=await response.json();if(!response.ok)throw Error(result.error||`HTTP ${response.status}`);
+        if(!Array.isArray(result.slides)||!result.slides.length)throw Error(en?'Invalid slides.':'讲解页格式无效。');
+        this.showPersonalSlides(result,request);
+        this.notice.textContent=en?'Personal draft ready · not teacher-reviewed.':'个人草稿已生成 · 未经教师审核。';
+      } catch(error) {this.notice.textContent=this.controller.signal.aborted?(en?'Stopped or timed out. You can retry.':'已停止或超时，可重新生成。'):error.message;}
+      finally {clearTimeout(deadline);this.busy=false;this.controller=null;this.controls();}
+    }
+    showPersonalSlides(result,request) {
+      this.personalPreview?.remove();
+      const en=request.language==='en', dialog=make('dialog','personal-slides-dialog');
+      this.personalPreview=dialog;this.viewSlides.hidden=false;
+      const bar=make('div','personal-slides-toolbar'), counter=make('span');
+      const stage=make('section','personal-slide'), notes=make('details'), noteBody=make('div');
+      notes.append(make('summary','',en?'Speaker notes':'讲解备注'),noteBody);
+      let index=0;
+      const draw=()=>{
+        const slide=result.slides[index];stage.replaceChildren();
+        stage.append(make('p','personal-slide-label',en?'Personal draft · not teacher-reviewed':'个人草稿 · 未经教师审核'),make('h2','',slide.title));
+        const points=make('ul');slide.bullets.forEach(point=>{const li=make('li');li.append(renderMarkdown(point));points.append(li);});stage.append(points);
+        const sources=make('div','personal-slide-sources');
+        slide.sources.forEach(number=>this.button((en?'Slide ':'第 ')+number+(en?'':' 页'),()=>{dialog.close();this.close();this.navigate(number-1);this.update();},sources));stage.append(sources);
+        noteBody.replaceChildren(renderMarkdown(slide.notes));notes.open=false;
+        counter.textContent=`${index+1} / ${result.slides.length}`;prev.disabled=index===0;next.disabled=index===result.slides.length-1;
+        mathQueue=mathQueue.catch(()=>{}).then(()=>typeset(stage)).then(()=>typeset(noteBody));
+      };
+      const prev=this.button('←',()=>{index--;draw();},bar);prev.setAttribute('aria-label',en?'Previous':'上一页');
+      bar.append(counter);
+      const next=this.button('→',()=>{index++;draw();},bar);next.setAttribute('aria-label',en?'Next':'下一页');
+      this.button(en?'Download HTML':'下载 HTML',()=>this.downloadPersonalSlides(result,request),bar);
+      this.button(en?'Close':'关闭',()=>dialog.close(),bar);
+      dialog.append(bar,stage,notes);document.body.append(dialog);draw();dialog.showModal();
+      dialog.addEventListener('keydown',event=>event.stopPropagation());
+      dialog.addEventListener('touchend',event=>event.stopPropagation());
+      dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close();});
+    }
+    downloadPersonalSlides(result,request) {
+      const doc=document.implementation.createHTMLDocument('Personal lecture supplement');
+      doc.documentElement.lang=request.language;
+      const meta=doc.createElement('meta');meta.name='viewport';meta.content='width=device-width, initial-scale=1';doc.head.append(meta);
+      const style=doc.createElement('style');style.textContent='body{margin:0;background:#eef2f4;color:#18212b;font:20px/1.6 system-ui}section{box-sizing:border-box;max-width:1100px;min-height:620px;margin:24px auto;padding:48px;background:white;border-top:6px solid #087b70;overflow-wrap:anywhere}h2{font-size:32px}li{margin:20px 0}footer,details{font-size:15px}a{color:#006a9c}@media(max-width:600px){section{padding:24px;min-height:0}h2{font-size:26px}}@media print{section{break-after:page;margin:0;min-height:0}}';doc.head.append(style);
+      result.slides.forEach(slide=>{
+        const section=doc.createElement('section');section.append(make('p','',request.language==='en'?'Personal draft · not teacher-reviewed':'个人草稿 · 未经教师审核'),make('h2','',slide.title));
+        const ul=make('ul');slide.bullets.forEach(point=>ul.append(make('li','',point)));section.append(ul);
+        const footer=make('footer');slide.sources.forEach(number=>{
+          const link=make('a','',`Slide ${number}: ${request.slides[number-1].title}`);const url=new URL(location.href);url.hash=String(number);url.search='';link.href=url.href;footer.append(link,doc.createTextNode(' · '));
+        });section.append(footer);
+        const notes=make('details');notes.append(make('summary','','Notes'),make('p','',slide.notes));section.append(notes);doc.body.append(section);
+      });
+      const url=URL.createObjectURL(new Blob(['<!doctype html>\n'+doc.documentElement.outerHTML],{type:'text/html;charset=utf-8'}));
+      const a=make('a');a.href=url;a.download='personal-lecture-slides.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
     async ask(override='', selectedContext=null) {
       if(this.busy||this.processing)return;

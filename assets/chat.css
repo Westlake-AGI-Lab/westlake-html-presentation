@@ -368,5 +368,17 @@ html[lang="en"] .agent-title {font-size:15px;}
 .chat-math mjx-assistive-mml {position:absolute!important;width:1px!important;height:1px!important;padding:0!important;border:0!important;overflow:hidden!important;clip:rect(1px,1px,1px,1px)!important;white-space:nowrap!important;}
 .chat-page-link {padding:0 2px;border:0;color:#005d9f;background:#eaf1fb;border-radius:3px;text-decoration:underline;cursor:pointer;font:inherit;}
 .agent-message-meta {white-space:pre-wrap;font-size:10px;}
+body.agent-open .class-entry,body.agent-open .class-launcher{visibility:hidden}
+.personal-slides-dialog{box-sizing:border-box;width:min(1060px,96vw);max-height:92dvh;padding:20px;border:1px solid #b4c1c9;border-radius:8px;background:#f3f6f7;color:#18212b;overflow:auto}
+.personal-slides-dialog::backdrop{background:rgba(0,0,0,.45)}
+.personal-slides-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.personal-slide{box-sizing:border-box;min-height:420px;background:white;border-top:5px solid #087b70;padding:30px 40px;overflow-wrap:anywhere}
+.personal-slide h2{font-size:30px;line-height:1.25;margin:16px 0 24px;letter-spacing:0}
+.personal-slide ul{padding-left:24px;font-size:22px;line-height:1.5}
+.personal-slide li{margin-bottom:18px}
+.personal-slide-label,.personal-slide-sources{font:14px/1.5 system-ui;color:#475569}
+.personal-slide-sources{display:flex;flex-wrap:wrap;gap:8px}
+.personal-slides-dialog details{font:16px/1.6 system-ui;margin-top:16px;overflow-wrap:anywhere;white-space:pre-wrap}
+@media(max-width:600px){.personal-slides-dialog{padding:12px}.personal-slide{padding:20px;min-height:360px}.personal-slide h2{font-size:24px}.personal-slide ul{font-size:18px}}
 @media(max-width:760px) {.agent-panel,.agent-panel.chat-wide{width:100vw;} #agentWide{display:none;} .agent-header{gap:7px;} .chat-privacy{font-size:10px;}}
 @media print {.agent-panel,.agent-launcher,.agent-scrim,.chat-image-dialog{display:none!important;}}
