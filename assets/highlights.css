@@ -1,0 +1,22 @@
+::highlight(ppt-yellow){background-color:#ffe475;color:#252b2c}
+::highlight(ppt-green){background-color:#a8e8bd;color:#252b2c}
+::highlight(ppt-pink){background-color:#f6b7d2;color:#252b2c}
+.highlight-button{display:inline-grid;place-items:center;flex:0 0 40px;width:40px;height:40px;padding:8px;border:1px solid #b8c8c4;border-radius:5px;background:#fff;color:#243d36;cursor:pointer;vertical-align:middle}
+.highlight-button img{display:block;width:22px;height:22px;pointer-events:none}
+.highlight-button:hover{border-color:#087565;background:#edf5f1}
+.highlight-button:focus-visible{outline:2px solid #087565;outline-offset:2px}
+.highlight-button:disabled{opacity:.4;cursor:default}
+#highlightToggle[aria-pressed=true]{background:#ffe475;border-color:#746414}
+.highlight-toolbar{position:fixed;top:66px;right:12px;z-index:97;max-width:calc(100vw - 24px);padding:8px;border:1px solid #bacbc5;border-radius:6px;background:#fff;box-shadow:0 4px 18px #173d3026;font:13px/1.4 system-ui,sans-serif;color:#263f37;letter-spacing:0}
+.highlight-toolbar[hidden]{display:none}
+.highlight-tools{display:flex;gap:6px;align-items:center}
+.highlight-swatch::before{content:"";width:23px;height:23px;border:1px solid #263f374d;border-radius:50%}
+.highlight-swatch[data-color=yellow]::before{background:#ffe475}
+.highlight-swatch[data-color=green]::before{background:#a8e8bd}
+.highlight-swatch[data-color=pink]::before{background:#f6b7d2}
+.highlight-status{max-width:270px;margin:7px 0 0;overflow-wrap:anywhere;font-size:12px;color:#536960}
+.highlight-status:empty{display:none}
+body.highlighting .slide.active{user-select:text;-webkit-user-select:text;cursor:text}
+body.highlighting .slide.active *{-webkit-user-select:text;user-select:text}
+@media(max-width:600px){.highlight-toolbar{top:62px}.highlight-tools{gap:4px}.highlight-button{width:40px;height:40px;flex-basis:40px}.utility-controls{max-width:calc(100vw - 22px);flex-wrap:wrap}.utility-controls #highlightToggle{width:34px;height:34px;flex-basis:34px;padding:6px}}
+@media print{.highlight-toolbar,#highlightToggle{display:none!important}::highlight(ppt-yellow),::highlight(ppt-green),::highlight(ppt-pink){background-color:transparent;color:inherit}}

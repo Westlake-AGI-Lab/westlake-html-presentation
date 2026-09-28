@@ -328,3 +328,11 @@ curl http://127.0.0.1:8765/api/health
 共用组件是 `assets/chat.js` 和 `assets/chat.css`。本地依赖：marked 18.0.13、DOMPurify 3.4.15、MathJax 3.2.2，许可证位于 `assets/vendor/`。Python 图片验证依赖见 `requirements.txt`；建议虚拟环境安装，启动器优先使用本项目 `.venv/bin/python`。
 
 后端单元测试：`python3 -m unittest discover -s tests -v`。浏览器回归应覆盖四种数学定界符、矩阵、代码、XSS、图片预览/移除/失效、停止/重试、页码跳转及窄屏布局。Diffusion 示例独立于主仓库，不应加入发布包。
+
+## 个人文本高亮
+
+在独立或学生模式中，点击荧光笔图标，选中幻灯片文字，再选择黄色、绿色或粉色。触屏使用系统长按选字及选区手柄。选中已有标记后点击橡皮擦可删除所有相交标记；撤销可恢复本次页面会话中当前页最近 20 次操作。关闭工具栏或按 Escape 退出高亮模式。启用时暂停滑动翻页，翻页按钮仍可使用。教师和投影模式不显示个人标记。
+
+标记自动保存在此浏览器的 localStorage 中，按 URL 路径、页位置和完整页面文字隔离。刷新后恢复文字未变化的页面标记；文字修改后使用独立标记集合。高亮只绘制文本范围，不修改讲稿 HTML、AI 文本上下文、缩略图或导出文件；此功能不会向服务器发送数据。主动截取屏幕时，截图可能包含可见标记。同一浏览器配置中的使用者共享存储，不同设备或来源不自动同步；清除浏览器数据会删除标记。保存失败会显示提示，标记仅保留在内存中。未集成学习档案或导出。每页最多 200 个范围；不支持图片、canvas、SVG 和已渲染的 MathJax 公式。不支持 CSS Custom Highlight 的浏览器将禁用按钮。
+
+文件：`assets/highlights.js`、`assets/highlights.css`、四个本地 Lucide 0.468.0 图标及服务端静态白名单；无配置或 API 变更。浏览器回归：安装 Playwright、Chrome 并启动本地服务后运行 `HIGHLIGHTS_TEST_URL=http://127.0.0.1:8776 node tests/test_highlights.cjs`，不调用模型。真实手机选区手柄仍需设备验证。内网 Diffusion 部署待完成：2026-09-28 SSH 握手超时，远端文件未修改。

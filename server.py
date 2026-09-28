@@ -82,6 +82,9 @@ REQUEST_LIMITS = RequestLimits(*(max(1, int(os.environ.get(name, default))) for 
 # A deployment-time inventory, never a directory listing or extension-only permission.
 PUBLIC_FILES = {HTML_NAME, "assets/chat.js", "assets/chat.css", "assets/i18n.js", "assets/pet.js", "assets/pet.css",
     "assets/thumbnails.js", "assets/thumbnails.css",
+    "assets/highlights.js", "assets/highlights.css",
+    "assets/vendor/lucide/highlighter.svg", "assets/vendor/lucide/eraser.svg",
+    "assets/vendor/lucide/undo-2.svg", "assets/vendor/lucide/x.svg",
     "assets/classroom.js", "assets/classroom.css", "assets/archive.js",
     "assets/vendor/fflate/fflate.js", "assets/vendor/qrcode/qrcode.js",
     "assets/region.js", "assets/region.css", "assets/vendor/html2canvas/html2canvas.min.js", "assets/vendor/lucide/scan.svg",

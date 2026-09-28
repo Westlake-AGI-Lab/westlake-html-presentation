@@ -1,5 +1,11 @@
 # Local verification / 本地验证记录
 
+## 个人文本高亮 / Personal text highlights (2026-09-28)
+
+- Chrome / Playwright 在 1440×1000 和 390×844 视口通过：三色高亮、重叠改色、删除、撤销、刷新恢复、翻页保留、存储失败提示、源文字变化隔离及教师/投影角色隔离。桌面真实鼠标拖选和模拟课堂每两秒轮询下的选区保持通过；触屏翻页冲突使用合成事件验证。截图已人工检查。 / Chrome / Playwright passed at 1440×1000 and 390×844: colors, overlapping recoloring, erase, undo, reload, navigation, storage failures, changed-source isolation and teacher/projection isolation. Actual desktop mouse selection survives mocked two-second classroom polling; synthetic touch events verify swipe suppression. Screenshots were visually inspected.
+- 32 项现有 Python 测试、Python/JavaScript 语法及差异空白检查通过。未调用真实 AI；真实手机长按选区手柄尚未验证。 / All 32 existing Python tests, Python/JavaScript syntax and diff whitespace checks passed. No real AI calls; physical-phone long-press handles remain untested.
+- 内网同步待完成：SSH 握手超时，HTTP 10 秒超时；未修改远端文件、配置或服务。 / Internal deployment pending: SSH banner exchange and the 10-second HTTP probe timed out; remote files, configuration and services were unchanged.
+
 ## 课程改进 / Lecture improvements (2026-09-20)
 
 - 29 项 Python 测试通过，包括同意采集、HTTP 问答联动、教师权限、同源校验、重试去重、分组依据及人数计算、真实生成路径的模拟接口、草稿编辑/拒绝/批准、HTML 转义、版本冲突及课堂删除清理。 / 29 Python tests passed, including opt-in capture through HTTP chat, teacher authorization, same-origin checks, retry deduplication, grouping evidence and participant counts, mocked real-generation path, draft editing/rejection/approval, HTML escaping, revision conflicts and room deletion cleanup.
