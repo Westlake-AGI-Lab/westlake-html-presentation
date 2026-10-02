@@ -1,0 +1,29 @@
+.learning-dialog {width:min(760px,calc(100vw - 24px));max-height:90dvh;box-sizing:border-box;padding:20px;border:1px solid #9ba8aa;border-radius:8px;background:#fff;color:#182c30;font:15px/1.5 system-ui;overflow:auto;letter-spacing:0}
+.learning-dialog::backdrop {background:rgba(0,0,0,.4)}
+.learning-dialog header,.learning-actions {display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.learning-dialog header {justify-content:space-between;position:sticky;top:-20px;background:white;z-index:1;padding:8px 0}
+.learning-dialog h2,.learning-teacher h2 {font-size:22px;margin:0 0 12px}
+.learning-dialog h3 {font-size:18px;margin:18px 0 8px}
+.learning-dialog section,.learning-teacher>section {padding:12px 0;border-top:1px solid #d6dfe0}
+.learning-dialog button,.learning-teacher button {font:inherit;padding:8px 12px;border:1px solid #b0bfc0;border-radius:4px;background:#f3f7f7;color:#133e39;cursor:pointer;min-height:40px}
+.learning-dialog button:disabled {opacity:.5;cursor:default}
+.learning-dialog textarea,.learning-teacher textarea {display:block;box-sizing:border-box;width:100%;font:inherit;padding:10px;border:1px solid #8a9a9c;border-radius:4px;resize:vertical;min-height:44px}
+.learning-dialog p,.learning-dialog blockquote,.learning-teacher p {white-space:pre-wrap;overflow-wrap:anywhere}
+.learning-dialog blockquote {margin:8px 0;padding-left:12px;border-left:3px solid #839d99}
+.learning-check {display:flex;gap:8px;align-items:flex-start;margin:12px 0}
+.learning-check input {margin-top:5px;flex:none}
+.learning-hint {background:#e7f2e9;padding:12px;border-left:3px solid #286843}
+.learning-question {font-weight:600}
+.learning-concept {padding:12px 0;border-bottom:1px solid #d6dfe0}
+.learning-modes {display:flex;gap:14px;padding:8px 12px;margin:6px 12px;border:0;font:14px system-ui}
+.learning-modes label {display:flex;gap:5px;align-items:center}
+.learning-modes legend {font-size:12px;color:#45615c}
+.learning-notice {color:#9a3c1b;min-height:24px}
+.learning-dialog details,.learning-teacher details {padding:10px 0}
+.learning-teacher {max-width:900px;margin:20px 0;padding-top:20px;border-top:1px solid #bbc8c9}
+.learning-teacher fieldset {margin:14px 0;padding:12px;border:1px solid #a9baba}
+.learning-teacher label {display:block;margin:10px 0;font:14px/1.5 system-ui}
+.learning-teacher .learning-check {display:flex}
+.learning-teacher input[type=number],.learning-teacher select {min-height:38px;font:inherit}
+@media(max-width:600px){.learning-dialog{padding:14px}.learning-dialog header{top:-14px}.learning-actions button{flex:1 1 auto}.learning-teacher{max-width:100%}}
+@media print {.learning-dialog,.learning-modes {display:none!important}}

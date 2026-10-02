@@ -121,6 +121,7 @@
     filters=el('select');filters.setAttribute('aria-label','按页筛选 / Filter slides');filters.onchange=renderTeacher;app.append(filters);
     posts=el('div','class-posts');app.append(posts);
     window.PPTImprovements?.mount(app);
+    window.PPTLearningTeacher?.mount(app);
     loadRooms().then(()=>{login.hidden=true;teacher.started=true;poll();}).catch(()=>notice(L('请使用教师口令登录；仅可信内网使用。','Sign in with the teacher password; trusted LAN only.')));
     // Start polling after a login as well, without creating duplicate timers.
     login.addEventListener('submit',()=>{if(!teacher.started){teacher.started=true;setTimeout(poll,2000);}});

@@ -47,6 +47,15 @@ class Classroom:
             CREATE TABLE IF NOT EXISTS improvement_drafts(id TEXT PRIMARY KEY, room TEXT,
                 revision TEXT, report TEXT, payload TEXT, status TEXT, html TEXT, created REAL);
             CREATE INDEX IF NOT EXISTS improvement_question_room ON improvement_questions(room,revision,at);
+            CREATE TABLE IF NOT EXISTS learning_concepts(deck TEXT, revision TEXT, version TEXT,
+                payload TEXT, updated REAL, PRIMARY KEY(deck,revision));
+            CREATE TABLE IF NOT EXISTS learning_shares(room TEXT, member TEXT, revision TEXT,
+                concept TEXT, state TEXT, version TEXT, at REAL, PRIMARY KEY(room,member,revision,concept));
+            CREATE TABLE IF NOT EXISTS learning_research_consents(room TEXT, member TEXT, protocol TEXT,
+                at REAL, PRIMARY KEY(room,member));
+            CREATE TABLE IF NOT EXISTS learning_research_events(id TEXT PRIMARY KEY, room TEXT, member TEXT,
+                participant TEXT, protocol TEXT, revision TEXT, concept TEXT, task TEXT, event TEXT,
+                state TEXT, hints INTEGER, attempts INTEGER, at REAL);
             ''')
             db.execute('UPDATE rooms SET danmaku=0,epoch=epoch+1,version=version+1 WHERE deck=?',(self.deck_id,))
             self.cleanup(db)
@@ -67,10 +76,13 @@ class Classroom:
         for row in db.execute('SELECT code FROM rooms WHERE ended IS NOT NULL AND ended<?', (time.time()-30*86400,)).fetchall():
             self.delete(db, row['code'])
         db.execute('DELETE FROM requests WHERE at<?', (time.time()-86400,))
+        db.execute('DELETE FROM learning_research_events WHERE at<?', (time.time()-30*86400,))
+        db.execute('DELETE FROM learning_research_consents WHERE at<?', (time.time()-30*86400,))
 
     def delete(self, db, code):
         for table in ('feedback','posts','likes','requests','members',
-                      'improvement_questions','improvement_reports','improvement_drafts'):
+                      'improvement_questions','improvement_reports','improvement_drafts',
+                      'learning_shares','learning_research_consents','learning_research_events'):
             db.execute(f'DELETE FROM {table} WHERE room=?', (code,))
         db.execute('DELETE FROM rooms WHERE code=?', (code,))
         self.events.pop(code, None)

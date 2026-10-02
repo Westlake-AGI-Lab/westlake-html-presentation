@@ -1,5 +1,13 @@
 # Local verification / 本地验证记录
 
+## Concept practice / 概念练习 (2026-10-03)
+
+- 42 Python tests passed, including 10 learning tests covering response evidence, correct/partial/uncertain states, hint ordering, answer disclosure, stale catalogue/source versions, owner isolation, teacher authentication, same-origin requests, private-source blocking, optional summary/research consent, withdrawal and classroom deletion. / 42项Python测试通过，含10项概念练习测试，覆盖证据校验、状态、提示顺序、答案解锁、版本/成员隔离、认证/同源检查及自愿分享/研究同意、撤回与课堂删除。
+- In-app browser/Playwright checks used the isolated scripted determinant demo at 1280x720 and 390x844: wrong attempt, first hint, revision, second hint, worked answer; correct attempt; teacher catalogue loading and publication blocked until review; default-off local saving, enabled persistence across reload, English/Chinese labels. Screenshots inspected; no horizontal overflow observed in the desktop dialog or mobile layout. / 桌面与移动视口的脚本演示已检查作答、两级提示、讲解、教师发布审核、本地自愿保存及双语切换，截图已检查。
+- Python compilation, learning JavaScript syntax, existing i18n dictionary checks and `git diff --check` passed. No paid model calls or real student data. / Python与JavaScript语法、现有双语字典及差异空白检查通过；未调用付费模型，未使用真实学生数据。
+- Not established: semantic quality of extraction/assessment, resistance to answer leakage in teacher-provided hints, physical-phone behavior, calibrated mastery, or learning effects. Region gating was inspected in code, not exercised through a full mobile crop interaction in this run. Research approval is not granted by configuration. / 尚未验证真实模型语义质量、审核提示的泄漏、真机体验、掌握度校准或学习效果；本轮框选门控仅检查代码。配置不构成伦理批准。
+- Internal deployment pending: SSH closed the connection and HTTP returned an empty reply. No remote files, credentials or services changed. / 内网部署待完成：SSH连接关闭，HTTP空响应，未修改远端文件、凭据或服务。
+
 ## 个人文本高亮 / Personal text highlights (2026-09-28)
 
 - Chrome / Playwright 在 1440×1000 和 390×844 视口通过：三色高亮、重叠改色、删除、撤销、刷新恢复、翻页保留、存储失败提示、源文字变化隔离及教师/投影角色隔离。桌面真实鼠标拖选和模拟课堂每两秒轮询下的选区保持通过；触屏翻页冲突使用合成事件验证。截图已人工检查。 / Chrome / Playwright passed at 1440×1000 and 390×844: colors, overlapping recoloring, erase, undo, reload, navigation, storage failures, changed-source isolation and teacher/projection isolation. Actual desktop mouse selection survives mocked two-second classroom polling; synthetic touch events verify swipe suppression. Screenshots were visually inspected.

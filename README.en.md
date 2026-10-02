@@ -1,5 +1,27 @@
 # Westlake University HTML Presentation · PPT Q&A Agent
 
+## Concept practice prototype (2026-10-03)
+
+The teacher console now includes **Concept practice**: extract draft concepts from slide text and speaker notes, edit questions/criteria/two hints/worked answers, and explicitly review before publishing. The server verifies each source quotation occurs on its cited slide or notes, rejects stale source and concurrent catalogue edits, and serves students a catalogue without private criteria or solutions. Extraction uses the configured provider; it does not inspect slide images. Semantic correctness and hint leakage still require teacher review.
+
+Students use **Practice** in the AI panel to answer an explanation, application or counterexample question in their own words. Assessment returns criterion labels with `correct`, `missing`, `incorrect` or `uncertain` and validated quotations from the response. Arbitrary model prose is discarded. Aggregate states are `understood`, `partial`, `misunderstood`, `uncertain`; these are observations, not grades or calibrated mastery. Hint 1 requires an attempt, hint 2 a further attempt. A reviewed worked answer unlocks after criteria are met, or after two attempts and both hints. An uncertain assessment remains explicitly uncertain; automatic clarifying questions and adaptive task selection are not implemented.
+
+**Try first** is the default when reviewed concepts exist. It gates chat/quick explanations, region questions and generation of personal slides until a practice explanation on the current source page/version has opened. **Explore** is an explicit alternative; this is a UI policy, not server access control or examination security. Existing personal previews, lecture text and notes remain accessible. A first attempt in a session is not evidence that the student has never seen the answer. With no reviewed catalogue, Explore remains the default.
+
+Practice sessions are memory-only, expire after 30 minutes, and are removed on subsequent practice requests or restart; up to 500 sessions and eight assessed attempts per session are allowed. Only checked **Save practice attempts on this browser** enables localStorage persistence (last 100 attempts), with download/delete controls. Practice records are separate from the existing ZIP learning archive. **Share this concept summary** sends only the latest server-derived evidence state for that concept to the current classroom; it never sends the written answer. Teachers see counts from opted-in memberships, filtered by source/catalogue version. Students can withdraw all their summaries. These counts currently sit beside lecture improvements; they are not yet input to automatic supplementary-slide drafting.
+
+Research logging has separate consent and is disabled by default. Operators must obtain the required institutional approval/exemption and participant information before configuring `LEARNING_STUDY_APPROVAL` and an HTTPS `LEARNING_STUDY_INFO` URL. Environment variables do not grant ethical approval. Consented records contain pseudonymous classroom membership, protocol, source/concept/question IDs, event type, assessment state, hint/attempt counts and timestamps; written answers and AI chats are excluded. Data and consent older than 30 days are cleaned on subsequent classroom requests; deleting a classroom also removes them. Withdrawal removes server-side research events, not previously downloaded exports, which the study team must manage. Provider processing/retention still applies to model requests.
+
+API: POST `/api/learning` with `action` (`catalogue`, `start`, `attempt`, `hint`, `explain`, `share`, `forget`, `withdraw`, `research-consent`); teacher POST `/api/classroom/learning-{catalogue,extract,save,summary,research-export}`. Teacher auth, same-origin checks and existing inference budgets apply. Student body limit: 16 KiB; teacher body limit: 128 KiB. Catalogue: 1–20 concepts, 1–6 tasks/concept, two hints and 1–4 criteria/task; extraction: at most 80 slides/60,000 text-and-note characters. Configured model and `MAX_OUTPUT_TOKENS` are reused, so truncated/invalid JSON fails without publication or scoring. Deploy `learning.py`, updated server/classroom modules, learning assets and their HTML imports together; preserve standalone lecture content.
+
+For an isolated, visibly scripted determinant rehearsal with no paid model calls:
+
+```sh
+python3 learning_demo.py --output /tmp/xiaoxi-practice-demo --mock --port 8781
+```
+
+Choose an empty output directory. Open `http://127.0.0.1:8781/`; teacher console `/?mode=teacher`, demo-only password `local-demo`. The script copies the app and creates three determinant slides and four questions without modifying the source lecture/private configuration. Its keyword-based mock is only for interaction testing, never assessment-quality evidence or study data. Omit `--mock` and supply provider settings through environment variables for real inference; independent review of materials and judgments is still needed. No student study or learning-effectiveness result is claimed. Internal synchronization remains pending: SSH closed the connection on 2026-10-03.
+
 ## Personal explanatory slides from a question
 
 The classroom entry controls hide while the AI panel is open so they do not cover the composer on mobile; closing the panel restores them.

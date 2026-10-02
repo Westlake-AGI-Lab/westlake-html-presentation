@@ -187,6 +187,7 @@
     }
     send(question) {
       if (!question || !this.image || this.capturing) return;
+      if (this.chat.learning?.blocks(this.context)) { this.close(); this.chat.learning.open(); return; }
       if (this.chat.busy || this.chat.processing) { this.setStatus('busy'); return; }
       if (this.chat.input.value.trim()) { this.setStatus('draft'); return; }
       if (this.chat.pending.length >= 3 || this.chat.messages.slice(-12).reduce((n,m) => n+(m.images?.length||0),0)+this.chat.pending.length >= 6) { this.setStatus('limit'); return; }

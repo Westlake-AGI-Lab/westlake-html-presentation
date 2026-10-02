@@ -102,6 +102,7 @@
         if(this.personalPreview?.open && !this.personalPreview.contains(event.target)) event.stopPropagation();
       }, true);
       this.archive = new LearningArchive(this); this.archiveReady = this.archive.init();
+      if (window.PPTLearning && !['teacher','project'].includes(window.PPTClassroom?.role)) this.learning = new PPTLearning(this);
       if (window.WestlakeRegion) this.region = new WestlakeRegion(this);
       window.addEventListener('ppt-math-ready', () => this.messages.forEach(m => this.paint(m)), {once:true});
       window.addEventListener('ppt-language-change', () => { this.messages.filter(m=>!m.text).forEach(m=>this.paint(m)); });
@@ -279,6 +280,7 @@
       }
     }
     async generateSlides() {
+      if(this.learning?.blocks(this.getContext())) { this.learning.open(); return; }
       if(this.busy||this.processing)return;
       const en=PPTI18n.language==='en', question=this.input.value.trim();
       if(!question){this.notice.textContent=en?'Enter your question first.':'请先输入问题。';this.input.focus();return;}
@@ -343,6 +345,7 @@
     }
     async ask(override='', selectedContext=null) {
       if(this.busy||this.processing)return;
+      if(this.learning?.blocks(selectedContext||this.getContext())) { this.learning.open(); return; }
       const question=(override||this.input.value).trim()||(this.pending.length?t('请结合当前 PPT 解释这张图片'):'');if(!question)return;
       const previous=this.messages.slice(-12);
       if(previous.reduce((sum,m)=>sum+(m.images?.length||0),0)+this.pending.length>6){this.notice.textContent='上下文累计超过 6 张图片，请清空对话后继续。';return;}
@@ -354,6 +357,7 @@
     }
     async run(request,retry) {
       if(this.busy||this.processing||!request)return;
+      if(this.learning?.blocks(request)) { this.learning.open(); return; }
       this.busy=true;this.stopReason='已停止，回答未完成';this.controller=new AbortController();this.open();this.status('正在结合 PPT 思考…');
       let message;
       if(retry){message=this.messages.at(-1);message.text='';message.error='';message.status='streaming';}
