@@ -126,7 +126,9 @@
         c.tasks.forEach((task, i) => button(commands, `${i+1}. ${task.kind}`, () => this.work(async () => {
           if (this.session) await api('forget', {session: this.session.session}).catch(() => {});
           this.session = await api('start', {concept: c.id, task: task.id}); this.answerText = '';
+          this.chat.navigate(c.page-1);
           this.drawCatalogue(); this.drawExercise(); this.guardLabels(); this.answer.focus({preventScroll: true});
+          this.dialog.scrollTop = 0;
         })));
         row.append(commands); this.catalogue.append(row);
       }

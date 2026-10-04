@@ -1,0 +1,60 @@
+.eigen-demo { --ink:#202b29; --navy:#202b29; --orange:#167568; background:#f8faf9; color:#202b29; font-family:Arial,sans-serif; letter-spacing:0; }
+.eigen-demo * { letter-spacing:0; }
+.eigen-top { position:fixed; inset:0 0 auto; height:68px; padding:0 28px; display:flex; align-items:center; gap:16px; border-bottom:1px solid #dce3df; background:#fff; z-index:30; }
+.eigen-top img { width:112px; height:auto; background:#243b35; padding:8px; border-radius:4px; }
+.eigen-top strong { font-size:16px; border-left:1px solid #dce3df; padding-left:16px; }
+.eigen-top small { color:#64736c; margin-left:auto; }
+.eigen-top button { border:0; background:#146f61; color:white; padding:11px 18px; border-radius:6px; font:600 14px Arial; cursor:pointer; }
+.eigen-rail { position:fixed; left:0; top:68px; bottom:74px; width:236px; padding:22px 14px; overflow:auto; border-right:1px solid #dce3df; z-index:10; background:#f1f5f2; }
+.eigen-rail h2 { font-size:12px; margin:0 10px 16px; color:#637369; }
+.eigen-rail button { display:flex; gap:12px; width:100%; text-align:left; padding:10px; background:transparent; border:0; border-radius:4px; color:#526159; font:13px/1.4 Arial; cursor:pointer; }
+.eigen-rail button span { color:#87968d; font-size:11px; padding-top:2px; }
+.eigen-rail button[aria-current=true] { background:#dcebe4; color:#145547; font-weight:700; }
+.eigen-demo .deck { position:fixed; top:68px; left:236px; width:calc(100% - 236px); height:calc(100svh - 142px); }
+.eigen-demo .slide { padding:0; display:flex; flex-direction:column; background:#fff; overflow:auto; transform:none; transition:opacity .15s; }
+.eigen-demo .slide:not(.active) { visibility:hidden; }
+.eigen-demo .slide-body { display:block; padding:38px 42px 20px; width:100%; min-width:0; flex:1 0 auto; }
+.eigen-demo .eyebrow { font-size:11px; color:#167568; font-weight:700; margin:0 0 16px; }
+.eigen-demo h1 { font-size:36px; line-height:1.15; max-width:900px; margin:0 0 14px; color:#202b29; }
+.eigen-demo .eigen-subtitle { font-size:18px; line-height:1.5; margin:0 0 24px; color:#617067; }
+.eigen-content { display:grid; gap:30px; min-width:0; }
+.eigen-content.with-lab { grid-template-columns:minmax(0,1fr) minmax(280px,1.1fr); align-items:center; }
+.eigen-formula { font-size:23px; overflow:auto; padding:14px 0; color:#124f45; }
+.eigen-explanation { font-size:18px; line-height:1.75; max-width:850px; }
+.eigen-demo .slide-footer { padding:15px 42px; font-size:11px; color:#738078; display:flex; justify-content:space-between; gap:12px; border-top:1px solid #edf0ee; }
+.vector-lab { border:1px solid #dde5df; border-radius:6px; padding:14px; background:#fbfdfb; min-width:0; }
+.vector-lab canvas { display:block; width:100%; aspect-ratio:680/480; }
+.vector-legend { display:flex; justify-content:center; gap:22px; font-size:13px; padding:10px 0; }
+.vector-legend span:first-child { color:#167568; }
+.vector-legend span:last-child { color:#b84b48; }
+.vector-lab label { display:block; font-size:12px; color:#586b5f; }
+.vector-lab input { display:block; width:100%; margin:12px 0; accent-color:#167568; }
+.vector-result { font:12px/1.5 monospace; margin:0; min-height:36px; color:#516159; }
+.vector-matrix {font:12px/1.5 monospace;margin:0 0 8px;color:#516159;}
+.eigen-demo .utility-controls { top:auto; right:auto; bottom:18px; left:252px; gap:6px; height:36px; }
+.eigen-demo .utility-controls button { font-size:11px; padding:8px; background:#fff; color:#43584b; border:1px solid #dce3df; border-radius:4px; }
+.eigen-demo .deck-controls { left:auto; transform:none; bottom:15px; right:24px; background:#fff; color:#294f40; border:1px solid #dce3df; border-radius:6px; box-shadow:none; }
+.eigen-demo .control-button {color:#294f40;}
+.eigen-class-menu {position:fixed;left:70px;bottom:27px;z-index:97;font:13px Arial;color:#43584b;}
+.eigen-class-menu summary {cursor:pointer;}
+.eigen-demo .eigen-class-menu .class-entry {bottom:65px;left:16px;border-radius:6px;}
+.eigen-demo .agent-launcher {transform:scale(.65);transform-origin:bottom right;}
+.eigen-demo .pet-greeting {display:none;}
+.eigen-demo #editButton {display:none;}
+.eigen-demo .keyboard-hint { display:none; }
+.eigen-demo .agent-launcher { bottom:85px; }
+.eigen-demo .learning-dialog { border:1px solid #dce3df; border-radius:8px; color:#202b29; max-height:88svh; }
+.eigen-demo .learning-dialog button { border-radius:4px; }
+.eigen-demo .learning-concept { border-bottom:1px solid #e3e9e5; padding:14px 0; }
+.eigen-demo .learning-question { font-size:19px; line-height:1.55; }
+.eigen-demo .learning-dialog textarea { padding:14px; border:1px solid #bdcec3; border-radius:4px; font-size:16px; background:white; color:#202b29; color-scheme:light; }
+@media(max-width:1100px) { .eigen-rail {width:194px} .eigen-demo .deck {left:194px;width:calc(100% - 194px)} .eigen-demo .slide-body {padding:28px} .eigen-demo h1 {font-size:30px} .eigen-demo .utility-controls {left:208px} .eigen-content.with-lab {grid-template-columns:1fr 1fr;gap:20px} .eigen-explanation {font-size:16px} }
+@media(max-width:760px) { .eigen-top {height:60px;padding:0 14px;gap:10px} .eigen-top img {width:82px} .eigen-top strong {font-size:12px;padding-left:10px} .eigen-top small {display:none} .eigen-top button {margin-left:auto;padding:9px 12px;font-size:12px} .eigen-rail {display:none} .eigen-demo .deck {top:60px;left:0;width:100%;height:calc(100svh - 125px)} .eigen-demo .slide-body {padding:24px 20px} .eigen-demo h1 {font-size:28px} .eigen-demo .eigen-subtitle {font-size:16px;margin-bottom:14px} .eigen-content.with-lab {grid-template-columns:1fr} .eigen-explanation {font-size:16px;line-height:1.6} .eigen-formula {font-size:18px} .eigen-demo .slide-footer {padding:12px 20px;font-size:10px} .eigen-demo .slide-footer span:last-child {display:none} .eigen-demo .utility-controls {left:12px;bottom:17px} .eigen-demo #editButton,.eigen-demo #printButton,.eigen-demo #fullscreenButton {display:none} .eigen-demo .deck-controls {right:12px;bottom:12px} }
+@media print { .eigen-top,.eigen-rail {display:none} .eigen-demo .deck {position:static;width:100%;height:auto} .eigen-demo .slide {visibility:visible!important;position:relative;opacity:1;page-break-after:always} }
+@media(max-width:760px) {
+  .eigen-demo .deck {height:calc(100svh - 177px);}
+  .eigen-demo .utility-controls {bottom:70px;left:16px;}
+  .eigen-demo .agent-launcher {bottom:64px;right:16px;width:auto;height:36px;transform:none;background:#fff;border:1px solid #dce3df;border-radius:4px;padding:8px;font-size:12px;}
+  .eigen-demo .agent-pet {display:none;}
+  .eigen-demo .agent-launcher .agent-launcher-copy {display:block;margin:0;font-size:12px;padding:0;}
+}

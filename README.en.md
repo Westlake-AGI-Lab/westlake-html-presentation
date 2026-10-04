@@ -1,5 +1,11 @@
 # Westlake University HTML Presentation · PPT Q&A Agent
 
+## Local linear algebra preview
+
+Run `python3 eigen_demo.py --output /tmp/xiaoxi-eigen-demo --port 8782` with an empty output directory, then open `http://127.0.0.1:8782`. This isolated 16-slide English adaptation of the supplied `Chapter_7.1-2.pdf` (Section 7.1) includes page references, vector diagrams for stretching, identity, projection and rotation, a chapter navigation rail and five seeded practice concepts. It does not replace the generic template or the deployed lecture. Selecting a practice task now navigates to its source slide.
+
+This is an **offline workflow rehearsal**: every assessment returns `uncertain`, never a simulated correct/incorrect judgment. After two attempts and two hints the reviewed explanation unlocks. General AI chat still requires a configured provider. The seeded catalogue is for demonstration and needs independent educational review before research; no study results or ethics approval are implied. Local teacher password: `local-demo`. This demo runs locally; publishing its source does not deploy it to a hosted website.
+
 ## Concept practice prototype (2026-10-03)
 
 The teacher console now includes **Concept practice**: extract draft concepts from slide text and speaker notes, edit questions/criteria/two hints/worked answers, and explicitly review before publishing. The server verifies each source quotation occurs on its cited slide or notes, rejects stale source and concurrent catalogue edits, and serves students a catalogue without private criteria or solutions. Extraction uses the configured provider; it does not inspect slide images. Semantic correctness and hint leakage still require teacher review.
