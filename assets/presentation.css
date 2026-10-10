@@ -1,0 +1,39 @@
+.utility-controls{max-width:calc(100vw - 34px);flex-wrap:wrap;justify-content:flex-end}
+#presentationCatalog{width:min(720px,90vw);max-height:80vh;border:1px solid #c6d4e2;border-radius:10px;padding:22px;background:#fff;color:#22345f}
+#presentationCatalog::backdrop{background:#102039aa}
+#presentationCatalog>h2{font:600 22px system-ui;margin:0 35px 16px 0}
+#presentationCatalog>button{position:absolute;right:14px;top:12px;background:none;border:0;font:26px system-ui;cursor:pointer}
+.presentation-catalog-list{display:grid;gap:5px}.presentation-catalog-list button{text-align:left;padding:10px;border:1px solid #dce5ed;border-radius:4px;background:#f6f8fb;cursor:pointer}.presentation-catalog-list button[aria-current=true]{border-color:#ff8c00}
+#audienceTools{position:fixed;right:18px;bottom:18px;z-index:91;padding:9px 15px;border:1px solid #ffffff66;border-radius:999px;background:#172748e8;color:white;font:13px system-ui;cursor:pointer}
+#audienceTools[hidden],#presenterNotice[hidden],#printNotice[hidden]{display:none!important}
+#presenterNotice,#printNotice{position:fixed;z-index:125;left:50%;top:85px;transform:translateX(-50%);max-width:min(760px,90vw);padding:15px 22px;background:#22345f;color:white;border-radius:7px;font:16px/1.6 system-ui}
+:fullscreen body.audience-mode:not(.audience-tools-visible) :is(.utility-controls,.deck-controls,.thumb-launcher,.keyboard-hint){opacity:0;pointer-events:none}
+:fullscreen body.audience-mode:not(.audience-tools-visible) :is(.utility-controls,.deck-controls,.thumb-launcher):focus-within{opacity:1;pointer-events:auto}
+body.audience-mode .agent-launcher{display:none!important}
+body.edit-mode .edit-toast.storage-error{background:#a72e36}
+.print-video-poster,.print-audio-label{display:none!important}
+@media print{
+html,body{width:1600px!important;height:auto!important;margin:0!important;overflow:visible!important;background:#fff!important}
+#deck{width:1600px!important;height:auto!important;transform:none!important;margin:0!important}
+#deck>.slide{position:relative!important;inset:auto!important;width:1600px!important;height:900px!important;margin:0!important;display:grid!important;opacity:1!important;transform:none!important;transition:none!important;break-inside:avoid;break-after:page;page-break-after:always;overflow:hidden!important}
+#deck>.slide.cover{grid-template-rows:65.4% 34.6%!important}
+#deck>.slide.navy-slide{display:block!important}
+.brand-header{position:relative!important;min-height:0!important;padding:0 64px!important}.brand-context{display:block!important}
+.slide-body{padding:54px 88px 40px!important;overflow:hidden!important}
+.contents-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;width:780px!important;margin-left:auto!important;margin-right:110px!important}
+.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.theory-cols{grid-template-columns:1fr 1fr!important;gap:48px!important}.references p{grid-template-columns:1.4fr 1fr!important;gap:24px!important}
+.split-layout{grid-template-columns:minmax(0,.92fr) minmax(420px,1.38fr)!important}
+.mosaic{min-height:480px!important;height:480px!important}
+.timeline{grid-template-columns:repeat(4,minmax(0,1fr))!important}.timeline::before{display:block!important}.step{padding:66px 0 0!important}.step::before{top:10px!important}
+.chart-layout{grid-template-columns:minmax(0,1.55fr) minmax(260px,.62fr)!important;gap:110px!important}
+.section-wrap{grid-template-columns:35% 1fr!important;padding:0 146px 0 0!important}.section-number{font-size:350px!important}
+#deck>.slide[data-backup=true]{display:none!important}
+#deck>.slide.print-last{break-after:auto;page-break-after:auto}
+#deck video,#deck audio{display:none!important}
+#deck .print-video-poster{display:block!important;width:100%;height:100%;object-fit:contain}
+#deck .print-audio-label{display:inline!important}
+.utility-controls,.deck-controls,.keyboard-hint,.presenter-notes,.edit-toast,.agent-launcher,.agent-panel,.agent-scrim,.thumb-launcher,.thumb-panel,.progress-track,.class-app,.class-overlay,.archive-dialog,.region-layer,.region-dialog,.highlight-toolbar,.improvements-panel,.learning-panel,#presentationCatalog,#audienceTools,#presenterNotice,#printNotice{display:none!important}
+*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;animation:none!important}
+@page{size:1600px 900px;margin:0}
+}

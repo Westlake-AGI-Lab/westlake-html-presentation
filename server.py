@@ -98,6 +98,7 @@ PUBLIC_FILES.update(str(p.relative_to(BASE_DIR)) for p in (BASE_DIR / "assets").
 PUBLIC_FILES.update(str(p.relative_to(BASE_DIR)) for p in
     (BASE_DIR / "assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2").glob("*.woff"))
 PUBLIC_FILES.update({'assets/learning.js', 'assets/learning.css'})
+PUBLIC_FILES.update({'presenter.html', 'assets/presenter.js', 'assets/presenter-view.js', 'assets/presenter.css', 'assets/presentation.js', 'assets/presentation.css', 'assets/print.js'})
 
 CLASSROOM = None
 CLASSROOM_LOCK = threading.Lock()

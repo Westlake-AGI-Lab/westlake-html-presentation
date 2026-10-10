@@ -128,13 +128,15 @@ class HTTPTests(unittest.TestCase):
     def tearDownClass(cls): cls.httpd.shutdown();cls.httpd.server_close()
 
     def test_static_get_and_head(self):
+        for name in ['presenter.html','assets/presenter.js','assets/presenter-view.js','assets/presenter.css','assets/presentation.js','assets/presentation.css','assets/print.js']:
+            self.assertIn(name, server.PUBLIC_FILES)
         for method in ['GET','HEAD']:
             for path in ['/server.py','/.env','/assets/','/assets/../server.py','/%2e%2e/server.py','/requirements.txt']:
                 with self.assertRaises(HTTPError) as error: urlopen(Request(self.base+path,method=method))
                 self.assertEqual(error.exception.code,404)
             for path in ['/','/assets/chat.js','/assets/chat.css','/assets/i18n.js','/assets/thumbnails.js','/assets/thumbnails.css','/assets/classroom.js','/assets/classroom.css','/assets/archive.js','/assets/vendor/fflate/fflate.js','/assets/vendor/qrcode/qrcode.js','/assets/vendor/mathjax/es5/tex-chtml.js',
                          '/assets/region.js','/assets/region.css','/assets/vendor/html2canvas/html2canvas.min.js','/assets/vendor/lucide/scan.svg',
-                         '/assets/improvements.js','/assets/improvements.css']:
+                         '/assets/improvements.js','/assets/improvements.css','/presenter.html','/assets/presenter.js','/assets/presenter-view.js','/assets/presenter.css','/assets/presentation.js','/assets/presentation.css','/assets/print.js']:
                 with urlopen(Request(self.base+path,method=method)) as response:
                     self.assertEqual(response.status,200)
                     response.read()

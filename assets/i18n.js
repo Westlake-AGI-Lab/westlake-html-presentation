@@ -2,6 +2,7 @@
 (() => {
   'use strict';
   const dictionary = {
+    '演讲者 P':'Presenter P','打开双屏演讲者视图（P）':'Open dual-screen presenter view (P)','退出全屏 F':'Exit fullscreen F','浏览器未能保存修改；请复制修改内容后保留。':'Browser could not save edits; copy your changes to keep them.',
     '分享片段给老师':'Share excerpt with teacher',
     '已保存到本机':'Saved on this device',
     '仅本次会话；打开学习档案可启用本机保存。':'Session only; open Learning archive to enable local saving.',

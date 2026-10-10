@@ -790,6 +790,7 @@
   </style>
   <link rel="stylesheet" href="assets/chat.css">
   <link rel="stylesheet" href="assets/pet.css">
+  <link rel="stylesheet" href="assets/presentation.css">
 </head>
 <body>
   <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progressFill"></div></div>
@@ -1084,16 +1085,24 @@
         try {
           const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
           editables.forEach((element, index) => {
-            if (Object.prototype.hasOwnProperty.call(saved, index)) element.innerHTML = saved[index];
+            const key = element.dataset.editKey || String(index);
+            const value = saved[key] ?? saved[index];
+            if (typeof value === 'string') element.innerHTML = cleanMarkup(value);
           });
         } catch (_) {}
       }
 
       function saveEdits() {
         const saved = {};
-        editables.forEach((element, index) => { saved[index] = element.innerHTML; });
-        try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch (_) {}
+        editables.forEach((element, index) => { saved[element.dataset.editKey || String(index)] = cleanMarkup(element.innerHTML); });
+        const toast = document.querySelector('.edit-toast');
+        try { localStorage.setItem(storageKey, JSON.stringify(saved)); toast.classList.remove('storage-error'); toast.textContent='编辑模式已开启 · 点击虚线区域直接修改 · 自动保存在本浏览器'; }
+        catch (_) { toast.classList.add('storage-error'); toast.textContent='浏览器未能保存修改；请复制修改内容后保留。'; }
+        window.dispatchEvent(new Event('ppt-content-change'));
       }
+
+      function cleanMarkup(value) { return DOMPurify.sanitize(value,{ALLOWED_TAGS:['strong','b','em','i','u','br','span','sub','sup','p','div','h1','h2','h3','h4','h5','h6','ul','ol','li','dl','dt','dd','a','blockquote','pre','code','table','thead','tbody','tfoot','tr','th','td'],ALLOWED_ATTR:['class','href','target','rel','colspan','rowspan']}); }
+      slides.forEach((slide, i) => { let j=0; slide.querySelectorAll('[data-editable]').forEach(element => { element.dataset.editKey ||= `${slide.id || slide.dataset.id || slide.dataset.title || i}-text-${j++}`; }); });
 
       function collectDeckContext() {
         return slides.map((slide, index) => {
@@ -1109,6 +1118,9 @@
       function updateAgentPageContext() { chat?.update(); }
 
       function showSlide(index, updateHash = true) {
+        if (editMode || !Number.isFinite(index)) return;
+        window.WestlakePresentation?.onNavigate(index);
+        if (current !== index) slides[current]?.querySelectorAll('video,audio').forEach(m => {m.pause();try{m.currentTime=0;}catch(_){}});
         current = Math.max(0, Math.min(slides.length - 1, index));
         slides.forEach((slide, i) => {
           slide.classList.toggle('active', i === current);
@@ -1126,8 +1138,8 @@
         if (updateHash) history.replaceState(null, '', `#${current + 1}`);
       }
 
-      function next() { if (!editMode) showSlide(current + 1); }
-      function previous() { if (!editMode) showSlide(current - 1); }
+      function next() { if (!editMode) window.WestlakePresentation ? WestlakePresentation.move(1) : showSlide(current + 1); }
+      function previous() { if (!editMode) window.WestlakePresentation ? WestlakePresentation.move(-1) : showSlide(current - 1); }
 
       function toggleEdit() {
         if(PPTClassroom.role!=='solo') return;
@@ -1135,8 +1147,11 @@
         document.body.classList.toggle('edit-mode', editMode);
         editButton.classList.toggle('active', editMode);
         editButton.textContent = editMode ? '完成 E' : '编辑 E';
+        editButton.setAttribute('aria-pressed',String(editMode));
         editables.forEach((element) => element.setAttribute('contenteditable', editMode ? 'true' : 'false'));
-        if (!editMode) saveEdits();
+        if (!editMode) {saveEdits();document.activeElement?.blur();}
+        prevButton.disabled=editMode||current===0;nextButton.disabled=editMode||current===slides.length-1;
+        window.dispatchEvent(new Event('ppt-content-change'));
       }
 
       if(PPTClassroom.role==='solo') loadEdits();
@@ -1156,22 +1171,30 @@
         document.body.classList.toggle('show-notes');
         notesButton.classList.toggle('active', document.body.classList.contains('show-notes'));
         notesButton.textContent = document.body.classList.contains('show-notes') ? '隐藏讲稿 N' : '讲稿 N';
+        notesButton.setAttribute('aria-pressed',String(document.body.classList.contains('show-notes')));
       });
       fullscreenButton.addEventListener('click', async () => {
         try {
           if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
           else await document.exitFullscreen();
-        } catch (_) {}
+        } catch (_) { fullscreenButton.title=PPTI18n.language==='en'?'Fullscreen unavailable. Try Chrome or Edge.':'当前浏览器未允许全屏，请使用 Chrome 或 Edge。'; }
       });
-      printButton.addEventListener('click', () => window.print());
+      document.addEventListener('fullscreenchange',()=>{const fs=!!document.fullscreenElement;fullscreenButton.setAttribute('aria-pressed',String(fs));fullscreenButton.textContent=fs?'退出全屏 F':'全屏 F';PPTI18n.refresh();});
       editables.forEach((element) => element.addEventListener('input', saveEdits));
+      editables.forEach(element=>element.addEventListener('paste',event=>{if(!editMode)return;event.preventDefault();const selection=getSelection();if(!selection.rangeCount)return;const range=selection.getRangeAt(0);if(!element.contains(range.commonAncestorContainer))return;range.deleteContents();const fragment=document.createDocumentFragment();event.clipboardData.getData('text/plain').split(/\r?\n/).forEach((text,i)=>{if(i)fragment.append(document.createElement('br'));fragment.append(document.createTextNode(text));});const last=fragment.lastChild;range.insertNode(fragment);if(last){range.setStartAfter(last);range.collapse(true);selection.removeAllRanges();selection.addRange(range);}saveEdits();}));
       document.addEventListener('keydown', (event) => {
+        if(event.altKey||event.ctrlKey||event.metaKey) return;
+        if(event.target.closest('#presentationCatalog')) return;
         if(PPTClassroom.role==='project'||PPTClassroom.role==='teacher') return;
         if(event.target.closest('.class-app,.archive-dialog,.class-launcher')) return;
         if (event.target.closest('#thumbnailPanel, .thumb-launcher')) return;
         if (event.target.closest('#agentPanel, .chat-image-dialog') && event.key !== 'Escape') return;
-        const typingTarget = event.target.closest('input, textarea, [contenteditable="true"]');
+        if(editMode&&event.key==='Escape'){event.preventDefault();toggleEdit();return;}
+        const typingTarget = event.target.closest('input, textarea, select, [contenteditable="true"]');
         if (typingTarget) return;
+        if(['VIDEO','AUDIO'].includes(event.target.tagName)) return;
+        if(event.key===' '&&event.target.closest('button,a')) return;
+        if(editMode&&['Home','End','ArrowRight','ArrowLeft','PageDown','PageUp',' '].includes(event.key)) return;
         if (['ArrowRight', 'PageDown', ' '].includes(event.key)) {
           event.preventDefault();
           next();
@@ -1180,10 +1203,10 @@
           previous();
         } else if (event.key === 'Home') {
           event.preventDefault();
-          showSlide(0);
+          showSlide(window.WestlakePresentation?.main()[0]??0);
         } else if (event.key === 'End') {
           event.preventDefault();
-          showSlide(slides.length - 1);
+          showSlide(window.WestlakePresentation?.main().at(-1)??slides.length - 1);
         } else if (event.key.toLowerCase() === 'e') {
           event.preventDefault();
           toggleEdit();
@@ -1201,12 +1224,14 @@
       });
 
       document.addEventListener('touchstart', (event) => {
+        if(event.target.closest('button,a,video,audio,input,select,dialog,[contenteditable=true],.utility-controls,#agentPanel,#thumbnailPanel,.class-app')){touchStartX=null;return;}
         const touch = event.changedTouches[0];
         touchStartX = touch.clientX;
         touchStartY = touch.clientY;
       }, { passive: true });
 
       document.addEventListener('touchend', (event) => {
+        if(touchStartX===null) return;
         if(PPTClassroom.role==='project'||PPTClassroom.role==='teacher'||event.target.closest('.class-app,.archive-dialog')) return;
         if (editMode || event.target.closest('#agentPanel, .chat-image-dialog, #thumbnailPanel, .thumb-launcher')) return;
         const touch = event.changedTouches[0];
@@ -1226,5 +1251,8 @@
     })();
   </script>
   <script src="assets/pet.js"></script>
+  <script src="assets/presentation.js"></script>
+  <script src="assets/presenter.js"></script>
+  <script src="assets/print.js"></script>
 </body>
 </html>

@@ -61,6 +61,9 @@
         const deck=document.createElement('div');deck.className='deck';deck.inert=true;
         const clone=this.slides[i].cloneNode(true);clone.classList.add('active');clone.classList.remove('before');clone.removeAttribute('aria-hidden');
         clone.querySelectorAll('script,iframe,object,embed,.presenter-notes').forEach(el=>el.remove());
+        clone.querySelectorAll('.print-video-poster,.print-audio-label').forEach(el=>el.remove());
+        clone.querySelectorAll('video').forEach(video=>{const image=document.createElement('img');image.src=video.poster;image.alt='';video.replaceWith(image);});
+        clone.querySelectorAll('audio').forEach(audio=>audio.remove());
         [clone,...clone.querySelectorAll('*')].forEach(el=>{el.removeAttribute('contenteditable');for(const attr of [...el.attributes])if(attr.name.startsWith('on'))el.removeAttribute(attr.name);});
         deck.append(clone); shadow.replaceChildren(css,deck);
       });
