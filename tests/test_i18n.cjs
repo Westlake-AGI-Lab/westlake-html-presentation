@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const context = {window:{}, localStorage:{getItem:()=> 'en'}, document:{addEventListener:()=>{}}};
-vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../assets/i18n.js'),'utf8'), context);
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../web/assets/i18n.js'),'utf8'), context);
 const {t} = context.window.PPTI18n;
 assert.equal(context.window.PPTI18n.language,'en');
 assert.equal(t('清空对话'),'Clear chat');

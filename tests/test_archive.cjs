@@ -1,10 +1,10 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');const vm=require('node:vm');
 const vendor={module:{exports:{}},exports:{},TextDecoder,TextEncoder,Uint8Array,Uint16Array,Uint32Array,Int32Array};
-vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../assets/vendor/fflate/fflate.js'),'utf8'),vendor);
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../web/assets/vendor/fflate/fflate.js'),'utf8'),vendor);
 const fflate=vendor.module.exports;
 const context={window:{},fflate,Uint8Array,DataView,TextDecoder,TextEncoder};
-vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../assets/archive.js'),'utf8'),context);
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'../web/assets/archive.js'),'utf8'),context);
 const {unpack}=context.window.PPTArchiveTools;
 const valid={'manifest.json':fflate.strToU8('{"version":1}'),'conversations.json':fflate.strToU8('[]')};
 assert.equal(fflate.strFromU8(unpack(fflate.zipSync(valid, {level:0}))['conversations.json']),'[]');

@@ -79,6 +79,7 @@
         if (saved?.version === 1 && Array.isArray(saved.records)) { this.records = saved.records.slice(-100); this.keep.checked = true; }
       } catch (_) { this.notice.textContent = L('Local practice records could not be loaded.', '无法读取本地练习记录。'); }
       window.addEventListener('ppt-slide-change', () => this.guardLabels());
+      window.addEventListener('ppt-practice-open', event => this.open(event.detail?.concept));
       window.addEventListener('ppt-language-change', () => {
         localize(this.dialog); localize(modes); localize(this.launch);
         if (this.data) { this.drawCatalogue(); this.drawResearch(); this.drawHistory(); }
@@ -112,7 +113,23 @@
       }
       this.drawCatalogue(); this.drawResearch(); this.drawHistory(); this.guardLabels();
     }
-    open() { if (!this.dialog.open) this.dialog.showModal(); this.work(() => this.load()); }
+    open(conceptId) {
+      if (!this.dialog.open) this.dialog.showModal();
+      this.work(async () => {
+        await this.load();
+        if (conceptId) {
+          const concept = this.data.concepts.find(c => c.id === conceptId);
+          if (concept?.tasks.length) await this.startTask(concept, concept.tasks[0]);
+        }
+      });
+    }
+    async startTask(concept, task) {
+      if (this.session) await api('forget', {session: this.session.session}).catch(() => {});
+      this.session = await api('start', {concept: concept.id, task: task.id}); this.answerText = '';
+      this.chat.navigate(concept.page-1);
+      this.drawCatalogue(); this.drawExercise(); this.guardLabels(); this.answer.focus({preventScroll: true});
+      this.dialog.scrollTop = 0;
+    }
     drawCatalogue() {
       this.catalogue.replaceChildren(node('summary', L('Reviewed concepts', '已审核概念')));
       this.catalogue.open = !this.session;
@@ -123,13 +140,7 @@
         const row = node('div', '', 'learning-concept'); row.append(node('strong', c.title), node('p', c.objective));
         const commands = node('div', '', 'learning-actions');
         button(commands, L('Slide ', '第 ') + c.page, () => { this.dialog.close(); this.chat.navigate(c.page-1); });
-        c.tasks.forEach((task, i) => button(commands, `${i+1}. ${task.kind}`, () => this.work(async () => {
-          if (this.session) await api('forget', {session: this.session.session}).catch(() => {});
-          this.session = await api('start', {concept: c.id, task: task.id}); this.answerText = '';
-          this.chat.navigate(c.page-1);
-          this.drawCatalogue(); this.drawExercise(); this.guardLabels(); this.answer.focus({preventScroll: true});
-          this.dialog.scrollTop = 0;
-        })));
+        c.tasks.forEach((task, i) => button(commands, `${i+1}. ${task.kind}`, () => this.work(() => this.startTask(c, task))));
         row.append(commands); this.catalogue.append(row);
       }
     }

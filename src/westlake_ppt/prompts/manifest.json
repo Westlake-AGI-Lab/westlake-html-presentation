@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "sha256": {
+    "agent.zh.v1.txt": "ac7f7e02711187f3fdcff1d83cebe96b1f29ba2d1e61bf548d8b6607839ea6d1",
+    "agent.en.v1.txt": "a453262b6fa3e359e45c5ec7f0fd2ed79e4e18b8038072e44755c8a7c5c3041c",
+    "personal-slides.v1.txt": "ab880528c5f69c6a790d6c3e25e284c237efc91a972aae951b0f5a5b6c7823b4",
+    "learning-system.v1.txt": "17c97cb4cb42afdf1bdf888f759b094e28a9fdd8667997b58ffd5b3bc7d8d4fd",
+    "improvement-system.v1.txt": "2c7acab910ec84e8b7d0544f78705e9c3c1f8fd6517223ae1f031134ef816c41",
+    "improvement-topics.v1.txt": "a6fdc6d9aa7b1de1f646140fdfee8b35512bc25ff374843965f593b7da718522",
+    "improvement-draft.v1.txt": "21b0351b6ab72357b1d0c2a2cf633a369b6570cc87754741c65323da12420f06",
+    "learning-extract.v1.txt": "18ead8c97c73e1670437a09494fa6e8a424ede361a81f02a4ee5a696b8314677",
+    "learning-assess.v1.txt": "361e9392c86aaa35e709a19248f914d2580f46097a3ee297c9d60199a596eaa0"
+  }
+}

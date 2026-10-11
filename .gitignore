@@ -10,3 +10,10 @@ __pycache__/
 learning-*.zip
 teacher-access*
 .venv/
+data/*
+!data/README.md
+results/
+experiments/**/results/
+*.egg-info/
+build/
+/dist/

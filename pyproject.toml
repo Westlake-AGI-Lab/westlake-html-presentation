@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "westlake-ppt"
+version = "0.1.0"
+description = "Lecture-grounded conceptual practice and HTML presentations"
+requires-python = ">=3.10"
+dependencies = ["Pillow>=11.3.0,<13"]
+
+[project.scripts]
+westlake-ppt = "westlake_ppt.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"westlake_ppt.prompts" = ["*.txt", "manifest.json"]

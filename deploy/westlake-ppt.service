@@ -14,7 +14,12 @@ Environment=CHAT_REQUESTS_PER_HOUR=30
 Environment=CHAT_REQUESTS_PER_DAY=200
 Environment=CHAT_MAX_CONCURRENT=2
 Environment=MAX_OUTPUT_TOKENS=3000
-ExecStart=%h/apps/westlake-ppt/.venv/bin/python %h/apps/westlake-ppt/server.py
+# Keep the separately deployed Diffusion deck and assets in their existing directory.
+Environment=PYTHONPATH=%h/apps/westlake-ppt/src
+Environment=PPT_WEB_ROOT=%h/apps/westlake-ppt
+Environment=PPT_DECK=西湖大学专属HTML演示模板.html
+Environment=PPT_DECK_ID=westlake-ppt
+ExecStart=%h/apps/westlake-ppt/.venv/bin/python -m westlake_ppt serve
 Restart=on-failure
 RestartSec=5
 UMask=0077

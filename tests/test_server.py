@@ -10,9 +10,7 @@ from urllib.request import urlopen, Request
 from urllib.error import HTTPError
 from PIL import Image
 
-spec = importlib.util.spec_from_file_location('ppt_server', Path(__file__).resolve().parents[1] / 'server.py')
-server = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(server)
+import server
 
 def picture(fmt='PNG', mime='image/png'):
     out = io.BytesIO()
@@ -129,7 +127,8 @@ class HTTPTests(unittest.TestCase):
 
     def test_static_get_and_head(self):
         for method in ['GET','HEAD']:
-            for path in ['/server.py','/.env','/assets/','/assets/../server.py','/%2e%2e/server.py','/requirements.txt']:
+            for path in ['/server.py','/.env','/assets/','/assets/../server.py','/%2e%2e/server.py','/requirements.txt',
+                         '/data/assessment.jsonl','/results/metrics.json','/src/westlake_ppt/prompts/manifest.json','/pyproject.toml']:
                 with self.assertRaises(HTTPError) as error: urlopen(Request(self.base+path,method=method))
                 self.assertEqual(error.exception.code,404)
             for path in ['/','/assets/chat.js','/assets/chat.css','/assets/i18n.js','/assets/thumbnails.js','/assets/thumbnails.css','/assets/classroom.js','/assets/classroom.css','/assets/archive.js','/assets/vendor/fflate/fflate.js','/assets/vendor/qrcode/qrcode.js','/assets/vendor/mathjax/es5/tex-chtml.js',
