@@ -7,3 +7,6 @@ Package layout, CLI and the service example are being prepared locally for owner
 ## Historical Notes
 
 The former README recorded a 2026-09-20 SSH timeout and mixed older deployment checks with current feature descriptions. Those statements are preserved only in [the English historical snapshot](history/README-before-package.en.md) and [the Chinese snapshot](history/README-before-package.zh.md). They are not verification of the current remote host or this migration.
+# Integration: 2026-10-11
+
+GitHub presentation changes were integrated with the local package and animated eigen demo. Internal Diffusion deployment is pending: the SSH connection failed host-key verification. No remote files or services were changed.

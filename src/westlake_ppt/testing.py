@@ -62,7 +62,8 @@ def run_browser_tests(node,env):
                     env[prefix+'_TEST_URL']=base+'/' if prefix in ('REGION','PERSONAL_SLIDES') else base
                     env[prefix+'_TEST_OUTPUT']=str(root/'results/browser'/name)
                 env['IMPROVEMENT_TEST_PASSWORD']=password
-                for name in ('region','highlights','personal_slides','improvements'):
+                env['PRESENTATION_TEST_URL']=base+'/'
+                for name in ('presentation_browser','presentation_served','region','highlights','personal_slides','improvements'):
                     code=subprocess.call([node,f'tests/test_{name}.cjs'],cwd=root,env=env)
                     if code:return code
                 return 0

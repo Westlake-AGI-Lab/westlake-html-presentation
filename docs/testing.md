@@ -1,5 +1,11 @@
 # Testing
 
+## Integration Check: 2026-10-11
+
+Merged the presentation update with the package layout and animated eigen demo. All 51 Python tests and seven Node checks passed. The full browser suite passed: offline linked presentation windows and printing, served presentation assets and failure recovery, region selection, highlights, personal slides and lecture improvements. The timer-reset check now waits for the asynchronous linked-window update. Separate Chrome checks covered the 16-slide eigen demo at 1440px and 390px, projection presets, moving animation and nonblank canvas rendering. No paid AI calls or student data were used.
+
+Presentation assets and `presenter.html` are in `web/` and included in generated demos. Internal deployment remains pending because SSH host-key verification failed; the existing remote lecture was not modified.
+
 Use `python3 westlake.py test` or installed `westlake-ppt test`. The default runs all Python `unittest` files plus the existing Node archive, localization and geometry checks. Missing Node is a failure, not a silent skip. `--suite python` explicitly limits the run to Python.
 
 `--suite browser` starts an isolated ephemeral server with a disposable teacher password, no provider key and temporary classroom data, then invokes the existing Node Playwright checks for region selection, highlights, personal slides and improvements. Install Node Playwright and Chrome before using it. `--suite all` runs both groups. Browser tests were retained instead of rewritten so this migration changes fewer test assumptions.

@@ -1,5 +1,16 @@
 # Local verification / 本地验证记录
 
+## 双屏演示迁移 / Presentation migration (2026-10-07)
+
+- 从“浙音ppt”会话迁移通用演示功能和修复，未迁移该课程正文、素材或固定时长。主模板保留10页，独立Diffusion稿件保留16页。/ Reusable features and fixes from the referenced presentation task were migrated, excluding lecture content, assets and fixed durations. The generic deck retains 10 slides; the separate Diffusion example retains 16.
+- 主项目44项、独立示例13项Python测试通过；两套稿件各41项Chrome/Playwright检查通过：离线双窗口和图片真实加载、双向翻页、当前/下一页真实尺寸预览、讲稿、计时、双语、音频播放/暂停/静音、静态媒体预览、精简/备份路线及Home/End边界、工具栏恢复、编辑锁定与Esc保存、结构恢复、恶意保存HTML过滤、学生/投影角色隔离和390px布局。/ All 44 main-project and 13 example Python tests, plus 41 browser checks for each deck passed, covering local windows and loaded images, navigation, previews, notes, timer, language, media, route boundaries, tools, editing and role isolation.
+- 补查修复离线预览图片：保留相对资源路径，让iframe的base解析，避免放宽HTML安全过滤；预览图片naturalWidth断言通过。/ Relative asset paths now resolve through the preview base without weakening HTML sanitization; naturalWidth assertions verify loaded images.
+- 既有框选问答、文字高亮、个人讲解页及课程改进的桌面/窄屏浏览器回归通过；ZIP、学习档案保存/容量失败及双语字典检查通过。高亮测试补充字体与入场动画等待，避免在文字尚未稳定时拖选。/ Existing region, highlights, personal-slide and lecture-improvement regressions passed on desktop/narrow viewports, together with archive, quota-failure and i18n checks. Native selection now waits for fonts and the entrance animation.
+- 实际生成10页模板及16页Diffusion PDF，均逐页渲染检查。修复深蓝章节页、封面比例、打印误用移动单栏和动画柱形空白；发现并修复编辑恢复将公式/双栏/列表容器移除的问题。备份页不打印、视频poster及统一16:9分页通过。/ Actual 10- and 16-page PDFs were rendered and visually inspected. Print layout/animation defects and flattened edited markup were identified and fixed; backup exclusion, posters and uniform pages passed.
+- 本地HTTP及4090线上各6组检查通过：新增资源GET/HEAD白名单、源码404、LAN弹窗关联与双向翻页、弹窗阻止提示、图片缺失时阻止打印及重试恢复、现有问答面板和390px双语工具栏；未出现页面脚本错误。AI接口使用mock，未调用付费模型。/ Six grouped HTTP checks passed locally and live, with no page errors or paid model calls.
+- 4090服务与原pdf-report-tool均保持active；本轮更新前备份至 `/home/user/apps/westlake-ppt-presentation-backup.MPAfsu`，上线文件哈希与独立本地示例一致。仅更新本轮演示组件和静态白名单，不改变私有配置、数据库及其他历史待部署功能。未自动commit或push。/ Both services remain active. A recoverable pre-deployment backup exists; deployed hashes match the standalone example. Private configuration and data were preserved; unrelated previously pending features were not deployed, and no Git commit/push was performed.
+- 边界：双屏用真实关联浏览器窗口模拟，未在实体双显示器/Safari/真实手机上验收；PDF验证不等于操作系统打印对话框验收。本轮未重新验证上游AI语义质量或付费接口。内网HTTP仍无传输加密。/ Limits: linked windows were exercised, not physical monitors, Safari or real phones. PDF checks do not validate the OS print dialog. Upstream AI quality/paid requests were not retested; LAN HTTP remains unencrypted.
+
 ## Concept practice / 概念练习 (2026-10-03)
 
 - 42 Python tests passed, including 10 learning tests covering response evidence, correct/partial/uncertain states, hint ordering, answer disclosure, stale catalogue/source versions, owner isolation, teacher authentication, same-origin requests, private-source blocking, optional summary/research consent, withdrawal and classroom deletion. / 42项Python测试通过，含10项概念练习测试，覆盖证据校验、状态、提示顺序、答案解锁、版本/成员隔离、认证/同源检查及自愿分享/研究同意、撤回与课堂删除。

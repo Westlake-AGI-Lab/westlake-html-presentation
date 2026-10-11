@@ -10,7 +10,8 @@ class EigenDemoTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             destination = Path(tmp)/'preview'
             eigen_demo.build(destination)
-            deck = next(destination.glob('*.html')).read_text()
+            deck = (destination/'deck.html').read_text()
+            self.assertTrue((destination/'presenter.html').is_file())
             self.assertEqual(deck.count('class="slide eigen-slide"'), 16)
             for c in eigen_demo.CONCEPTS:
                 self.assertIn(c['source'], eigen_demo.SLIDES[c['page']-1][3])

@@ -19,4 +19,6 @@ def public_files(base_dir, deck_name):
     public.update(str(p.relative_to(base_dir)) for p in
         (base_dir / "assets/vendor/mathjax/es5/output/chtml/fonts/woff-v2").glob("*.woff"))
     public.update({'assets/learning.js', 'assets/learning.css'})
+    public.update({'presenter.html', 'assets/presenter.js', 'assets/presenter-view.js',
+                   'assets/presenter.css', 'assets/presentation.js', 'assets/presentation.css', 'assets/print.js'})
     return public

@@ -27,6 +27,8 @@ async function marks(page, color) { return page.evaluate(c => CSS.highlights.get
       }}));
       await page.goto(base + '/?mode=student&room=TEST#4');
       await page.waitForSelector('#highlightToggle');
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForFunction(() => getComputedStyle(document.querySelector('.slide.active')).opacity === '1');
       const original = await page.locator('.slide.active').innerHTML();
       await page.evaluate(() => PPTI18n.setLanguage('en'));
       await page.click('#highlightToggle');
