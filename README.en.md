@@ -20,7 +20,7 @@ The preview binds only to localhost. Its teacher password `local-demo` is for is
 
 ## Courses and materials
 
-- **Computer Architecture and Parallel Computing**: `2610CST3004`, Huan Wang, Fall 2026. Lecture 07, *Out-of-Order Execution & Tomasulo (ILP-2)*, preserves all 24 pages of the supplied PDF, including figures, credits and page numbers. Two introductory teaching samples are also available. [Canvas course](https://canvas.westlake.edu.cn/courses/2042) may require university login.
+- **Computer Architecture and Parallel Computing**: `2610CST3004`, Fall 2026. Lecture 07, *Out-of-Order Execution & Tomasulo (ILP-2)*, preserves all 24 pages of the supplied PDF, including figures, credits and page numbers. Two introductory teaching samples are also available. [Canvas course](https://canvas.westlake.edu.cn/courses/2042) may require university login.
 - **Linear Algebra**: the existing 16-slide eigenvector/diagonalization lecture with animated geometry, practice and classroom quizzes, plus a vectors sample.
 - **Calculus**: derivatives and integrals samples.
 - **Data Structure and Algorithm Design**: search and stacks/queues samples.

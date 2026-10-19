@@ -20,7 +20,7 @@ python3 -m venv .venv
 
 ## 课程与资料
 
-- **Computer Architecture and Parallel Computing**：`2610CST3004`，Huan Wang，Fall 2026。第 07 讲 *Out-of-Order Execution & Tomasulo (ILP-2)* 保留所提供 PDF 的全部 24 页，包括图表、署名和页码。另有两份入门教学示例。[Canvas 课程](https://canvas.westlake.edu.cn/courses/2042) 可能需要校内登录。
+- **Computer Architecture and Parallel Computing**：`2610CST3004`，Fall 2026。第 07 讲 *Out-of-Order Execution & Tomasulo (ILP-2)* 保留所提供 PDF 的全部 24 页，包括图表、署名和页码。另有两份入门教学示例。[Canvas 课程](https://canvas.westlake.edu.cn/courses/2042) 可能需要校内登录。
 - **Linear Algebra**：原有 16 页特征向量/对角化讲义，含几何动画、练习与课堂测验，另有向量示例。
 - **Calculus**：导数和积分示例。
 - **Data Structure and Algorithm Design**：搜索、栈与队列示例。
