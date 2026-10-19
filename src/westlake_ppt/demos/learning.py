@@ -60,6 +60,7 @@ def prepare(destination, mock):
     if any(destination.iterdir()): raise SystemExit('Choose an empty isolated demo directory')
     shutil.copytree(base/'web/assets', destination/'assets')
     shutil.copy2(base/'web/presenter.html', destination/'presenter.html')
+    shutil.copy2(base/'web/courses.html', destination/'courses.html')
     name = 'deck.html'
     text = (base/'web'/name).read_text(); span = MainSpan(text)
     if span.start is None or span.end is None: raise SystemExit('Cannot locate the template deck')

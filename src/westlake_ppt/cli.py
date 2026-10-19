@@ -16,7 +16,7 @@ def main(argv=None):
     serve.add_argument('--web-root',type=Path);serve.add_argument('--deck')
     serve.add_argument('--host');serve.add_argument('--port',type=int)
     demo=commands.add_parser('demo',help='Run an isolated demonstration')
-    demo.add_argument('topic',choices=['eigen','determinants']);demo.add_argument('--output',type=Path,required=True)
+    demo.add_argument('topic',choices=['eigen','determinants','courses']);demo.add_argument('--output',type=Path,required=True)
     demo.add_argument('--port',type=int,default=8782);demo.add_argument('--mock',action='store_true')
     test=commands.add_parser('test',help='Run Python and JavaScript checks from one command')
     test.add_argument('--suite',choices=['unit','python','browser','all'],default='unit')
@@ -34,8 +34,9 @@ def main(argv=None):
             from .server.app import main as serve_main
             serve_main();return 0
         if args.command=='demo':
-            name='eigen' if args.topic=='eigen' else 'learning'
+            name='eigen' if args.topic in ('eigen','courses') else 'learning'
             command=[sys.executable,'-m','westlake_ppt.demos.'+name,'--output',str(args.output),'--port',str(args.port)]
+            if args.topic=='courses':command.append('--dashboard')
             if args.mock and name=='learning':command.append('--mock')
             return subprocess.call(command,env=child_environment())
         if args.command=='test':

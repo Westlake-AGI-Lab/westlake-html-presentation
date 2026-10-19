@@ -45,6 +45,7 @@ REQUEST_LIMITS = RequestLimits(*_settings.request_limits)
 PUBLIC_FILES = public_files(BASE_DIR, HTML_NAME)
 
 CLASSROOM = None
+QUIZ = None
 CLASSROOM_LOCK = threading.Lock()
 LEARNING = None
 LEARNING_LOCK = threading.Lock()
@@ -162,6 +163,45 @@ class PresentationHandler(SimpleHTTPRequestHandler):
         name = unquote(urlsplit(self.path).path).lstrip("/") or HTML_NAME
         if name == LEGACY_DECK:
             name = HTML_NAME
+        params = dict(parse_qsl(urlsplit(self.path).query))
+        if getattr(self.server, 'catalog_home', False) and urlsplit(self.path).path == '/' and not params:
+            name = 'courses.html'
+        if name == 'api/courses':
+            from ..courses import catalog
+            source = (BASE_DIR / HTML_NAME).read_text(encoding='utf-8')
+            is_eigen = 'class="eigen-demo"' in source
+            courses = catalog(BASE_DIR)
+            for course in courses:
+                for lecture in course['lectures']:
+                    if lecture.get('source'):
+                        lecture['preview'] = lecture['slides'][0].get('thumbnail', '')
+                    lecture['slideCount'] = len(lecture.pop('slides'))
+                    lecture['href'] = 'lecture.html?course=' + course['id'] + '&lecture=' + lecture['id']
+                if is_eigen and course['id'] == 'linear-algebra':
+                    course['lectures'].append(dict(id='diagonalization', number='7.1', title='Eigenvectors and diagonalization',
+                        summary='The existing interactive Linear Algebra demo, with animated geometry, practice, and classroom quiz.',
+                        existing=True, slideCount=16, href=HTML_NAME))
+            self.json_response(200, {'courses':courses, 'current':{'isEigen':is_eigen, 'href':HTML_NAME}}, head)
+            return
+        if name == 'lecture.html':
+            from ..courses import catalog, render_lecture
+            # Sample lectures cannot silently join the main deck's classroom or quiz.
+            if params.get('mode', 'solo') != 'solo' or params.get('room'):
+                self.json_response(400, {'error':'Sample lectures support self-study only.'}, head)
+                return
+            course = next((c for c in catalog(BASE_DIR) if c['id'] == params.get('course')), None)
+            lecture = next((l for l in course['lectures'] if l['id'] == params.get('lecture')), None) if course else None
+            if lecture is None:
+                self.send_error(404)
+                return
+            body = render_lecture((BASE_DIR / HTML_NAME).read_text(encoding='utf-8'), course, lecture).encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            if not head:
+                self.wfile.write(body)
+            return
         if name.startswith('api/classroom/'):
             if head:
                 self.json_response(405, {'error':'GET required'}, True); return
@@ -233,6 +273,11 @@ class PresentationHandler(SimpleHTTPRequestHandler):
                 if not isinstance(data,dict): raise ValueError('Invalid object')
                 teacher, member = self.credentials()
                 action = urlsplit(self.path).path.rsplit('/',1)[-1]
+                if action.startswith('quiz-'):
+                    if QUIZ is None:
+                        raise ClassroomError(404, 'Class quizzes are not enabled for this deck')
+                    self.json_response(200, QUIZ.action(action.removeprefix('quiz-'), data, teacher, member))
+                    return
                 if action.startswith('learning-'):
                     classroom().require_teacher(teacher)
                     if action == 'learning-extract':
@@ -338,6 +383,7 @@ def main():
     classroom()
     ThreadingHTTPServer.request_queue_size = 128
     server = ThreadingHTTPServer((HOST, PORT), PresentationHandler)
+    server.catalog_home = globals().get('CATALOG_HOME', False)
     print(f"Westlake HTML presentation: http://{HOST}:{server.server_port}", flush=True)
     try:
         server.serve_forever()

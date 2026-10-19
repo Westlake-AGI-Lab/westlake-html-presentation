@@ -12,7 +12,11 @@ class EigenDemoTests(unittest.TestCase):
             eigen_demo.build(destination)
             deck = (destination/'deck.html').read_text()
             self.assertTrue((destination/'presenter.html').is_file())
-            self.assertEqual(deck.count('class="slide eigen-slide"'), 16)
+            self.assertEqual(deck.count('class="slide eigen-slide '), 16)
+            self.assertIn('class="slide eigen-slide layout-lab"', deck)
+            self.assertIn('class="slide eigen-slide layout-derivation"', deck)
+            self.assertIn('class="slide eigen-slide layout-summary"', deck)
+            self.assertIn('id="deck" aria-live="polite"', deck)
             for c in eigen_demo.CONCEPTS:
                 self.assertIn(c['source'], eigen_demo.SLIDES[c['page']-1][3])
                 self.assertIn(f'source p. {c["page"]}', deck)

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Choose a course and an illustrated introductory lecture in the Xiaoxi learning workspace.">
+  <title>Courses · Xiaoxi</title>
+  <link rel="stylesheet" href="assets/courses.css">
+</head>
+<body>
+  <aside class="catalog-sidebar">
+    <img class="catalog-university-logo" src="assets/westlake-logo-dark.png" alt="Westlake University">
+    <a href="courses.html" class="catalog-wordmark catalog-workspace-label"><span>Learning Workspace</span></a>
+    <section class="student-profile" aria-label="Student profile">
+      <div class="student-avatar" aria-hidden="true">SA</div>
+      <div class="student-details"><span class="student-role" data-label="student">Student</span><strong>Sholpan Amankeldi</strong><span class="student-id">ID: 20243841001</span></div>
+    </section>
+    <nav aria-label="Workspace"><a class="sidebar-current" href="courses.html" aria-current="page"><span aria-hidden="true">▦</span><span data-label="courses">Courses</span></a></nav>
+    <div class="sidebar-bottom"><p data-label="workspace">Your space to understand.</p></div>
+  </aside>
+  <div class="catalog-main">
+    <header class="catalog-topbar"><span data-label="workspaceTitle">Learning workspace</span><button id="catalogLanguage" type="button">中文</button></header>
+    <main>
+      <div class="catalog-heading"><div><p class="catalog-eyebrow">EXPLORE · UNDERSTAND · PRACTICE</p><h1 data-label="heading">Your courses</h1><p class="catalog-description" data-label="description">Choose a subject. Find your next idea.</p></div><span class="catalog-count" id="courseCount"></span></div>
+      <div class="catalog-toolbar"><label class="catalog-search"><span aria-hidden="true">⌕</span><input id="courseSearch" type="search" aria-label="Search courses" placeholder="Search courses or lectures"></label><div class="catalog-filters" role="group" aria-label="Course category"><button type="button" data-filter="all" aria-pressed="true" data-label="all">All courses</button><button type="button" data-filter="Mathematics" aria-pressed="false" data-label="math">Mathematics</button><button type="button" data-filter="Computer science" aria-pressed="false" data-label="cs">Computer science</button></div></div>
+      <p id="catalogStatus" role="status" data-label="loading">Loading courses…</p>
+      <div class="course-grid" id="courseGrid"></div>
+      <aside class="catalog-original" id="currentPresentation" hidden></aside>
+      <footer class="catalog-footer"><span data-label="sampleNote">Introductory teaching samples · Not an official course catalog</span><span>XIAOXI / LEARN WITH CONTEXT</span></footer>
+    </main>
+  </div>
+  <dialog id="lectureDialog" aria-labelledby="lectureDialogTitle"><div class="lecture-dialog-top"><span class="catalog-eyebrow" data-label="lectureList">COURSE LECTURES</span><button type="button" id="closeLectures" aria-label="Close lecture list">×</button></div><h2 id="lectureDialogTitle"></h2><div id="lectureCourseMeta" class="lecture-course-meta" hidden></div><p id="lectureDialogDescription"></p><div id="lectureList"></div><p class="lecture-note" data-label="lectureNote">Samples open in self-study mode. The existing Linear Algebra demo retains its own practice and class quiz.</p></dialog>
+  <script src="assets/courses.js"></script>
+</body>
+</html>

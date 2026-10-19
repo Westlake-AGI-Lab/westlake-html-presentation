@@ -20,7 +20,6 @@ data/                    ignored except README
 results/                 ignored experiment outputs
 docs/                    current documentation; history/ holds old snapshots
 tests/                   Python checks and existing Node checks
-deploy/                  systemd example
 ```
 
 Root `server.py`, `classroom.py`, `improvements.py`, `learning.py` and demo scripts are compatibility shims, not second implementations. `westlake.py` supports a checkout without installing the console entry point. The frontend remains HTML/JS; URLs such as `/assets/chat.js` are unchanged even though files moved under `web/`.

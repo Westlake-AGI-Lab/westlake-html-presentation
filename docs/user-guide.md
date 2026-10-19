@@ -2,7 +2,7 @@
 
 ## 安装与目录
 
-从仓库根目录运行 `python3 -m venv .venv`，然后运行 `.venv/bin/python -m pip install -e .`。统一入口为 `.venv/bin/westlake-ppt serve`；开发时也可使用 `python3 westlake.py serve`。前端在 `web/`，Python 包在 `src/westlake_ppt/`。下文命令均从仓库根目录执行；旧 Python 启动脚本仍兼容。详细配置见 [configuration.md](configuration.md)，API 见 [api.md](api.md)。
+从仓库根目录运行 `python3 -m venv .venv`，然后运行 `.venv/bin/python -m pip install -e .`。当前目录入口为 `.venv/bin/python westlake.py demo courses --output /tmp/xiaoxi-workspace --port 8782`（输出目录须为空）。`serve` 仍用于内部通用模板或显式配置的网页目录。前端在 `web/`，Python 包在 `src/westlake_ppt/`。下文命令均从仓库根目录执行；旧 Python 启动脚本仍兼容。详细配置见 [configuration.md](configuration.md)，API 见 [api.md](api.md)。
 
 ## 先尝试，再查看讲解
 
@@ -17,6 +17,12 @@
 5. 研究记录默认关闭，与教师摘要分享分开。仅在机构要求的伦理批准/豁免及参与者说明已准备好后配置研究；学生还须独立同意。撤回清除服务器研究事件，已下载文件由研究团队处理。
 
 演练：`python3 learning_demo.py --output /tmp/xiaoxi-practice-demo --mock --port 8781`，输出目录须为空。教师演示口令 `local-demo`。页面明确标注脚本模拟评分，不代表真实AI判断质量，也不能用于研究结果。
+
+## 课堂测验与报告
+
+在线性代数演示的教师控制台创建课堂后，点击 **Create quiz**，从预设题库选择1至5题，编辑题目、选项、答案键和解释，勾选审核后发布。学生在顶部 **Quiz** 中明确加入测验；答题时实时显示已答和剩余数量。每个测验只提交一次，若仍有未答题，须在测验窗口内确认按跳过提交。
+
+关闭测验或结束课堂后，学生逐题看到正确、错误或跳过状态、自己的选择、正确答案和解释。**Class report** 汇总测验、题目、提交和未提交次数，并显示选项数量、百分比及按幻灯片去重的错误人数；跨多个测验的提交总数不是去重学生数。报告可下载为聚合JSON或HTML。**Open sample report** 使用独立的虚构课堂，不代表真实教学或研究结果。私人聊天不进入测验报告。
 
 ## 根据自己的问题生成讲解页
 
@@ -49,7 +55,7 @@ AI 面板打开时课堂入口暂时隐藏，关闭面板后恢复，避免移�
 
 完整的项目背景、技术原理、配置与开发指南请见 [中文 README](../README.md) 或 [English README](../README.en.md)。后续功能更新须同步维护这两份文档。
 
-当前内网分享地址为 [Diffusion 理论入门](http://10.21.3.45:8765/)，展示 16 页教学示例，需校内网络或相应 VPN。GitHub 仓库中的 HTML 仍是通用模板；Diffusion 稿件独立维护，不提交到仓库。共享问答使用部署者的 API 额度。
+当前版本以课程目录为首页；源码与讲义素材在仓库内。内网服务器须独立部署，当前不可验证可用。共享问答会使用部署者配置的 API 额度。
 
 直接双击 `web/deck.html` 即可演示；如需使用右侧的 PPT 智能讲解 Agent，请按下面方式通过本地服务启动。
 
@@ -62,7 +68,7 @@ AI 面板打开时课堂入口暂时隐藏，关闭面板后恢复，避免移�
 
 菜单及预设问题随 `English / 中文` 切换。键盘用户可用方向键移动矩形、Shift+方向键调整大小、Enter 截取。编辑时请先退出编辑；已有聊天草稿请先发送或清空。截图沿用聊天图片上限，不自动重试。预览由网页重绘，复杂公式可能存在差异；视频、iframe、未加载或跨域图片请改用上传截图。发送后的图片沿用现有聊天存储规则。
 
-框选功能已包含在 GitHub 通用模板中。AI 回答需要启动本地服务并配置支持图片的服务商。Diffusion 稿件仍独立维护，不进入仓库或发布包。部署历史及待办见[部署日志](deployment-log.md)。
+框选功能已包含在 GitHub 通用模板中。AI 回答需要启动本地服务并配置支持图片的服务商。当前课程目录与讲义素材随源码一并发布。部署历史及待办见[部署日志](deployment-log.md)。
 
 ## 启动 PPT 智能讲解 Agent
 
@@ -138,3 +144,11 @@ Agent 会自动读取每一页的标题、正文和演讲者讲稿，并实时�
 4. 点击关闭或按 Escape 退出；启用荧光笔时不使用滑动翻页，可继续使用翻页按钮。
 
 标记仅保存在当前浏览器，刷新可恢复，不会修改老师的演示文稿，也不会共享给老师或其他学生。同一浏览器配置的其他使用者仍可能看到这些标记。更换设备、来源地址或修改幻灯片文字不会自动迁移标记。清除浏览器数据会删除标记，保存失败会显示提示。每页最多 200 个标记；学习档案、下载和打印不包含这些标记。仅支持可选择的普通文字，不支持图片内文字、SVG、canvas 或已渲染公式。不支持文本高亮 API 的浏览器会禁用按钮。真实手机长按手柄尚待实机验证。
+
+## Course selection
+
+Run `python3 westlake.py demo courses --output /tmp/xiaoxi-course-catalog --port 8782` with an empty output directory, then open `http://127.0.0.1:8782/`. Choose a card and a lecture. `/courses.html` is also available during ordinary serving. The existing animated Linear Algebra demo retains its practice and quizzes; seven new introductory samples are self-study only, with independent browser storage. UI language switches do not translate lecture content. Use the current checkout; GitHub updates and internal-server deployment are separate actions.
+
+## Architecture Lecture 7
+
+Open Computer Architecture and Parallel Computing in the catalog and choose the supplied Lecture 07. Course: 2610CST3004, Fall 2026; instructor: Huan Wang. The 24-page lecture preserves original diagrams and credits. Use grouped contents/search, page entry and zoom/fit. Edit, Notes and Highlight are available below the slide. The top-right menu offers fullscreen, presenter view, and printing; Original PDF downloads the unchanged source. Original PDF artwork stays unchanged; edits add personal captions/notes, and PDF highlighting marks page regions. Animations remain static PDF snapshots. Q&A receives lecture text; images require an explicit attachment/region capture. Existing samples and the Linear Algebra demo are retained.

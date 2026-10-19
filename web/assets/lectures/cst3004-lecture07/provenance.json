@@ -1,0 +1,10 @@
+{
+  "source": "User-supplied lecture7-preview.pdf",
+  "sha256": "ea7e569471ccaee3563769da7097b0633528bea57b4b445d5e3d5f725e3eb650",
+  "title": "Out-of-Order Execution & Tomasulo (ILP-2)",
+  "instructor": "Huan Wang",
+  "pages": 24,
+  "renderWidth": 1920,
+  "renderer": "pypdfium2",
+  "contentPolicy": "Original page layouts, diagrams, logos, and credits preserved. PDF animation frames are static."
+}

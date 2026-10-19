@@ -17,3 +17,10 @@ experiments/**/results/
 *.egg-info/
 build/
 /dist/
+
+# Local authoring/editor tools; not application dependencies.
+.agents/
+.claude/
+.codex/
+.cursor/
+PRODUCT.md

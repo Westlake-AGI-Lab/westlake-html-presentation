@@ -1,12 +1,9 @@
-# Deployment Log
+# Deployment status
 
-## 2026-10-05: Local Package Migration
+## Current course workspace — 2026-10-19
 
-Package layout, CLI and the service example are being prepared locally for owner review. No remote restart or deployment is asserted. The separately maintained Diffusion deck remains outside this repository.
+The local workspace includes four course cards, the supplied 24-page architecture Lecture 07, seven teaching samples, the animated Linear Algebra lecture, display profile, annotations/notes/highlighting and the light presenter view with full-slide fitting. The launch command is `python3 westlake.py demo courses --output /tmp/xiaoxi-workspace --port 8782` with a new/empty output directory.
 
-## Historical Notes
+The owner requested publishing this current source version to GitHub. Obsolete presentation-specific service instructions and historical README snapshots are excluded from the current tree. Secrets, local agent/editor tools, classroom databases and generated preview directories are not release content.
 
-The former README recorded a 2026-09-20 SSH timeout and mixed older deployment checks with current feature descriptions. Those statements are preserved only in [the English historical snapshot](history/README-before-package.en.md) and [the Chinese snapshot](history/README-before-package.zh.md). They are not verification of the current remote host or this migration.
-# Integration: 2026-10-11
-
-GitHub presentation changes were integrated with the local package and animated eigen demo. Internal Diffusion deployment is pending: the SSH connection failed host-key verification. No remote files or services were changed.
+The internal endpoint http://10.21.3.45:8765/ remains unverified and unavailable from this session. SSH has closed the connection or timed out before authentication, and HTTP has returned empty replies/timeouts. No remote file, credential, model setting or service has been changed. Internal synchronization remains pending; GitHub publication is separate from deployment.

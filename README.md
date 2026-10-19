@@ -1,59 +1,67 @@
-# Westlake HTML Presentation
+# Learning Workspace
 
-10月11日整合了特征向量动画演示、Python包结构与双屏演示更新。前端文件（含 `presenter.html`）位于 `web/`；生成演示时也复制演讲者页面及资源。`python3 westlake.py test --suite browser` 包含双屏演示检查。本次整合尚未部署到内部Diffusion服务器：SSH主机密钥验证失败。
+[English](README.en.md) · [使用指南](docs/user-guide.md)
 
-[English](README.en.md) | [使用说明](docs/user-guide.md)
+本地课程工作区，提供讲义导航、Xiaoxi 助手和配套演讲者视图。本仓库包含当前课程目录与讲义界面。
 
-## 双屏演示与打印修复（2026-10-07）
+## 启动当前工作区
 
-点击“演讲者 P”或按 P 打开关联的演讲者窗口。将原幻灯片窗口放到外接屏幕，按 F 全屏；演讲者窗口显示当前页、下一页、讲稿和计时器，并可控制翻页、跳页、暂停/重置计时以及当前页音视频的播放、暂停、重播、静音和进度。视频预览使用静态封面，实际播放在观众窗口；浏览器若禁止自动播放，先在观众窗口点击播放。两窗口的界面语言同步，正文保持原语言。窗口由主页面关联，分别打开两份 HTML 不会自动配对。
-
-普通观众窗口保留演示按钮；双屏全屏时工具栏自动收起，移动鼠标到顶部/底部、键盘聚焦按钮或点击“演示工具”可唤出。关闭演讲者窗口恢复普通演示。学生和教师控制台不提供本地演讲者入口；课堂投影端可以打开只读演讲者视图，翻页仍由教师控制台管理，不改变课堂权限。浏览器窗口连接使用随机会话与窗口身份校验，不新增服务器会话或 AI 请求。
-
-目录 G 提供直接跳页。可在 .slide 上标记 data-backup="true" 为备份页、data-skip="true" 为精简路线跳过页；未配置时隐藏相关按钮。顺序翻页、下一页预览和 End 按当前主讲路线运行；备份可通过目录/缩略图进入，Esc 或演讲者窗口“返回主讲”回到进入前页面。打印始终包含全部主讲页，不包含备份页，不受精简路线影响。
-
-打印按钮先结束编辑、暂停媒体，并等待所有主讲页图片与字体就绪（最长 20 秒）；失败会提示重试。隐藏页图片提前加载，视频打印静态封面、音频打印素材说明。统一 1600×900 的 16:9 页面，修复封面比例、深蓝章节页、桌面多栏布局、图表动画造成的空白和末页分页；讲稿、聊天、课堂浮层及工具栏不打印。使用按钮准备打印比直接 Ctrl/Cmd+P 更可靠；视频须提供本地 poster 图片。
-
-本地编辑支持 Esc 完成、编辑期间禁止跳页、纯文本粘贴和存储失败提示；兼容旧索引文字，保存时使用页面/元素键，并清理危险 HTML。建议为页面设置稳定 id 或 data-id；重排同一页元素后应备份旧编辑并设置 data-edit-key。浏览器编辑不会写回文件。
-
-需随页面一起复制 presenter.html、完整 assets，以及后端新的静态白名单。演示、双屏和打印可离线运行；AI 与课堂仍需原有 Python 服务。浏览器自动化测试见 tests/test_presentation_browser.cjs，需 Playwright 和 Chrome，运行时不调用付费 AI。
-
-编辑恢复会保留公式容器、双栏、列表、表格和安全链接，不再把结构拆成普通文字。运行 `node tests/test_presentation_browser.cjs` 验证离线双窗口、媒体、编辑和 PDF；`PRESENTATION_TEST_URL=http://127.0.0.1:8765/ node tests/test_presentation_served.cjs` 验证 HTTP 资源、弹窗及打印失败重试（示例稿件另设 `PRESENTATION_EXPECT_SLIDES=16`）。测试需 Playwright 和 Chrome，接口使用 mock，不产生 AI 费用。
-
-本轮双屏、打印及编辑组件已于 2026-10-07 备份后同步到 4090 的 16 页 Diffusion 示例，并通过线上双窗口和静态资源验证；未替换稿件、私有配置或课堂数据库。仅表示本轮组件上线，不能据此认定其他历史待部署功能已同步。验证详情见 `tests/VERIFICATION.md`。
-
-## 本地线性代数预览
-
-基于讲义来源的概念练习 HTML 工作区：教师审核问题、学生书面作答、分步提示及自愿分享概念摘要。另支持讲义问答、课堂互动和浏览器本地学习档案。模型判断不是成绩，也不是经过验证的掌握程度评分。
-
-## 快速开始
-
-需要 Python 3.10+。在仓库目录运行：
+需要 Python 3.10+，在仓库根目录运行：
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-.venv/bin/westlake-ppt serve
+.venv/bin/python westlake.py demo courses --output /tmp/xiaoxi-workspace --port 8782
 ```
 
-打开 `http://127.0.0.1:8765`。AI 调用须在服务端配置凭据，见[配置说明](docs/configuration.md)。默认仅允许本机访问。仓库 `web/` 包含通用讲义与前端；在其他目录使用已安装包时，须指定 `serve --web-root /path/to/web`。macOS 使用 `launch.command`。原 Python 入口及中文启动器仍兼容。
+打开 **http://127.0.0.1:8782/**。输出目录须为新目录或空目录；重新预览时换一个目录，不要删除已有课堂数据。此命令重现当前本地课程目录，包括线性代数动画讲义。单独运行 `serve` 会打开内部通用模板，不是课程目录启动命令。模板保留在源码中，因为生成讲义需要其中的共享控件。
 
-## 演示与开发
+预览仅监听本机。教师口令 `local-demo` 仅供独立演示；输出目录保存独立课堂数据，不得在共享服务中使用该演示口令。本机修改和推送 GitHub 都不会自动部署内网服务器，详见[部署说明](docs/deployment.md)。
+
+## 课程与资料
+
+- **Computer Architecture and Parallel Computing**：`2610CST3004`，Huan Wang，Fall 2026。第 07 讲 *Out-of-Order Execution & Tomasulo (ILP-2)* 保留所提供 PDF 的全部 24 页，包括图表、署名和页码。另有两份入门教学示例。[Canvas 课程](https://canvas.westlake.edu.cn/courses/2042) 可能需要校内登录。
+- **Linear Algebra**：原有 16 页特征向量/对角化讲义，含几何动画、练习与课堂测验，另有向量示例。
+- **Calculus**：导数和积分示例。
+- **Data Structure and Algorithm Design**：搜索、栈与队列示例。
+
+七份入门示例各有七页，并明确标为教学示例，不代表官方大学课程目录。示例代码仅展示，不执行。PDF 中的动画过程仍是静态帧。
+
+## 目录与讲义界面
+
+目录提供课程卡片、搜索、学科筛选和中英文界面。左栏显示透明背景大学标识、Learning Workspace 文字及用户提供的展示资料 **Sholpan Amankeldi · ID 20243841001**。资料为静态展示，不提供登录或身份验证。
+
+原稿讲义与目录示例采用浅色界面，提供可搜索目录、页码输入、缩放/适合窗口、讲稿、荧光笔、打印，以及适用时的原文件下载。已移除 Read text，隐藏文本仍用于搜索与助手上下文。PDF 编辑只添加个人批注及修改讲稿；荧光笔标记区域，支持撤销、清除此页与键盘替代操作。原稿图片和 PDF 下载保持不变。HTML 示例可直接编辑文字并高亮选中文字。修改和标记保存在本浏览器，不改变仓库文件。
+
+演讲者视图以当前页为主，右侧显示下一页和可滚动讲稿，按可用宽度与高度完整适合幻灯片。PDF/示例采用固定 1600×900 预览画布，不受观众窗口大小或缩放影响。保留联动翻页、选页、计时暂停/重置、全屏、语言、媒体和已配置的精简/备份路线。窄屏按纵向排列。请从讲义打开演讲者视图，单独打开的演讲者页面不会自动配对。
+
+## 助手、练习与课堂限制
+
+AI 需要服务端配置提供商。密钥不得进入 Git 或 HTML，详见[配置说明](docs/configuration.md)。问答使用讲义文字与页码；嵌入的页面图像不会自动发送给模型，主动附件或框选才可附加图像。文字上下文不代表图片理解。切换界面语言不会翻译讲义正文。
+
+目录示例与所提供的计算机体系结构讲义使用自学模式，每讲具有独立浏览器存储，不复用主线性代数讲义的课堂、练习或测验题库。线性代数演示保留推理作答、分阶段提示、可选讲解、教师审核的题库测验及汇总课堂报告。题库组装不等于 AI 出题；离线练习评估始终返回 `uncertain`，不代表评分或有效掌握度测量。示例报告在独立课堂中使用明确标注的虚构参与者。
+
+浏览器档案、课堂参与、自愿分享与研究收集有独立控制。私有聊天不作为教师报告。不声称已有研究结果、正式无障碍合规或校方授权；品牌与讲义素材权利归原权利人。
+
+## 开发与验证
 
 ```sh
-python3 westlake.py demo eigen --output /tmp/xiaoxi-eigen-demo --port 8782
 python3 westlake.py test
-python3 westlake.py eval assessment_agreement --smoke
-python3 westlake.py prompts
+python3 westlake.py test --suite browser
 ```
 
-演示输出目录须为空，包含16页英文线性代数讲义、向量动画和五个练习概念。离线评估始终返回 `uncertain`，不评测真实模型。教师演示口令为 `local-demo`。测试命令运行 Python 和 Node 单元检查；可选浏览器检查需要 Node Playwright 与 Chrome。合成实验的冒烟测试结果不属于研究发现。
+首个命令运行 Python 与 Node 单元检查。浏览器检查需要 Playwright 和 Chrome；目录、原稿与演讲者专项回归命令见[测试说明](docs/testing.md)。检查覆盖桌面/窄屏、原 PDF 完整性、隔离的模拟 AI 上下文、浏览器编辑/讲稿/标记、演讲者适配和课堂权限，不代表真实模型质量、实体设备行为或服务器已成功部署。
 
-## 文档
+运行依赖声明在 `pyproject.toml`。PDF 提取与渲染已在素材准备时完成，不增加服务运行时 PDF 依赖。凭据、`.env`、课堂数据、结果、生成的预览及本地编辑器/代理设置不进入提交。
 
-- [架构与目录](docs/architecture.md)、[API](docs/api.md)、[配置](docs/configuration.md)
-- [课堂与练习](docs/classroom.md)、[隐私与安全](docs/privacy.md)
-- [测试](docs/testing.md)、[部署与兼容](docs/deployment.md)、[部署日志](docs/deployment-log.md)
-- [研究要求与状态](docs/research.md)、[实验](experiments/README.md)、[演示准备](docs/DEMO_READINESS.md)
+## 项目结构
 
-私有数据、结果、凭据及单独维护的 Diffusion 讲义不得提交 Git。研究收集与公开数据发布须分别取得同意及适用的伦理批准/豁免。不声称已有研究结果、录用、获奖或校方授权；所提供品牌素材仍受权利人许可约束。维护约定见 [AGENTS.md](AGENTS.md)。
+- `src/westlake_ppt/`：Python 服务、目录渲染、课堂和演示。
+- `web/`：共享前端、课程目录、演讲者及已登记讲义素材。
+- `tests/`：单元与浏览器检查。
+- `docs/`：架构、配置、使用流程和部署状态。
+- `experiments/`：可选研究工具，不属于学生界面。
+
+[架构](docs/architecture.md) · [API](docs/api.md) · [隐私](docs/privacy.md) · [课堂](docs/classroom.md) · [验证](tests/VERIFICATION.md)
+
+macOS 可双击 `launch.command` 或 `启动智能PPT.command` 在 8782 端口打开课程工作区；已有本机服务时复用，否则创建新的隔离预览目录。

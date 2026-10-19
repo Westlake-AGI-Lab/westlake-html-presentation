@@ -32,6 +32,10 @@ class Classroom:
                 page INTEGER, ended REAL, created REAL, likes INTEGER, danmaku INTEGER,
                 version INTEGER, epoch INTEGER);
             CREATE TABLE IF NOT EXISTS members(token TEXT PRIMARY KEY, room TEXT, id TEXT, muted INTEGER);
+            CREATE TABLE IF NOT EXISTS quizzes(id TEXT PRIMARY KEY, room TEXT, title TEXT,
+                questions TEXT, created REAL, closed REAL, sample INTEGER);
+            CREATE TABLE IF NOT EXISTS quiz_entries(quiz TEXT, room TEXT, member TEXT, enrolled REAL,
+                answers TEXT, submitted REAL, PRIMARY KEY(quiz,member));
             CREATE TABLE IF NOT EXISTS feedback(room TEXT, member TEXT, page INTEGER, kind TEXT, at REAL,
                 PRIMARY KEY(room,member,page));
             CREATE TABLE IF NOT EXISTS posts(id TEXT PRIMARY KEY, room TEXT, member TEXT, page INTEGER,
@@ -80,7 +84,7 @@ class Classroom:
         db.execute('DELETE FROM learning_research_consents WHERE at<?', (time.time()-30*86400,))
 
     def delete(self, db, code):
-        for table in ('feedback','posts','likes','requests','members',
+        for table in ('feedback','posts','likes','requests','members','quizzes','quiz_entries',
                       'improvement_questions','improvement_reports','improvement_drafts',
                       'learning_shares','learning_research_consents','learning_research_events'):
             db.execute(f'DELETE FROM {table} WHERE room=?', (code,))

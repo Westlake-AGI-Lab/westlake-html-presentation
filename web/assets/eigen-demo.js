@@ -1,6 +1,12 @@
 (() => {
   'use strict';
   const slides = [...document.querySelectorAll('.eigen-slide')];
+  const announcer = document.createElement('p');
+  announcer.className = 'eigen-announcer';
+  announcer.setAttribute('role','status');
+  announcer.setAttribute('aria-live','polite');
+  announcer.setAttribute('aria-atomic','true');
+  document.body.append(announcer);
   const top = document.createElement('header'); top.className = 'eigen-top';
   top.innerHTML = '<img src="assets/westlake-logo.png" alt="Westlake"><strong>Linear algebra</strong><small>Local preview · Offline assessment</small><button type="button">Practice</button>';
   top.querySelector('button').onclick = () => document.getElementById('agentPractice')?.click();
@@ -29,6 +35,8 @@
       if(i===current)b.scrollIntoView({block:'nearest'});
     });
     slides.forEach((slide,i)=>{slide.inert=i!==current;});
+    document.body.classList.toggle('eigen-lab-active',Boolean(slides[current].querySelector('.vector-lab')));
+    announcer.textContent = `Slide ${current+1} of ${slides.length}: ${slides[current].dataset.title}`;
     document.title = slides[current].dataset.title + ' · Linear algebra';
   }
   addEventListener('ppt-slide-change',update); update();

@@ -1,59 +1,67 @@
-# Westlake HTML Presentation
+# Learning Workspace
 
-[中文](README.md) | [User guide](docs/user-guide.md)
+[中文](README.md) · [User guide](docs/user-guide.md)
 
-The October 11 integration combines the animated eigenvector demo and Python package layout with the presentation update. Frontend files, including `presenter.html`, live in `web/`; demo generation copies the presenter and its assets too. `python3 westlake.py test --suite browser` includes the presentation checks. This integration has not been deployed to the internal Diffusion server: SSH host-key verification failed.
+A local course workspace with lecture navigation, Xiaoxi assistance and a matching presenter view. This repository contains the current course catalog and lecture interfaces.
 
-## Dual-screen presentation and print fixes (October 7, 2026)
+## Start the current workspace
 
-Click Presenter P or press P to open the linked presenter window. Move the original slide window to the external display and press F for fullscreen. The presenter shows the current slide, next slide, notes and timer, with navigation, slide selection, timer pause/reset and playback/pause/replay/mute/seek controls for current-slide media. Video previews use static posters; playback occurs in the audience window. If autoplay is blocked, click Play in that window first. UI language stays synchronized; slide content is not translated. Independently opened HTML files do not pair automatically.
-
-The normal audience window retains its controls. In dual-screen fullscreen, move to the top/bottom, focus a control with the keyboard or click Tools to reveal the toolbar. Closing the presenter restores normal presentation. Students and the teacher console do not offer a local presenter entry. Classroom projection can open a read-only presenter view; the teacher console remains in charge of slide changes. Random session values and window identity validate messages; no server session or AI request is added.
-
-Contents G jumps to a slide. Mark .slide elements with data-backup="true" for backups or data-skip="true" for slides omitted from the brief route; related buttons are hidden when unconfigured. Sequential navigation, next-slide preview and End use the main route. Open backups from contents/thumbnails and use Escape or Return to main slides to restore the previous slide. Printing includes every main slide, excludes backups and is independent of the brief route.
-
-Print finishes editing, pauses media and waits for main-slide images and fonts (up to 20 seconds); failures show a retry notice. Hidden-slide images load eagerly, videos print posters and audio prints a media label. Pages use a uniform 1600×900 canvas in 16:9. Fixes cover the cover ratio, dark section slides, desktop columns, blank animated charts and final-page breaks. Notes, chat, classroom overlays and controls are excluded. The prepared Print button is more reliable than direct Ctrl/Cmd+P. Supply a local poster image for each video.
-
-Editing supports Escape to finish, navigation locks, plain-text paste and visible storage-failure notices. Legacy indexed text remains readable; new saves use slide/element keys and sanitize unsafe HTML. Give slides stable id or data-id values; back up edits and set data-edit-key when rearranging elements within a slide. Browser edits do not modify the source file.
-
-Copy presenter.html and the complete assets folder with the deck, and update the backend static allowlist. Presentation, dual-screen views and printing work offline; AI and classrooms still require the existing Python service. tests/test_presentation_browser.cjs requires Playwright and Chrome and does not call paid AI.
-
-Restored edits preserve equation containers, columns, lists, tables and safe links rather than flattening structural markup. Run `node tests/test_presentation_browser.cjs` for offline windows, media, editing and PDFs; use `PRESENTATION_TEST_URL=http://127.0.0.1:8765/ node tests/test_presentation_served.cjs` for HTTP assets, popup behavior and print-failure recovery (set `PRESENTATION_EXPECT_SLIDES=16` for the example). Playwright and Chrome are required; API calls are mocked without AI charges.
-
-These presentation, printing and editing components were backed up and deployed to the 16-slide 4090 Diffusion example on 2026-10-07. Live linked-window and static-resource checks passed; lecture content, private configuration and classroom data were preserved. This deployment does not establish that unrelated historically pending features are live. See `tests/VERIFICATION.md` for coverage and limits.
-
-## Local linear algebra preview
-
-An HTML lecture workspace with source-grounded conceptual practice: teacher-reviewed questions, written attempts, staged hints and optional concept summaries. It also supports presentation Q&A, classroom interaction and a browser-local learning archive. Model judgments are not grades or validated mastery scores.
-
-## Quick Start
-
-Python 3.10+ is required. From this checkout:
+Python 3.10+ is required. Run from the repository root:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-.venv/bin/westlake-ppt serve
+.venv/bin/python westlake.py demo courses --output /tmp/xiaoxi-workspace --port 8782
 ```
 
-Open `http://127.0.0.1:8765`. Configure provider credentials server-side for AI calls; see [configuration](docs/configuration.md). The default is localhost only. The repository's `web/` directory contains the generic deck and frontend; an installed package used elsewhere needs `serve --web-root /path/to/web`. macOS: `launch.command`. Former Python entry points and the Chinese launcher remain compatible.
+Open **http://127.0.0.1:8782/**. The output directory must be new or empty; use another directory for a new preview rather than deleting saved classroom data. This command reproduces the current local catalog, including the animated Linear Algebra lecture. `serve` alone opens the internal generic template; it is not the catalog startup command. The template remains in the source because lecture generation uses its shared controls.
 
-## Demo And Development
+The preview binds only to localhost. Its teacher password `local-demo` is for isolated demonstrations. The output directory holds its separate classroom data; do not use the demo password for a shared service. Changing local files or pushing to GitHub does not deploy the internal server. See [deployment](docs/deployment.md).
+
+## Courses and materials
+
+- **Computer Architecture and Parallel Computing**: `2610CST3004`, Huan Wang, Fall 2026. Lecture 07, *Out-of-Order Execution & Tomasulo (ILP-2)*, preserves all 24 pages of the supplied PDF, including figures, credits and page numbers. Two introductory teaching samples are also available. [Canvas course](https://canvas.westlake.edu.cn/courses/2042) may require university login.
+- **Linear Algebra**: the existing 16-slide eigenvector/diagonalization lecture with animated geometry, practice and classroom quizzes, plus a vectors sample.
+- **Calculus**: derivatives and integrals samples.
+- **Data Structure and Algorithm Design**: search and stacks/queues samples.
+
+The seven introductory samples each have seven slides and are labeled as teaching samples. They do not constitute an official university course catalog. Sample code is displayed, not executed. PDF animation sequences remain static frames.
+
+## Catalog and lecture interface
+
+The catalog offers course cards, search, subject filters and English/Chinese UI. Its sidebar shows the transparent university logo, Learning Workspace label and the user-supplied display profile **Sholpan Amankeldi · ID 20243841001**. This profile is static, without sign-in or identity verification.
+
+Source lectures and catalog samples use a light interface with searchable contents, page entry, zoom/fit, notes, highlighting, printing and original-file download where available. Read text has been removed; hidden transcripts still support search and assistant context. PDF editing adds personal captions and edits notes, while highlighting marks regions with undo/clear and a keyboard alternative. Original PDF artwork and downloads remain unchanged. HTML samples support direct text editing and text highlights. Edits and marks persist in this browser; they do not modify repository files.
+
+Presenter view gives the current slide the main area, with next-slide preview and scrollable notes at right. It fits the whole slide by width and height. PDF/sample previews use a stable 1600×900 canvas, independent of audience zoom or window size. Linked navigation, slide selection, timer pause/reset, fullscreen, language, media and configured brief/backup routes remain available. Narrow windows use a vertical layout. Open the view from the lecture; independent presenter pages do not pair automatically.
+
+## Assistant, practice and classroom limits
+
+AI requires server-side provider configuration. Keep API keys outside Git and HTML; see [configuration](docs/configuration.md). Questions use lecture text and page references. Embedded slide images are not automatically sent to the model; explicit attachments or region capture can supply images. Text context does not imply image understanding. UI language changes do not translate lecture content.
+
+Catalog samples and the supplied architecture lecture use self-study mode with separate browser storage per lecture. They do not reuse the main Linear Algebra classroom, practice or quiz banks. The Linear Algebra demo retains written attempts, staged hints, optional explanations, teacher-reviewed bank-based quizzes and aggregate class reports. Quiz assembly is not AI question generation. The offline practice assessor always returns `uncertain`; its output is not grading or a validated mastery estimate. Sample reports use explicitly fictional participants in a separate classroom.
+
+Browser archives, classroom participation, voluntary sharing and research collection have separate controls. Private chats are not teacher reports. No research result, formal accessibility conformance or official university authorization is claimed. Supplied brand and lecture assets retain their owners' rights.
+
+## Development and verification
 
 ```sh
-python3 westlake.py demo eigen --output /tmp/xiaoxi-eigen-demo --port 8782
 python3 westlake.py test
-python3 westlake.py eval assessment_agreement --smoke
-python3 westlake.py prompts
+python3 westlake.py test --suite browser
 ```
 
-The demo output directory must be empty. It contains 16 English linear-algebra slides, animated vector geometry and five practice concepts. Its offline assessor always returns `uncertain`; it does not evaluate a real model. Teacher demo password: `local-demo`. The test command runs Python and Node unit checks; optional browser checks require Node Playwright and Chrome. Synthetic experiment smoke results are not research findings.
+The first command runs Python and Node unit checks. Browser checks require Playwright and Chrome. Additional catalog, source-lecture and presenter regression commands are documented in [testing](docs/testing.md). Checks cover desktop/mobile layouts, original PDF integrity, isolated mocked AI context, browser editing/notes/highlights, presenter fitting and classroom permissions. They do not establish real-model quality, physical-device behavior or successful server deployment.
 
-## Documentation
+Runtime dependencies are declared in `pyproject.toml`. PDF extraction/rendering was performed during asset preparation; it adds no PDF runtime dependency. Credentials, `.env`, classroom data, results, generated previews and local editor/agent setup are excluded from commits.
 
-- [Architecture and layout](docs/architecture.md), [API](docs/api.md), [configuration](docs/configuration.md)
-- [Classroom and practice](docs/classroom.md), [privacy and security](docs/privacy.md)
-- [Testing](docs/testing.md), [deployment and compatibility](docs/deployment.md), [deployment log](docs/deployment-log.md)
-- [Research requirements and status](docs/research.md), [experiments](experiments/README.md), [demo readiness](docs/DEMO_READINESS.md)
+## Project layout
 
-Private data, results, credentials and the separately maintained Diffusion deck do not belong in Git. Research collection and public data release need their own consent and applicable ethics approval/exemption. No study results, acceptance, award or official university authorization are claimed. Supplied brand assets remain subject to their owners' permissions. Maintenance rules are in [AGENTS.md](AGENTS.md).
+- `src/westlake_ppt/`: Python server, catalog rendering, classroom and demos.
+- `web/`: shared frontend, catalog, presenter and registered lecture assets.
+- `tests/`: unit and browser checks.
+- `docs/`: architecture, configuration, workflows and deployment status.
+- `experiments/`: optional research tooling; it is not part of the student interface.
+
+[Architecture](docs/architecture.md) · [API](docs/api.md) · [Privacy](docs/privacy.md) · [Classroom](docs/classroom.md) · [Verification](tests/VERIFICATION.md)
+
+On macOS, `launch.command` or `启动智能PPT.command` opens the course workspace on port 8782, reusing a running local server or creating a fresh isolated preview directory.

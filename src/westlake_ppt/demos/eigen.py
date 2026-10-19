@@ -30,8 +30,10 @@ SLIDES = [
 
 
 def concept(cid, page, title, question, expected, hints, kind='explain'):
+    objective = ('Use a counterexample to test the claim.' if kind == 'counterexample'
+                 else 'Explain the result using evidence from the slide.')
     return dict(id=cid, page=page, title=title, source=SLIDES[page-1][3],
-                objective=title, tasks=[dict(id=cid+'-reason', kind=kind, question=question,
+                objective=objective, tasks=[dict(id=cid+'-reason', kind=kind, question=question,
                 checks=[dict(label='Conceptual reasoning', expected=expected)],
                 hints=hints, answer=expected)])
 
@@ -68,18 +70,28 @@ def build(destination):
     for i, (title, subtitle, formula, notes, diagram) in enumerate(SLIDES, 1):
         lab = f'<div class="vector-lab" data-transform="{diagram}"></div>' if diagram else ''
         practice = next((c for c in CONCEPTS if c['page'] == i), None)
+        if diagram:
+            layout = 'layout-lab'
+        elif i in {2, 6, 12, 13, 15}:
+            layout = 'layout-derivation'
+        elif i in {3, 4, 7}:
+            layout = 'layout-structure'
+        elif i == len(SLIDES):
+            layout = 'layout-summary'
+        else:
+            layout = 'layout-concept'
         checkpoint = (f'<div class="eigen-checkpoint"><span>CONCEPT CHECK</span><p>{html.escape(practice["title"])}</p>'
                       f'<button type="button" data-practice-concept="{practice["id"]}">Try this question <span aria-hidden="true">&#8594;</span></button></div>') if practice else ''
-        sections.append(f'<section class="slide eigen-slide" data-title="{html.escape(title)}"><div class="slide-body">'
+        sections.append(f'<section class="slide eigen-slide {layout}" data-title="{html.escape(title)}"><div class="slide-body">'
                         f'<div class="eyebrow">LINEAR ALGEBRA / 7.1 / {i:02d}</div><h1>{html.escape(title)}</h1>'
                         f'<p class="eigen-subtitle">{html.escape(subtitle)}</p><div class="eigen-content {"with-lab" if diagram else ""}">'
                         f'<div class="eigen-reading"><div class="eigen-formula">\\[{html.escape(formula)}\\]</div><p class="eigen-explanation">{html.escape(notes)}</p>{checkpoint}</div>{lab}</div></div>'
                         f'<footer class="slide-footer"><span>Adapted from Chapter 7.1–2 · source p. {i}</span><span>Section 7.1 · Diagonalization</span></footer>'
                         f'<aside class="presenter-notes">{html.escape(notes)}</aside></section>')
-    text = text[:span.start]+'<main class="deck" id="deck">'+''.join(sections)+'</main>'+text[span.end:]
-    text = text.replace('</head>', '<link rel="stylesheet" href="assets/eigen-demo.css"></head>')
+    text = text[:span.start]+'<main class="deck" id="deck" aria-live="polite" aria-atomic="false">'+''.join(sections)+'</main>'+text[span.end:]
+    text = text.replace('</head>', '<link rel="stylesheet" href="assets/eigen-demo.css"><link rel="stylesheet" href="assets/quiz.css"></head>')
     text = text.replace('<body>', '<body class="eigen-demo"><script>try {localStorage.setItem("westlake-ui-language","en")} catch (_) {}</script>')
-    text = text.replace('</body>', '<script src="assets/eigen-demo.js"></script><script src="assets/eigen-geometry.js"></script><script src="assets/eigen-lab.js"></script></body>')
+    text = text.replace('</body>', '<script src="assets/eigen-demo.js"></script><script src="assets/eigen-geometry.js"></script><script src="assets/eigen-lab.js"></script><script src="assets/quiz.js"></script></body>')
     (destination/name).write_text(text)
     (destination/'demo-concepts.json').write_text(json.dumps(CONCEPTS, indent=2))
 
@@ -88,10 +100,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--port', type=int, default=8782)
+    parser.add_argument('--dashboard', action='store_true', help='Open the course catalog as the local home page')
     args = parser.parse_args(); destination = args.output.resolve(); build(destination)
     os.environ.update(PPT_CONFIG_PATH=str(destination/'unconfigured.json'), CLASSROOM_DATA_DIR=str(destination/'private-data'),
                       PPT_WEB_ROOT=str(destination), PPT_DECK='deck.html', TEACHER_PASSWORD='local-demo', HOST='127.0.0.1', PORT=str(args.port))
     from westlake_ppt.server import app as server
+    server.CATALOG_HOME = args.dashboard
+    from westlake_ppt.classroom.quiz import Quiz
+    from .eigen_quiz import BANK
+    server.QUIZ = Quiz(server.classroom(), BANK)
+    server.PUBLIC_FILES.update({'assets/quiz.js', 'assets/quiz.css'})
     server.PUBLIC_FILES.update({'assets/eigen-demo.css', 'assets/eigen-demo.js', 'assets/eigen-geometry.js',
                                 'assets/eigen-lab.js', 'assets/vendor/lucide/play.svg', 'assets/vendor/lucide/pause.svg'})
     learning = server.learning(); teacher = server.classroom().post('login', {'password': 'local-demo'})['_cookie']

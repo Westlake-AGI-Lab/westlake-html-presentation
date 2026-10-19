@@ -1,0 +1,1007 @@
+[
+  {
+    "id": "computer-architecture",
+    "title": "Computer Architecture and Parallel Computing",
+    "zh": "计算机系统架构与并行计算",
+    "category": "Computer science",
+    "color": "plum",
+    "icon": "cpu",
+    "description": "From instructions and memory to faster parallel programs.",
+    "lectures": [
+      {
+        "id": "lecture-07-tomasulo",
+        "number": "07",
+        "title": "Out-of-Order Execution & Tomasulo (ILP-2)",
+        "summary": "Lecture 7 · Huan Wang · Fall 2026. The complete 24-page lecture on scoreboarding, register renaming, reservation stations, and the common data bus.",
+        "kind": "source",
+        "source": {
+          "format": "pdf",
+          "file": "assets/lectures/cst3004-lecture07/source.pdf",
+          "name": "lecture7-preview.pdf",
+          "sha256": "ea7e569471ccaee3563769da7097b0633528bea57b4b445d5e3d5f725e3eb650",
+          "date": "2026-10-19",
+          "instructor": "Huan Wang",
+          "pageCount": 24
+        },
+        "slides": [
+          {
+            "title": "Out-of-Order Execution & Tomasulo (ILP-2)",
+            "lead": "",
+            "sourcePage": 1,
+            "group": "Introduction",
+            "image": "assets/lectures/cst3004-lecture07/page-01.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-01.webp",
+            "text": "Computer System Architecture and Parallel Computing\nFall 2026\nHuan Wang, Westlake University\nhttps://huanwang.tech\nLecture 7: Out-of-Order Execution & Tomasulo (ILP-2)\n2026.10.19 Mon",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 1. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Motivation: The Problem with In-Order Issue",
+            "lead": "",
+            "sourcePage": 2,
+            "group": "Foundations",
+            "image": "assets/lectures/cst3004-lecture07/page-02.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-02.webp",
+            "text": "Motivation: The Problem with In-Order Issue\nIn-order issue: issue follows program order; an unready head blocks everything behind it.\n(a ready instruction cannot pass an unready predecessor — a direct limit on performance)\nI1: fld    f0, 0(x1)     # cache miss, long latency\nI2: fadd.d f4, f4, f0    # RAW — must wait for I1\nI3: fadd.d f6, f8, f10   # fully independent of I1/I2\n• I1 — cache miss, long-latency wait\n• I2 — RAW through f0, waits for I1\n• I3 — operands ready, ALU free, yet blocked behind\n• Head-of-line blocking — ready elements cannot pass an \nunready queue head\n• Multiple issue allows together, never passing; in-order \nsuperscalar shares the limit\n→ We need out-of-order (OoO) execution or called dynamic (run-time) scheduling.\nBtw, why use FP instructions? Integer ALU operations \ntake one cycle, so an unready head costs little.\nfld: Floating-point Load Doubleword",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 2. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Dynamic Scheduling: Scoreboarding → Tomasulo",
+            "lead": "",
+            "sourcePage": 3,
+            "group": "Foundations",
+            "image": "assets/lectures/cst3004-lecture07/page-03.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-03.webp",
+            "text": "Dynamic Scheduling: Scoreboarding → Tomasulo\nCDC 6600 (delivered from 1964); the scoreboard was \nthis machine’s central control mechanism. Photo: Jitze \nCouperus, CC BY 2.0, via Wikimedia Commons\nFor scientific computing (FP, Multiply)\nHistorical note\nThe idea of OoO execution predated VLSI \ndensity (1978, DARPA, VLSI project) and \nclassic 5-stage pipelining (1980s), and \ncache (1968):  mainframe-only for decades, \nmainstream once transistor budgets \nallowed it\n1964\nCDC 6600 · Scoreboarding\n· central status tables\n· out-of-order execution / write result\n· no renaming → WAR / WAW stalls remain\n1967\nIBM System/360 Model 91 · Tomasulo\n· distributed reservation stations\n· tag renaming at issue\n· the common data bus (CDB) broadcast\n+ WAR / WAW removed\nBall back: 1964 was a landmark year for computer architecture: \nalongside the CDC 6600, IBM announced System/360 (chief architect \nGene Amdahl), defining the compatible-family ISA paradigm.\ndiscrete component 分立原件\nintegrated circuits 集成电路",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 3. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Hardware Background of CDC 6600",
+            "lead": "",
+            "sourcePage": 4,
+            "group": "Foundations",
+            "image": "assets/lectures/cst3004-lecture07/page-04.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-04.webp",
+            "text": "Hardware background of CDC6600\n Global lockstep pipeline (MIPS 5-stage)\n1980s\nCDC 6600 (scoreboard, independent FUs)\n1964\nClock One global clock; all pipeline registers update together Shared clock, but no single chained pipeline; each FU runs \nindependently\nProgress All instructions advance in lockstep; a stall freezes the \nwhole pipeline\nEach FU advances on its own; one blocked FU blocks no other\nStructure Fixed chain of stages: IF–ID–EX–MEM–WB Parallel independent functional units — not a series pipe\nModel Hardware pipeline registers Per-instruction state machine (Issue / Read / Execute / Write Result)",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 4. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Refresh: The Five Pipeline Stages in Hardware",
+            "lead": "",
+            "sourcePage": 5,
+            "group": "Foundations",
+            "image": "assets/lectures/cst3004-lecture07/page-05.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-05.webp",
+            "text": "Refresh: The Five Pipeline Stages in Hardware\nIF/ID ID/EX EX/MEM MEM/WB\nIF\nFetch ID\nDecode EX\nExecute MEM\nMemory WB\nWrite back\nIF — Fetch\nRead the instruction at \nPC from the instruction \nmemory; an adder \nforms PC + 4.\nHardware: PC register, \nI-memory, adder\nID — Decode\nDecode the opcode \ninto control signals; \nread rs / rt from the \nregister file; \nsign-extend the \nimmediate.\nHardware: Control \nunit, register-file read \nports, sign extender\nEX — Execute\nThe ALU computes the \nresult, the load / store \naddress, or the branch \ncondition and target.\nHardware: ALU, \nbranch adder\nMEM — Memory\nA load reads, a store \nwrites data memory at \nthe EX address; other \ninstructions pass \nthrough.\nHardware: D-memory \nread / write ports\nWB — Write back\nA multiplexer selects \nthe ALU result or the \nloaded data and writes \nit to the destination \nregister.\nHardware: \nRegister-file write port, \nMUX\nPipeline registers (IF/ID, ID/EX, EX/MEM, MEM/WB) latch every signal at each clock edge — the “lockstep” the \nprevious slide contrasts with the CDC 6600.\nDiagram redrawn after the classic RISC pipeline figure — Patterson & Hennessy, Computer Organization and Design, ch. 4; \nhttps://en.wikipedia.org/wiki/Classic_RISC_pipeline",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 5. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Scoreboarding: Issue Stage",
+            "lead": "",
+            "sourcePage": 6,
+            "group": "Scoreboarding",
+            "image": "assets/lectures/cst3004-lecture07/page-06.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-06.webp",
+            "text": "What the Issue stage does (CDC 6600 scoreboard model):\n1. Check: a functional unit is free; no WAW conflict with an in-flight instruction\n2. Allocate a free functional unit\n3. Add a row in the Instruction Status table, state = Issue\n4. In the Unit Status table: FU.Busy = Yes; record Op, Fi (destination), Fj / Fk (sources)\n5. Register Result Status table: RegisterResult[Fi] = this FU\nIn essence, issue dispatches the instruction to an FU and registers it in the central \nscoreboard, and the instruction then waits to read operands and execute. It moves from the \nfetch queue to the FU / scoreboard — nothing is written to the architectural register file \nyet.\nScoreboarding: Issue Stage",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 6. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Scoreboarding: Overview",
+            "lead": "",
+            "sourcePage": 7,
+            "group": "Scoreboarding",
+            "image": "assets/lectures/cst3004-lecture07/page-07.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-07.webp",
+            "text": "Scoreboarding: Overview\nScoreboarding is a scheduling algorithm. The scoreboard: Maintain one central hardware table (3 subtables), \nanswering each cycle — can it issue? are operands ready? can the result be written? It has 4 stages (not \ncorresponding to 4 stages in pipelining).\nStage Action Stall when\n1. Issue allocate a free unit structural (no free unit) · WAW in-flight writer\n(because of no renaming)\n2. Read operands read valid sources RAW — a source is in flight\n3. Execute compute; may reorder —\n4. Write result write via result bus, forward WAR — an earlier reader needs the old value\n(because of no renaming)\nThree tables\n● Instruction status\n● Functional unit (FU) status\n● register result status\nAchieved\nIn-order issue · OoO execution \nand write result; RAW via waiting \n+ bus forwarding\nNot achieved\nRegister names persist: WAW \nblocks issue, WAR blocks \nwriteback\nScoreboarding routes around RAW waits at run time; name dependences still block issue and \nwriteback —> Tomasulo algorithm (1967).\nI1: fadd f4, f0, f1\nI2: fmul f4, f8, f10",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 7. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Scoreboarding — Animated Walkthrough",
+            "lead": "",
+            "sourcePage": 8,
+            "group": "Scoreboarding",
+            "image": "assets/lectures/cst3004-lecture07/page-08.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-08.webp",
+            "text": "⭐\n Scoreboarding — Animated Walkthrough\nThe program, line by line\nLD F6, 34(R2): F6 = Mem[R2 + 34] — base register \nR2 + displacement 34 (bytes).\nLD F2, 45(R3): F2 = Mem[R3 + 45].\nMULTD F0, F2, F4: F0 = F2 × F4 — the pattern is OP \nFi, Fj, Fk, i.e. Fi = Fj op Fk.\nF0–F10 are floating-point registers; R2/R3 are \ninteger (address) registers.\nReading the tables: Fi = destination register; \nFj/Fk = sources; Qj/Qk = the unit that will produce \nthat operand (who to wait for); Rj/Rk = operand \nvalue ready and not yet read.\nWatch I6 (ADDD): blocked at issue (Add busy — \nstructural), then finished at cycle 12 but cannot \nwrite F6 until DIVD reads it (WAR, cycle 18).\nCompletion order 1, 2, 4, 3, 6, 5 — out-of-order, \nyet the final register file matches in-order \nexecution.\nHow to read: every number is a clock cycle, counted from cycle 1 (top right of the frame). Gold cells mark exactly what changed this cycle — follow \nthe gold to find each cycle's event. A value written at cycle c can be read at cycle c + 1.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 8. Original lecture by Huan Wang, Westlake University, Fall 2026. The supplied PDF contains a static snapshot; its original animation is not included."
+          },
+          {
+            "title": "From Scoreboarding to Tomasulo",
+            "lead": "",
+            "sourcePage": 9,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-09.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-09.webp",
+            "text": "So far:  in-order issue has head-of-line blocking; scoreboarding executes out of order but still \nstalls on WAR and WAW name dependences.\nNext:  build the four components — reservation stations, renaming at issue, the common data \nbus, wakeup — then derive four instructions on the board.\nWhy it matters:  these four components are the direct ancestors of the scheduler in every \nmodern out-of-order core, including gem5’s O3CPU in Lab 7.\nNext: Tomasulo’s Algorithm",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 9. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Tomasulo: The Man, Two Principles, Two Terms",
+            "lead": "",
+            "sourcePage": 10,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-10.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-10.webp",
+            "text": "Tomasulo: The Man, Two Principles, Two Terms\n1967\nRobert M. Tomasulo, IBM Computer Scientist, System/360 Model 91\nThe flagship scientific machine of the System/360 family; its floating-point unit ran the \nalgorithm — built from discrete logic, no compiler involved.  \nPaper: An Efficient Algorithm for Exploiting Multiple Arithmetic Units (IBM J. R&D, 1967) [URL]\nP1 — Hardware decides readiness\nNot the compiler: an instruction executes when its \noperands are ready and its functional unit is free — \nnot when its turn in program order comes\nP2 — Register renaming\nAt issue, register names are replaced by fresh tags; \nWAR and WAW name dependences disappear, RAW \nsurvives as a tag chain\nTerm — Reservation station (RS)\nA small waiting queue in front of each unit; every entry \nholds one issued instruction: the operation and each \noperand as a value or a tag\nTerm — Common data bus (CDB)\nOne broadcast channel: each finished result (tag + \nvalue) reaches every waiting station and the register \nfile in the same cycle\n1997 Eckert–Mauchly Award",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 10. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Reservation Stations: Value or Provenance",
+            "lead": "",
+            "sourcePage": 11,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-11.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-11.webp",
+            "text": "⭐\n Reservation Stations: Value or Provenance\nOne entry = all hardware state of one issued, unfinished instruction:\nField Holds Valid when\nbusy entry occupied? set at issue, cleared after write result\nOp operation (fadd / fmul...) selects the unit class\nVj, Vk source values already available; copied at issue\nQj, Qk producer tags pending → non-empty; CDB match \nclears Q into V\nA effective address load/store buffers only; once base is \nready\nQi[f] — register result status\nOne tag per architectural register, \npointing to the station that will write f; \nempty = stored value valid\nEach operand slot: exactly one of \nvalue/tag\nAdd1: fadd · Qj=L1 · Vk=f0 · busy=1\nSnapshot at issue\nOperands are fixed from then on; later \nregister rewrites cannot affect a waiting \nstation\nEach source operand answers one question: is the value already here (in V), or must a tag be \nwaited for (in Q)? The instruction no longer remembers its original register names.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 11. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Renaming at Issue: Names Become Fresh Tags",
+            "lead": "",
+            "sourcePage": 12,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-12.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-12.webp",
+            "text": "⭐\n Renaming at Issue: Names Become Fresh Tags\nThe four-instruction board example: tag assignment at issue, cycle by cycle:\nCycle Instruction Station taken: operands recorded as Qi after issue\nc1 I1: fld f2,0(x1) L1: A=0(x1) Qi[f2]=L1\nc2 I2: fadd.d f4,f2,f0 Add1: Qj=L1, Vk=f0 Qi[f4]=A1\nc3 I3: fmul.d f6,f8,f10 Mul1: Vj=f8(old), Vk=f10 Qi[f6]=M1\nc4 I4: fadd.d f8,f4,f6 Add2: Qj=A1, Qk=M1 Qi[f8]=A2\nWAR removed\nI3 reads f8, I4 writes it: the old value \nis in Vj at c3; I4 gets fresh A2 and \nneed not wait\nWAW removed\nSame-name writers get distinct \ntags; Qi always points to the latest; \nno coupling through the name\nRAW retained\nTrue deps become tag chains: \nI2←L1, I4←A1/M1; produced values \narrive via the CDB\nHardware register renaming: at issue, architectural names map to physical result locations named \nby tags. Name dependences arise from sharing one name; an exclusive name per in-flight \ninstruction removes them.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 12. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "The Common Data Bus: One Broadcast, All Compare",
+            "lead": "",
+            "sourcePage": 13,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-13.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-13.webp",
+            "text": "⭐\n The Common Data Bus: One Broadcast, All Compare\n(1) Broadcast\nThe finisher drives (its tag, the result); one per cycle, others \narbitrate\n(2) Wakeup\nAll stations compare Qj/Qk in parallel; match → value into V, Q \ncleared — comparator hardware, not a lookup\n(3) Select\nBoth Q empty and the unit free → candidate; arbitration picks who \nruns this cycle\n(4) Register file, same cycle\nMatching Qi → write value, clear tag; bus forwarding — no \nwrite-then-read wait\nThe CDB generalizes L3 forwarding: L3 bypassed one result to the next instruction’s execute stage; \nthe CDB broadcasts a result to all waiters and the register file at once.\nL1 finishes\nCDB: broadcast (L1, mem[f2])\nAdd1\nQj=L1 ✓ woken\nAdd2\nQj=A1: no match\nMul1\nV ready: unaffected\nRegister file: Qi[f2]=L1 ✓\nwrite f2, clear the tag\nSelect: Add1 ready, adder free → runs next cycle",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 13. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "The Three Phases",
+            "lead": "",
+            "sourcePage": 14,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-14.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-14.webp",
+            "text": "⭐\n The Three Phases\n1\nIssue — rename, park\nTake the head; require a free \nstation\nValid source → V; otherwise \nQ=Qi[src]\nQi[dst] ← this tag\nStall: no free entry (structural) — \nissue freezes\n2\nExecute — wait, compute\nBoth Q empty (or address A ready) \n→ the unit computes\nBefore that, the instruction merely \nwaits\nRAW — await the producer’s CDB \nbroadcast; execution goes out of \norder\n3\nWrite result — broadcast, \nfree\nDrive (tag, result) onto the CDB\nMatching Q → copy value, clear Q; \nmatching Qi → write register, clear \ntag\nFree the station\nWait: CDB busy → arbitration, one \nper cycle\nTerms:  classic “issue” = enter station and rename, usually \n“dispatch” today; modern “issue” means wakeup/select out \nof the station (see the glossary)\nNo software involved:  per-cycle decisions are comparator \nand arbitration circuits; the compiler only supplies the ISA \nprogram\nThe three constraint classes are each handled: structural hazards block at issue, RAW waits before \nexecute, and WAR/WAW simply do not exist after renaming at issue.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 14. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Tomasulo’s Algorithm — Animated Walkthrough",
+            "lead": "",
+            "sourcePage": 15,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-15.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-15.webp",
+            "text": "⭐\n Tomasulo's Algorithm — Animated Walkthrough\nSame six instructions as the \nscoreboard animation — watch \nwhat is missing: no structural issue \nstalls, no WAR write stall.\nReservation stations hold each \noperand as a value (V) or a producer \ntag (Q); the register status Qi says \nwho will write each register.\nCDB broadcast: a finished result \n(tag + value) fills every matching Q \nin the same cycle — tags become \nvalues (wakeup).\nWhy no WAR stall: DIVD's source \nwas renamed to a station tag at \nissue; ADDD writes the architectural \nF6 without harming anyone.\nExample: Hennessy & Patterson, Computer Architecture: A Quantitative Approach — animation created for this course.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 15. Original lecture by Huan Wang, Westlake University, Fall 2026. The supplied PDF contains a static snapshot; its original animation is not included."
+          },
+          {
+            "title": "Summary: Scoreboarding vs. Tomasulo",
+            "lead": "",
+            "sourcePage": 16,
+            "group": "Tomasulo",
+            "image": "assets/lectures/cst3004-lecture07/page-16.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-16.webp",
+            "text": "Summary: Scoreboarding vs. Tomasulo\nAspect Scoreboard (CDC 6600, 1964) Tomasulo (IBM 360/91, 1967)\nWhere status lives One central scoreboard (three tables) Distributed — in the reservation stations and the Qi \nregister tags\nDependence tracking Watches register names; polls operand \nreadiness each cycle\nTags (Qi) track producers; the CDB pushes results by \nbroadcast\nName dependences \nWAR/WAW\nNot eliminated — WAW stalls issue, WAR stalls \nwriteback\nEliminated — names are decoupled by renaming at \nissue\nResult delivery Wait for the register-file writeback, then read \nthe register\nCDB bypass broadcast — waiters receive the value in \nthe broadcast cycle\nSame goal — dynamic scheduling at run time. The difference is distribution + renaming + \nbroadcast: the scoreboard’s questions answered without a central table, without \nname-dependence stalls, and without waiting for writeback.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 16. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Onwards: From 1967 to Today",
+            "lead": "",
+            "sourcePage": 17,
+            "group": "Modern cores",
+            "image": "assets/lectures/cst3004-lecture07/page-17.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-17.webp",
+            "text": "Onwards: From 1967 to Today\nHistorical lesson: ideas predate technology\n1967: comparators and buffers too costly → mainframe-only for \ndecades; 1990s: on-chip budgets allow it → standard in \ngeneral-purpose cores\n1995: three lines converge; the structure \npersists\nμops (L6) + Tomasulo (L7) + ROB·prediction·speculation (L8) — \nthis lecture builds the middle block\nEquivalents in modern cores\nreservation stations → issue queue (scheduler);  tags → \nphysical-register numbers;  register status table → register \nalias table\nnames change; the “value or provenance” wait logic does not\nIn-order cores did not disappear\nEnergy-first embedded and “little” cores still issue in order; \nmicroarchitecture is a cost–benefit choice, not a replacement\n1967\nTomasulo’s algorithm\nmainframe era: hardware costly\n1995\nthree lines converge\nμops + Tomasulo + ROB/speculation\n2000s–now\nIssue queue + physical register file\ntags are register numbers; ROBs: hundreds",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 17. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Summary: What Out-of-Order Buys and What It Costs",
+            "lead": "",
+            "sourcePage": 18,
+            "group": "Modern cores",
+            "image": "assets/lectures/cst3004-lecture07/page-18.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-18.webp",
+            "text": "Summary: What Out-of-Order Buys and What It Costs\nGains\n● tolerates latencies known only at run time (misses, \nbus occupancy, long ops)\n● fills issue slots: one chain waits, independent chains \nuse the units\n● binary portability: wider windows in new cores, no \nrecompilation\nCosts\narea and power: \n● stations and comparators run in parallel every \ncycle; \n● wakeup logic is on the frequency critical path \ndesign and verification complexity; \n● speculation adds a microarchitectural side-channel \nsurface (L8)\nMeasured magnitudes (typical general-purpose \ncores)\n0.5–1   in-order cores\n2–4   wide OoO cores · typical general code\n6–8   peaks on ILP-rich regular code\nFar below the issue-width peak: short blocks, RAW chains, \nmisses and branches cap it; returns diminish with window size \n(Wall 1993; quantified in L8)",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 18. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "History: A Detour to Out-of-Order Execution",
+            "lead": "",
+            "sourcePage": 19,
+            "group": "Modern cores",
+            "image": "assets/lectures/cst3004-lecture07/page-19.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-19.webp",
+            "text": "History: A Detour to Out-of-Order Execution\n1964\nCDC 6600 · \nscoreboard\nFirst dynamic \nscheduling (S. Cray): ten \nheterogeneous \nfunctional units, \nout-of-order \ncompletion.\nFP latencies differ by up \nto 40× — no fixed \nschedule can fit.\n1967\nIBM 360/91 · \nTomasulo\nRenaming tags + CDB \nbroadcast: WAR/WAW \neliminated by \nconstruction.\nCAM compare and the \nbroadcast bus are \ncostly in discrete \ntransistors — dynamic \nscheduling goes \ndormant.\n1980s\nRISC · five-stage \npipeline\nISA co-designed with \nthe pipeline: fixed \nformat, load/store, \nsingle-cycle ALU.\nIn-order lockstep wins \non clock rate and \ncompiler-friendliness; \nout-of-order is shelved.\n1990s\nOoO returns · \nTomasulo + ROB\nClock-rate wall: ILP \nbecomes the only way \nforward.\nRenaming + in-order \ncommit via the reorder \nbuffer — Pentium Pro \n(1995) makes \nout-of-order \nmainstream.\nToday\nBoth live on\nFive-stage pipeline: the \nteaching baseline and \nthe embedded core.\nOoO superscalar: every \nhigh-performance core \n— the 1964 idea, \nmainstream at last.\nLessons:\n● Technologies come and go, but insights are forever.\n● 技术的成败会随着条件变化 The success or failure of a tech is up to its condition.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 19. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Three Gaps Remain — All Closed in L8",
+            "lead": "",
+            "sourcePage": 20,
+            "group": "Modern cores",
+            "image": "assets/lectures/cst3004-lecture07/page-20.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-20.webp",
+            "text": "⭐\n Three Gaps Remain — All Closed in L8\n1\nImprecise exceptions\nResults reach registers out of order; \nat an exception “earlier done, later \nundone” cannot be guaranteed\nInterrupts, page faults and traps \nrequire an ordered visible state\n→ L8: reorder buffer (ROB) + \nin-order commit; speculative results \ncan then be squashed together\n2\nThe window stops at \nbranches\nUntil the direction is known the \nwindow is confined to \n4–7-instruction blocks\nBranches are frequent; without \ncrossing them a large window stays \nempty\n→ L8: branch prediction + \nspeculative execution; execute the \npredicted path, roll back through the \nROB on a miss\n3\nStore→load RAW through \nmemory\nWhether addresses coincide is \nunknown until computed; a load \ncannot pass a store\nPointers make aliasing undecidable \nat compile time (the run-time \ncounterpart of L6 GCD / restrict)\n→ L8: memory disambiguation; \nloads speculatively pass stores, \naddresses checked afterward, \nviolations replayed\nWith all three closed, classic Tomasulo becomes the modern speculative out-of-order core; L8 \nthen asks how much ILP this actually mines — the answer is the ILP wall and the turn toward \nDLP/TLP.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 20. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Summary: Ready Instructions Go First",
+            "lead": "",
+            "sourcePage": 21,
+            "group": "Modern cores",
+            "image": "assets/lectures/cst3004-lecture07/page-21.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-21.webp",
+            "text": "Summary: Ready Instructions Go First\n1 · Motivation: head-of-line blocking\nReady independent instructions are held behind an unready head\n2 · Scoreboarding (1964): central tables, out-of-order execution\nNo renaming → WAR/WAW still stall\n3 · Tomasulo (1967): three mechanisms\nStations wait distributed (value or tag) · renaming at issue removes WAR/WAW · the CDB broadcast wakes every waiter and \nforwards in the same step\n4 · Three phases\nIssue (rename into a station; structural hazards block here) → execute (wait for RAW tags; out of order) → write result \n(broadcast, free; out-of-order completion)\n5 · Window value: fill waits with independent work; with non-blocking caches, MLP\nRAW chains such as pointer chasing cannot be filled\nIn one sentence: dynamic ILP uses tags at run time to track the real data flow, letting \noperand-ready instructions pass unready ones while preserving RAW order exactly. L6 posed \nthe problem, L7 built the engine, and L8 adds commit and speculation before reaching the ILP wall.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 21. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Further Reading & Tools",
+            "lead": "",
+            "sourcePage": 22,
+            "group": "References & glossary",
+            "image": "assets/lectures/cst3004-lecture07/page-22.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-22.webp",
+            "text": "Further Reading & Tools\nTextbook sections\nHennessy & Patterson, Computer Architecture: A Quantitative \nApproach (6e) — §3.4 (the CDC 6600 scoreboard), §3.5 (Tomasulo: \nstation fields, tag renaming, the CDB, the three phases, a full \ntiming example), §3.6 (ROB and speculation; detailed in L8)\nPatterson & Hennessy, Computer Organization and Design (RISC-V \nEdition) — §4.10 (an ILP-organized introduction; suitable as \npreparation)\nLinks and tools\ngem5 documentation — official documentation for the Lab 7 \nsimulator; MinorCPU in-order, O3CPU out-of-order\nperf wiki and macOS Instruments — the IPC-measurement tools \nfor the blog question (perf stat -e cycles,instructions)\nComputer History Museum: Robert Tomasulo profile — historical \nbackground of the algorithm and the Model 91 context\nPapers (every reference cited in this deck)\nThornton, Parallel Operation in the Control Data 6600, AFIPS FJCC \n1964 — the original account of out-of-order execution and \nscoreboarding\nTomasulo, An Efficient Algorithm for Exploiting Multiple Arithmetic \nUnits, IBM Systems Journal 1967 — first-hand definition of stations, \ntags and the CDB; 1997 Eckert–Mauchly Award\nSmith & Pleszkun, Implementing Precise Interrupts in Pipelined \nProcessors, IEEE TC 1988 — the source of the reorder-buffer idea \nYeager, The MIPS R10000 Superscalar Microprocessor, IEEE Micro \n1996 — the designers’ account of the first commercial out-of-order \nRISC processor\nGwennap, Intel’s P6 Uses Decoupled Superscalar Design, \nMicroprocessor Report 1995 — how x86 μops, Tomasulo-style \nscheduling and ROB speculation converged (slide 23)\nWall, Limits of Instruction-Level Parallelism, ASPLOS 1991 / WRL \nTR 1993 — quantitative basis for the s16 magnitudes; used \nsystematically in L8",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 22. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Appendix: Glossary (1/2)",
+            "lead": "",
+            "sourcePage": 23,
+            "group": "References & glossary",
+            "image": "assets/lectures/cst3004-lecture07/page-23.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-23.webp",
+            "text": "Appendix: Glossary (1/2)\nIssue (enter an RS/buffer and rename) → [wait for operands as “value or tag”] → Execute → Write result (CDB \nbroadcast)   [+ in-order Commit / ROB — L8]\nTerm Definition Notes / examples\nDynamic scheduling Hardware decides cycle by cycle at run time when each instruction uses which \nfunctional unit; timing decisions are not fixed in machine code.\nCounterpart to L6 compiler scheduling; scoreboarding and \nTomasulo are both dynamic.\nHead-of-line blocking When the head of an ordered queue cannot be served, ready elements behind \nit cannot be served either.\nSlide 4: a missing load and a RAW fadd block an \nindependent fadd; out-of-order issue removes it.\nScoreboard\nThe CDC 6600’s centralized dynamic scheduler: three tables (instruction status, \nunit status, register result status) answer whether to issue, read operands, or \nwrite results.\nIn-order issue, out-of-order execution and write result; no \nrenaming — WAR stalls at write result, WAW at issue.\nArchitectural / physical \nregister\nArchitectural registers are ISA-defined and named in encodings (f2, x1); \nphysical registers are the actual result-holding cells, more numerous.\nA tag is a physical result location temporarily provided by a \nstation; in modern cores it is a physical register number.\nTag / Qi / V, Q fields\nA tag is the unique hardware name of an in-flight instruction’s result; Qi[f] \nnames the station that will currently write register f; V holds a known operand \nvalue, Q the tag of its producer.\nAn empty Q means the operand is ready; slide 14: I2 has \nQj=L1.\nReservation station / issue \nqueue\nA small hardware queue in front of a functional unit holding \nissued-but-not-started instructions; each entry holds Op, Vj/Vk, Qj/Qk, busy \n(memory buffers also A).\nClassic term: reservation station; modern cores say issue \nqueue or scheduler, same role.\nHardware register renaming At issue, architectural names map to tag-named physical result locations, so \nevery in-flight writer has a unique name.\nRemoves WAR/WAW; cannot remove RAW (kept as a tag \nchain).\nCommon data bus (CDB) The shared bus broadcasting (producer tag, value) from a functional unit to all \nstations, memory buffers and the register file simultaneously.\nTypically one result per cycle with arbitration; the \ngeneralization of L3 forwarding.\nWakeup / select\nTwo combinational steps per cycle: compare the broadcast tag against all Q \nfields in parallel (wakeup); arbitration picks among ready entries with free \nunits (select).\nMust complete in one clock cycle; dedicated \ncomparator/arbitration circuits, not software.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 23. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          },
+          {
+            "title": "Appendix: Glossary (2/2)",
+            "lead": "",
+            "sourcePage": 24,
+            "group": "References & glossary",
+            "image": "assets/lectures/cst3004-lecture07/page-24.webp",
+            "thumbnail": "assets/lectures/cst3004-lecture07/thumb-24.webp",
+            "text": "Appendix: Glossary (2/2)\nTerm Definition Notes / examples\nIssue / dispatch \n(terminology note)\nIn the classic paper “issue” means entering a station and renaming \n(used here); in modern pipelines this is usually “dispatch”, while \n“issue” means leaving the queue for a unit once operands are ready.\ngem5/O3CPU documentation uses the modern \nusage; this lecture’s board work follows the classic \nthree-phase wording.\nIn-/out-of-order issue, \nexecution, completion\nIssue, execution and completion (write result) may each follow \nprogram order or not; classic Tomasulo: issue in order, execution and \ncompletion out of order.\nIn the slide-14 walkthrough I3 executes and writes \nbefore I2.\nWrite result / writeback \nvs commit (retirement)\nWrite result: the result reaches waiters over the CDB and enters its \n(tag/physical) location, possibly out of order; commit: results become \nirrevocable architectural state in program order.\nClassic Tomasulo has no commit step and writes \nregisters directly (imprecise exceptions); commit is \nadded by the L8 ROB.\nPrecise exception A machine state at exception time in which all instructions before the \nfaulting one have completed and taken effect, and none after it has.\nOut-of-order architectural writes break it; in-order \ncommit with a ROB restores it (L8).\nOut-of-order / instruction \nwindow\nAt any instant, the set of issued-but-incomplete instructions among \nwhich hardware freely selects ready ones to execute.\nIn the classic model, occupied station and buffer \nentries; in modern cores, roughly the ROB capacity.\nMLP (memory-level \nparallelism)\nMultiple independent cache misses in flight at once; requires a \nnon-blocking cache with MSHRs (L5) and a window that keeps \nindependent loads in flight.\nPointer chasing is a RAW chain with one miss in \nflight; Lab 8 Task 8.0 models L=10.\nμop (micro-op) A RISC-like internal operation decoded from a CISC instruction (e.g. \nx86); Tomasulo-style scheduling works in μops.\nThe Pentium Pro (1995) fusion: μops + Tomasulo + \nROB; defined also in the L6 glossary.",
+            "width": 1920,
+            "height": 1080,
+            "notes": "Source: lecture7-preview.pdf, page 24. Original lecture by Huan Wang, Westlake University, Fall 2026. "
+          }
+        ]
+      },
+      {
+        "id": "performance",
+        "number": "01",
+        "title": "How computers execute programs",
+        "summary": "CPU execution, memory locality, and the limits of parallel speedup.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "From program to processor",
+            "lead": "A program becomes a sequence of machine instructions.",
+            "bullets": [
+              "The compiler translates source code into instructions.",
+              "The processor reads instructions and operands, computes, and stores results.",
+              "Goal: connect program structure with execution cost."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "The instruction cycle",
+            "lead": "Fetch → decode → execute → write back.",
+            "bullets": [
+              "The program counter identifies the next instruction.",
+              "Registers hold values close to the execution units.",
+              "Real processors overlap work; this cycle is a conceptual model."
+            ],
+            "formula": "",
+            "notes": "A modern CPU may decode multiple instructions per cycle and execute out of order. Do not treat the simple cycle as a hardware timing guarantee.",
+            "code": ""
+          },
+          {
+            "title": "Measure execution time",
+            "lead": "A faster clock alone does not guarantee a faster program.",
+            "bullets": [
+              "Instruction count depends on the program, compiler, and instruction set.",
+              "CPI means average cycles per instruction for this workload.",
+              "Example: 1 billion instructions × 2 CPI / 2 GHz = 1 second."
+            ],
+            "formula": "T_{CPU}=\\frac{\\text{instructions}\\times\\text{CPI}}{\\text{clock rate}}",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Why caches matter",
+            "lead": "Repeated access to nearby data can reduce memory stalls.",
+            "bullets": [
+              "Temporal locality: reuse a recently accessed value.",
+              "Spatial locality: access values stored close together.",
+              "A row-wise traversal often suits a row-major array."
+            ],
+            "formula": "",
+            "notes": "Use a sufficiently wide total and valid array bounds. Cache behavior depends on layout, dimensions, and hardware.",
+            "code": "for (int row = 0; row < rows; ++row)\n    for (int col = 0; col < cols; ++col)\n        total += a[row * cols + col];"
+          },
+          {
+            "title": "Parallel work has a serial part",
+            "lead": "Only the parallel portion benefits from extra workers.",
+            "bullets": [
+              "Let p be the parallel fraction and N the number of workers.",
+              "If p = 0.9 and N = 4, ideal speedup is about 3.08.",
+              "Communication and scheduling can reduce real speedup."
+            ],
+            "formula": "S(N)=\\frac{1}{(1-p)+p/N}",
+            "notes": "Amdahl’s law here assumes a fixed problem size, no extra overhead, and perfectly scalable parallel work.",
+            "code": ""
+          },
+          {
+            "title": "Shared data needs coordination",
+            "lead": "Two threads updating one value can lose an update.",
+            "bullets": [
+              "Read-modify-write is not automatically atomic.",
+              "Use a reduction, atomic operation, or appropriate synchronization.",
+              "Choose independent work before adding more threads."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": "// Conceptual race; this is not safe shared code:\n// Thread A reads 0; thread B reads 0.\n// Both write 1. Expected total: 2; actual: 1."
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "A workload is 80% parallel. What is its ideal speedup on 4 workers?",
+            "bullets": [
+              "Explain why the speedup is less than 4.",
+              "Name one cache-friendly change to a numerical loop.",
+              "Compare the assumptions with a real application."
+            ],
+            "formula": "",
+            "notes": "Answer: 1/(0.2+0.8/4)=2.5. The serial portion limits speedup; real overhead may reduce it further.",
+            "code": ""
+          }
+        ]
+      },
+      {
+        "id": "parallelism",
+        "number": "02",
+        "title": "Decomposing work for parallel execution",
+        "summary": "Data parallelism, task parallelism, and safe reductions.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "Find independent work",
+            "lead": "Parallel execution starts with identifying work that can overlap.",
+            "bullets": [
+              "A dependency requires one result before another step can begin.",
+              "Independent operations may run concurrently.",
+              "Goal: design a decomposition before choosing a thread count."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Data parallelism",
+            "lead": "Apply the same operation to independent pieces of data.",
+            "bullets": [
+              "Scale every pixel in an image.",
+              "Add corresponding elements of two arrays.",
+              "Split the index range into chunks; avoid overlapping writes."
+            ],
+            "formula": "",
+            "notes": "Illustrative sequential C++; parallel execution needs an explicit runtime. Assume equally sized arrays and no overlapping input/output storage.",
+            "code": "// Each output element has exactly one writer.\nfor (std::size_t i = 0; i < a.size(); ++i)\n    out[i] = a[i] + b[i];"
+          },
+          {
+            "title": "Task parallelism",
+            "lead": "Run different tasks when their inputs are ready.",
+            "bullets": [
+              "Load one independent resource while processing another.",
+              "A dependency graph records which tasks must wait.",
+              "The longest dependency chain limits completion time."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Reductions combine local results",
+            "lead": "Give each worker a private accumulator, then combine them.",
+            "bullets": [
+              "Partition the input without overlap.",
+              "Compute one partial sum per worker.",
+              "Combine partial sums after those workers finish."
+            ],
+            "formula": "\\sum_{i=1}^{n}x_i=\\sum_{j=1}^{p}\\left(\\sum_{i\\in C_j}x_i\\right)",
+            "notes": "Chunks C_j form a partition. Floating-point addition is not associative; changing the order may change rounding. Integer accumulation can overflow.",
+            "code": ""
+          },
+          {
+            "title": "Balance work and overhead",
+            "lead": "Small tasks increase scheduling cost; large tasks can leave workers idle.",
+            "bullets": [
+              "Static chunks suit workloads with predictable cost.",
+              "Dynamic scheduling can help when task costs vary.",
+              "Measure the complete workload, including synchronization and transfers."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Avoid false sharing",
+            "lead": "Independent variables can still share a cache line.",
+            "bullets": [
+              "Different workers may repeatedly modify nearby values.",
+              "Cache coherence can move the shared cache line between cores.",
+              "Use private accumulation and combine results later when appropriate."
+            ],
+            "formula": "",
+            "notes": "False sharing is a performance effect, not by itself a data race. Padding choices depend on actual hardware and layout.",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "How would you sum ten million values using four workers?",
+            "bullets": [
+              "Describe the partition and ownership of each accumulator.",
+              "Identify the final synchronization point.",
+              "Explain why four workers need not produce a fourfold speedup."
+            ],
+            "formula": "",
+            "notes": "Use disjoint chunks, private partial sums, then synchronize and combine. Memory bandwidth, scheduling, the serial combine, and rounding behavior all matter.",
+            "code": ""
+          }
+        ]
+      }
+    ],
+    "code": "2610CST3004",
+    "term": "Fall 2026",
+    "instructor": "Huan Wang",
+    "canvas": "https://canvas.westlake.edu.cn/courses/2042"
+  },
+  {
+    "id": "linear-algebra",
+    "title": "Linear Algebra",
+    "zh": "线性代数",
+    "category": "Mathematics",
+    "color": "blue",
+    "icon": "matrix",
+    "description": "Vectors, transformations, and the geometry behind matrices.",
+    "lectures": [
+      {
+        "id": "vectors",
+        "number": "01",
+        "title": "Vectors and linear transformations",
+        "summary": "Build intuition for combinations, independence, and matrix maps.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "Vectors describe direction and magnitude",
+            "lead": "Coordinates describe a vector relative to a chosen basis.",
+            "bullets": [
+              "In the plane, (2, 1) means two units along the first basis vector and one along the second.",
+              "Changing coordinates does not necessarily change the geometric vector.",
+              "Goal: read a matrix as a transformation."
+            ],
+            "formula": "v=\\begin{pmatrix}2\\\\1\\end{pmatrix}=2e_1+e_2",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Build a linear combination",
+            "lead": "Scale vectors, then add them.",
+            "bullets": [
+              "The span is the set of all combinations of the chosen vectors.",
+              "Two nonparallel vectors span the plane.",
+              "Multiples of one nonzero vector span a line."
+            ],
+            "formula": "2\\binom{1}{0}+3\\binom{0}{1}=\\binom{2}{3}",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "A matrix is determined by its columns",
+            "lead": "The columns tell us where the standard basis vectors go.",
+            "bullets": [
+              "The first column is the image of e₁.",
+              "The second column is the image of e₂.",
+              "Multiplication combines those columns using the input coordinates."
+            ],
+            "formula": "A=\\begin{pmatrix}2&1\\\\0&1\\end{pmatrix},\\quad A\\binom{x}{y}=x\\binom{2}{0}+y\\binom{1}{1}",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "What makes a map linear?",
+            "lead": "It preserves vector addition and scalar multiplication.",
+            "bullets": [
+              "Scaling, rotations about the origin, and projections are linear.",
+              "A nonzero translation is not linear: it moves the origin.",
+              "Checking only T(0)=0 is necessary but not sufficient."
+            ],
+            "formula": "T(au+bv)=aT(u)+bT(v)",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Independence means no redundancy",
+            "lead": "Neither vector can be built from the other.",
+            "bullets": [
+              "The vectors (1, 0) and (0, 1) are independent.",
+              "The vectors (1, 2) and (2, 4) are dependent.",
+              "A basis is an independent set that spans the space."
+            ],
+            "formula": "c_1v_1+c_2v_2=0\\ \\Longrightarrow\\ c_1=c_2=0",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "A projection can lose information",
+            "lead": "Projection onto the x-axis keeps x and removes y.",
+            "bullets": [
+              "The image is the x-axis.",
+              "Every vector on the y-axis maps to zero.",
+              "The map cannot be inverted because many inputs share one output."
+            ],
+            "formula": "P=\\begin{pmatrix}1&0\\\\0&0\\end{pmatrix},\\quad P\\binom{2}{3}=\\binom{2}{0}",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "Apply A = [[2, 1], [0, 1]] to (3, 2).",
+            "bullets": [
+              "Explain the answer as a combination of the columns.",
+              "Can the projection P be undone for every input? Why?",
+              "Next: eigenvectors identify directions a transformation preserves."
+            ],
+            "formula": "",
+            "notes": "Answer: A(3,2)=(8,2). Projection cannot be undone globally because the original y-coordinate is lost.",
+            "code": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "calculus",
+    "title": "Calculus",
+    "zh": "微积分",
+    "category": "Mathematics",
+    "color": "green",
+    "icon": "curve",
+    "description": "Understand change through limits, derivatives, and accumulation.",
+    "lectures": [
+      {
+        "id": "derivatives",
+        "number": "01",
+        "title": "The derivative as a rate of change",
+        "summary": "From secant slopes to tangent lines and local approximation.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "How fast is a quantity changing?",
+            "lead": "The derivative measures an instantaneous rate of change.",
+            "bullets": [
+              "A position function gives location as a function of time.",
+              "Average velocity compares two different times.",
+              "Instantaneous velocity is the limit of those average rates."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Start with an average rate",
+            "lead": "A secant line joins two points on a graph.",
+            "bullets": [
+              "The numerator is the change in the output.",
+              "The denominator is the change in the input.",
+              "For f(x)=x², between x=2 and x=3 the slope is 5."
+            ],
+            "formula": "\\frac{f(a+h)-f(a)}{h},\\quad h\\ne0",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Let the interval shrink",
+            "lead": "The derivative exists when the difference quotient approaches a finite limit.",
+            "bullets": [
+              "The limit must agree from both sides for an interior point.",
+              "We take a limit; we do not substitute h=0 into a quotient.",
+              "A corner can prevent the derivative from existing."
+            ],
+            "formula": "f\\prime(a)=\\lim_{h\\to0}\\frac{f(a+h)-f(a)}{h}",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Differentiate x squared",
+            "lead": "Expand first, cancel, and then take the limit.",
+            "bullets": [
+              "The difference quotient simplifies to 2a+h.",
+              "As h approaches zero, the slope approaches 2a.",
+              "At a=2, the tangent slope is 4."
+            ],
+            "formula": "\\frac{(a+h)^2-a^2}{h}=2a+h\\longrightarrow2a",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "A tangent line is a local model",
+            "lead": "Near a, a differentiable function is approximately linear.",
+            "bullets": [
+              "At a=2, f(2)=4 and f′(2)=4.",
+              "The tangent model predicts f(2.1) ≈ 4.4.",
+              "The actual value is 4.41; approximation quality depends on distance and curvature."
+            ],
+            "formula": "f(a+\\Delta x)\\approx f(a)+f\\prime(a)\\Delta x",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Not every continuous curve has a tangent slope",
+            "lead": "The absolute-value function has a corner at zero.",
+            "bullets": [
+              "From the left, the difference quotient is −1.",
+              "From the right, it is +1.",
+              "The function is continuous at zero, but it is not differentiable there."
+            ],
+            "formula": "f(x)=|x|",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "Find the slope of x² at x=3 and its tangent-line estimate at x=3.02.",
+            "bullets": [
+              "Write the derivative as a limit before using the result.",
+              "State the units if x is time and f(x) is position.",
+              "Explain why a continuous function may fail to be differentiable."
+            ],
+            "formula": "",
+            "notes": "Slope: 6. Tangent estimate: 9+6(0.02)=9.12; exact value 9.1204. For position/time, the derivative has units of velocity.",
+            "code": ""
+          }
+        ]
+      },
+      {
+        "id": "integrals",
+        "number": "02",
+        "title": "Accumulation and the definite integral",
+        "summary": "Riemann sums, signed area, and the Fundamental Theorem.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "From rate to total change",
+            "lead": "Integrals describe accumulation over an interval.",
+            "bullets": [
+              "A rate gives change per unit of input.",
+              "Multiply the rate by a small interval to approximate a small change.",
+              "Add those changes across the interval."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Build a Riemann sum",
+            "lead": "Partition the interval and sum rectangular contributions.",
+            "bullets": [
+              "Each width is Δxᵢ.",
+              "Choose a sample point xᵢ* inside each subinterval.",
+              "The rectangle height is f(xᵢ*)."
+            ],
+            "formula": "\\sum_{i=1}^{n}f(x_i^*)\\Delta x_i",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Refine the partition",
+            "lead": "For a continuous function, the sums approach the definite integral.",
+            "bullets": [
+              "The largest subinterval width must approach zero.",
+              "Different sample points give the same limit.",
+              "A definite integral is a number for fixed endpoints."
+            ],
+            "formula": "\\int_a^b f(x)\\,dx=\\lim_{\\max\\Delta x_i\\to0}\\sum_i f(x_i^*)\\Delta x_i",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Accumulation is signed",
+            "lead": "Contributions below the horizontal axis are negative.",
+            "bullets": [
+              "The integral of an odd function over a symmetric interval is zero when it is integrable.",
+              "Zero signed area does not mean no region exists.",
+              "Use the integral of |f| when total geometric area is required."
+            ],
+            "formula": "\\int_{-1}^{1}x\\,dx=0,\\qquad\\int_{-1}^{1}|x|\\,dx=1",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Connect accumulation and differentiation",
+            "lead": "An antiderivative lets us compute the integral from endpoint values.",
+            "bullets": [
+              "Assume f is continuous on [a,b] and F′=f there.",
+              "Evaluate F at the upper endpoint and subtract its value at the lower endpoint.",
+              "The added constant in F cancels."
+            ],
+            "formula": "\\int_a^b f(x)\\,dx=F(b)-F(a)",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Work a complete example",
+            "lead": "Accumulate the rate f(x)=2x from x=0 to x=3.",
+            "bullets": [
+              "An antiderivative is F(x)=x².",
+              "The result is 3²−0²=9.",
+              "The triangle under the graph has base 3 and height 6, so its area is also 9."
+            ],
+            "formula": "\\int_0^3 2x\\,dx=[x^2]_0^3=9",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "Evaluate the integral of 3x² from 0 to 2.",
+            "bullets": [
+              "Name an antiderivative before substituting endpoints.",
+              "Explain how rate units change after integration.",
+              "Distinguish net displacement from total distance."
+            ],
+            "formula": "",
+            "notes": "Answer: [x³] from 0 to 2 = 8. Integrating velocity over time gives displacement; integrating the absolute value of velocity gives distance.",
+            "code": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data-structures",
+    "title": "Data Structure and Algorithm Design",
+    "zh": "数据结构与算法设计",
+    "category": "Computer science",
+    "color": "ochre",
+    "icon": "tree",
+    "description": "Choose representations, reason about cost, and design correct algorithms.",
+    "lectures": [
+      {
+        "id": "search",
+        "number": "01",
+        "title": "Searching, data structures, and complexity",
+        "summary": "Compare linear and binary search using invariants and growth rates.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "The representation shapes the algorithm",
+            "lead": "Choose a data structure to support the operations you need.",
+            "bullets": [
+              "An array supports direct access by index.",
+              "A linked list supports traversal through links.",
+              "The best choice depends on the workload, not a universal ranking."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Start with linear search",
+            "lead": "Check elements one at a time until you find a match.",
+            "bullets": [
+              "Works on unsorted input.",
+              "Worst case: inspect all n elements.",
+              "Best case: the first element matches."
+            ],
+            "formula": "",
+            "notes": "Illustrative C++ snippet; include <vector> and <cstddef>. Assumes the size fits in int. This site displays code; it does not execute it.",
+            "code": "int find(const std::vector<int>& a, int target) {\n    for (std::size_t i = 0; i < a.size(); ++i)\n        if (a[i] == target) return static_cast<int>(i);\n    return -1;\n}"
+          },
+          {
+            "title": "Binary search needs ordered input",
+            "lead": "Use the middle element to discard half of the remaining candidates.",
+            "bullets": [
+              "Assume ascending order and efficient random access.",
+              "If the middle value is too small, keep only larger indices.",
+              "Sorting first has its own cost; count it when comparing one-off searches."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Keep a precise search interval",
+            "lead": "Use the half-open interval [lo, hi).",
+            "bullets": [
+              "Initially, every possible match is in [0, n).",
+              "If a[mid] is too small, set lo = mid+1.",
+              "Otherwise set hi = mid; this variant finds the first value not less than target."
+            ],
+            "formula": "",
+            "notes": "Illustrative C++ fragment. a is an ascending std::vector<int>. Short-circuit evaluation makes the final access safe even when lo equals a.size(). Empty input is valid.",
+            "code": "std::size_t lo = 0, hi = a.size();\nwhile (lo < hi) {\n    auto mid = lo + (hi - lo) / 2;\n    if (a[mid] < target) lo = mid + 1;\n    else hi = mid;\n}\nbool found = lo < a.size() && a[lo] == target;"
+          },
+          {
+            "title": "Reason about growth",
+            "lead": "Binary search repeatedly halves the candidate interval.",
+            "bullets": [
+              "Linear search has O(n) worst-case comparisons.",
+              "Binary search has O(log n) worst-case comparisons on an ordered array.",
+              "Big-O describes a growth bound, not exact elapsed time."
+            ],
+            "formula": "\\frac{n}{2^k}\\le1\\quad\\Longrightarrow\\quad k\\ge\\log_2 n",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Trace an example",
+            "lead": "Search for 7 in [1, 3, 5, 7, 9].",
+            "bullets": [
+              "Start [0, 5): mid=2, value=5 → lo=3.",
+              "Next [3, 5): mid=4, value=9 → hi=4.",
+              "Next [3, 4): mid=3, value=7 → hi=3. Finish at index 3."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "What happens when the target is absent or the array is empty?",
+            "bullets": [
+              "Trace the interval for target 6 in [1, 3, 5, 7, 9].",
+              "Explain why a linked list does not offer the same random-access cost.",
+              "State the sorted-input assumption before choosing binary search."
+            ],
+            "formula": "",
+            "notes": "Target 6: lower-bound index 3, found=false. Empty input: lo=hi=0 and found=false, with no element access. A linked list requires traversal to reach a middle element.",
+            "code": ""
+          }
+        ]
+      },
+      {
+        "id": "stacks-queues",
+        "number": "02",
+        "title": "Stacks, queues, and graph traversal",
+        "summary": "Use access order to design useful algorithms.",
+        "minutes": 20,
+        "slides": [
+          {
+            "title": "Choose the next item deliberately",
+            "lead": "A data structure can encode the order in which work is processed.",
+            "bullets": [
+              "A stack selects the most recently added item.",
+              "A queue selects the earliest added item.",
+              "Changing this order changes how a search explores a graph."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "A stack is last in, first out",
+            "lead": "Push adds an item; pop removes the most recently added item.",
+            "bullets": [
+              "A stack can model nested function calls.",
+              "Balanced-parentheses checking needs to remember the latest unmatched opening symbol.",
+              "Check for emptiness before reading or removing the top."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "A queue is first in, first out",
+            "lead": "Enqueue at the back and dequeue from the front.",
+            "bullets": [
+              "A queue models work arriving in order.",
+              "A deque or ring buffer can support efficient queue operations.",
+              "Repeatedly removing the first element of a contiguous array may require shifting."
+            ],
+            "formula": "",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Depth-first search uses a stack",
+            "lead": "Explore a branch before returning to alternatives.",
+            "bullets": [
+              "Keep a visited set when the graph can contain cycles.",
+              "An explicit stack can replace recursive calls.",
+              "DFS is useful for reachability and many dependency analyses."
+            ],
+            "formula": "",
+            "notes": "A plain recursive DFS needs stack space proportional to recursion depth. Dependency ordering also requires detecting directed cycles.",
+            "code": ""
+          },
+          {
+            "title": "Breadth-first search uses a queue",
+            "lead": "Explore all vertices at one distance before the next distance.",
+            "bullets": [
+              "Start with the source at distance zero.",
+              "Mark a vertex visited when it is enqueued.",
+              "In an unweighted graph, BFS finds shortest paths measured by edge count."
+            ],
+            "formula": "",
+            "notes": "Illustrative C++ fragment. Assumes valid initialized graph and visited arrays, and a queue supporting these operations. Tracking actual distances or parents requires additional arrays.",
+            "code": "queue.push(source);\nvisited[source] = true;\nwhile (!queue.empty()) {\n    auto v = queue.front(); queue.pop();\n    for (auto u : neighbors[v]) {\n        if (!visited[u]) {\n            visited[u] = true; queue.push(u);\n        }\n    }\n}"
+          },
+          {
+            "title": "Account for vertices and edges",
+            "lead": "With adjacency lists, a complete traversal processes vertices and adjacency entries.",
+            "bullets": [
+              "Standard BFS and DFS take O(V+E) time.",
+              "The visited structure and worklist use O(V) auxiliary space.",
+              "An adjacency matrix changes the neighbor-scanning cost."
+            ],
+            "formula": "T(V,E)=O(V+E)",
+            "notes": "",
+            "code": ""
+          },
+          {
+            "title": "Check your understanding",
+            "lead": "Which structure finds shortest routes when every edge has equal cost?",
+            "bullets": [
+              "Explain why processing vertices by distance matters.",
+              "Describe what can go wrong if visited is omitted in a cyclic graph.",
+              "Would the same shortest-path claim hold for arbitrary unequal edge weights?"
+            ],
+            "formula": "",
+            "notes": "Use BFS with a queue for equal-cost edges. Omitting visited can repeat work indefinitely. Arbitrary unequal weights require a suitable shortest-path algorithm; plain BFS is insufficient.",
+            "code": ""
+          }
+        ]
+      }
+    ]
+  }
+]

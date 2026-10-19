@@ -1,6 +1,6 @@
 # Privacy And Security
 
-The public repository must contain no credentials, classroom databases, student datasets or private Diffusion deck. `data/` is ignored except its README; all `results/` directories are ignored. Ignore rules are safeguards, not permission to force-add private files.
+The public repository must contain no credentials, classroom databases or private student response datasets. `data/` is ignored except its README; all `results/` directories are ignored. Ignore rules are safeguards, not permission to force-add private files.
 
 AI requests go to the configured provider with `store: false`; this does not establish a provider-wide retention guarantee. The application does not persist AI chats by default. Browser archives, teacher question sharing, concept summaries and research metadata have separate opt-in flows. Shared browser profiles can access locally saved records.
 
