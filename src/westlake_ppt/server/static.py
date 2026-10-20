@@ -25,7 +25,11 @@ def public_files(base_dir, deck_name):
                    'assets/presenter.css', 'assets/presentation.js', 'assets/presentation.css', 'assets/print.js'})
     public.update({'courses.html', 'assets/courses.js', 'assets/courses.css',
                    'assets/catalog-link.js', 'assets/course-player.js', 'assets/course-player.css'})
-    public.update({'assets/source-lecture.js', 'assets/source-lecture.css'})
+    public.update({'assets/source-lecture.js', 'assets/source-lecture.css',
+                   'progress.html', 'assets/progress.js', 'assets/progress.css',
+                   'discussions.html', 'assets/discussions.js', 'assets/discussions.css',
+                   'assets/discussion-service.js', 'assets/discussion-share.js',
+                   'assets/hash-lab.js', 'assets/hash-lab.css', 'assets/hash-lab-model.js'})
     # Only image/PDF paths registered in the catalog; never grant an asset directory.
     inventory = base_dir / 'assets/courses.json'
     if inventory.is_file():

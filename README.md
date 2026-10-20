@@ -23,9 +23,9 @@ python3 -m venv .venv
 - **Computer Architecture and Parallel Computing**：`2610CST3004`，Fall 2026。第 07 讲 *Out-of-Order Execution & Tomasulo (ILP-2)* 保留所提供 PDF 的全部 24 页，包括图表、署名和页码。另有两份入门教学示例。[Canvas 课程](https://canvas.westlake.edu.cn/courses/2042) 可能需要校内登录。
 - **Linear Algebra**：原有 16 页特征向量/对角化讲义，含几何动画、练习与课堂测验，另有向量示例。
 - **Calculus**：导数和积分示例。
-- **Data Structure and Algorithm Design**：搜索、栈与队列示例。
+- **Data Structure and Algorithm Design**：搜索、栈与队列示例，以及原创哈希函数实验室。
 
-七份入门示例各有七页，并明确标为教学示例，不代表官方大学课程目录。示例代码仅展示，不执行。PDF 中的动画过程仍是静态帧。
+七份入门示例各有七页，并明确标为教学示例，不代表官方大学课程目录。七份入门示例的代码仅展示，不执行；独立哈希实验室可选执行代码。PDF 中的动画过程仍是静态帧。
 
 ## 目录与讲义界面
 
@@ -65,3 +65,32 @@ python3 westlake.py test --suite browser
 [架构](docs/architecture.md) · [API](docs/api.md) · [隐私](docs/privacy.md) · [课堂](docs/classroom.md) · [验证](tests/VERIFICATION.md)
 
 macOS 可双击 `launch.command` 或 `启动智能PPT.command` 在 8782 端口打开课程工作区；已有本机服务时复用，否则创建新的隔离预览目录。
+
+## My progress
+
+侧栏在 Courses 上方新增 My progress 与 Discussions。My progress 按课程记录活跃学习时间、每日活动日历及实际文本/PDF 高亮，排除空闲和后台时间。可跨标签暂停追踪；清除时间历史会保留原稿高亮及讲稿。这些是本地活动记录，不是成绩、掌握度估计、排名或研究报告。同一浏览器资料的使用者共享存储，不跨设备同步。
+
+## Discussions — 本地原型
+
+讨论支持课程/主题搜索筛选、最近/未回答/我的帖子视图、嵌套人类回复、编辑/删除自己的帖子和回复，以及有帮助标记。虚构示例参与者展示教师置顶及验证解释，有帮助不代表 AI 已验证。Markdown、代码和数学公式复用既有本地渲染器。
+
+在讲义私聊中，对一条已完成问题或回答选择 Share to Discussion。编辑标题、学生背景和所选 AI 摘录，选择课程/分类/可见性，预览、勾选审核再确认发布。只有所选消息进入编辑器，不附加完整会话、附件或隐藏上下文。AI 摘录编辑后仍保留 AI 生成/未验证标记，取消不会创建帖子。原私有导师继续使用服务端提供商配置。
+
+Ask my agent 创建可编辑、未发布的脚本草稿。Start agent discussion 需明确启动，最多两或三轮，对比固定解释/反例，可暂停/停止。每条内容都需单独审核并确认发布。同学代理是模拟，不联系真实同学或 LLM 代理。
+
+原型使用浏览器 localStorage（`xiaoxi-discussions-v1`）存储帖子，不向其他学生发送消息，也未实现账号、审核或成员权限。Course members / Study group / Only me 是可见性预览，不提供真实访问控制；共用浏览器的人可以读取存储内容。未发布代理草稿仅保留于页面内存。真实多人讨论和实时代理仍需后端与身份认证。
+
+## 哈希表实验室
+
+在 Data Structure and Algorithm Design 中打开 Hash functions · Interactive lab。公开版本新增十页原创 HTML 教学示例，不依赖私有原稿 PDF。Visualize 分步演示分数规范化、字节求和冲突、32 位霍纳哈希与字节抽样；修改示例输入后观察每一步。Try C++ 提供可编辑的可运行代码；引导可视化依据输入字段，不跟踪任意代码编辑。示例哈希和可视化均不构成密码学保证。
+
+C++ 执行为可选功能，默认关闭。通过固定版本的 Runno 依赖在本机运行 Clang/WebAssembly，不执行原生学生二进制，不使用在线编译器。安装 Node.js 22+ 后运行：
+
+```sh
+(cd tools/cpp-runner && npm ci --ignore-scripts)
+CPP_RUNNER_ENABLED=1 python3 westlake.py demo courses --output /tmp/xiaoxi-with-cpp --port 8782
+```
+
+请使用新输出目录。`CPP_RUNNER_NODE` 可指定 Node 可执行文件绝对路径。`/api/cpp/status` 返回可用状态；`/api/cpp/run` 接收 JSON `code` 和可选 `stdin`，仅接受同源 localhost 请求，并限制源代码/输入大小、并发、速率、输出、时间及 WebAssembly 内存。不向来宾传递提供商凭据或主机文件系统权限。编译/运行失败会显示在输出面板。私有讲义目录、PDF、生成数据和依赖均不进入本次发布，不新增许可证或声称校方授权。
+
+2026-10-20 验证：统一单元命令通过 68 项 Python 测试（其中两项可选编译器测试在该轮跳过）及 10 项 JavaScript 测试。另一次启用编译器的运行通过全部四项 C++ 边界/隔离测试。Chrome 桌面/移动端通过 My progress、Discussions 及公开哈希实验室测试，覆盖活跃/空闲计时、存储错误、所选消息隐私、审核批准、有限代理、真实 C++ 输出、诊断及超时。聊天回答为模拟，未进行付费模型调用、真实同学接收或生产鉴权测试。内部 Diffusion 同步待完成：远端关闭 SSH，未修改远端演示、配置或凭据。

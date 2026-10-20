@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Choose a course and an illustrated introductory lecture in the Xiaoxi learning workspace.">
+  <title>Discussions · Xiaoxi</title>
+  <link rel="stylesheet" href="assets/courses.css">
+  <link rel="stylesheet" href="assets/progress.css">
+  <link rel="stylesheet" href="assets/discussions.css">
+</head>
+<body>
+  <aside class="catalog-sidebar">
+    <img class="catalog-university-logo" src="assets/westlake-logo-dark.png" alt="Westlake University">
+    <a href="courses.html" class="catalog-wordmark catalog-workspace-label"><span>Learning Workspace</span></a>
+    <section class="student-profile" aria-label="Student profile">
+      <div class="student-avatar" aria-hidden="true">SA</div>
+      <div class="student-details"><span class="student-role" data-label="student">Student</span><strong>Sholpan Amankeldi</strong><span class="student-id">ID: 20243841001</span></div>
+    </section>
+    <nav aria-label="Workspace"><a class="sidebar-link" href="progress.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h16M8 15l4-5 4 2 5-8"/></svg><span data-label="progress">My progress</span></a><a class="sidebar-current" href="discussions.html" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2A8.5 8.5 0 0 1 21 11.5Z"/><path d="M7 9h9M7 13h6"/></svg><span data-label="discussions">Discussions</span></a><a class="sidebar-link" href="courses.html"><span aria-hidden="true">▦</span><span data-label="courses">Courses</span></a></nav>
+    <div class="sidebar-bottom"><p data-label="workspace">Your space to understand.</p></div>
+  </aside>
+  <div class="catalog-main">
+    <header class="catalog-topbar"><span data-label="workspaceTitle">Learning workspace</span><button id="discussionsLanguage" type="button">中文</button></header>
+    <main class="discussions-main"><p id="discussionDemoNote" class="discussion-local"></p><p id="discussionNotice" role="status" class="discussion-meta"></p><div id="discussionsApp"></div></main>
+  </div>
+  <script src="assets/vendor/marked/lib/marked.umd.js"></script>
+  <script src="assets/vendor/dompurify/dist/purify.min.js"></script>
+  <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]}};</script>
+  <script defer src="assets/vendor/mathjax/es5/tex-chtml.js"></script>
+  <script type="module" src="assets/discussions.js"></script>
+</body></html>

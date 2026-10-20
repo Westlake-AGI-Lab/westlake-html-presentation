@@ -37,6 +37,8 @@
   const titleBlock=make('div','source-title-block');titleBlock.append(make('h1','',info.title),make('p','',[L('Lecture ','第 ')+info.number+(L('',' 讲')),info.instructor,info.term].filter(Boolean).join(' · ')));
   const more=make('details','source-more');const summary=make('summary');summary.innerHTML=svg('more');summary.setAttribute('aria-label',L('More presentation tools','更多演示工具'));more.append(summary);
   for(const [id,en,zh]of [['editButton',info.isPdf?'Edit annotations E':'Edit slide E','编辑 E'],['notesButton','Notes N','讲稿 N'],['fullscreenButton','Fullscreen','全屏'],['presenterButton','Presenter view','演讲者视图'],['printButton','Print slides','打印幻灯片']])more.append(action(null,en,zh,()=>{$(id)?.click();more.open=false;syncTools();},'source-menu-action'));
+  more.append(action(null,'My progress','我的进度',()=>{location.href='progress.html';},'source-menu-action'));
+  more.append(action(null,'Discussions','讨论',()=>{location.href='discussions.html';},'source-menu-action'));
   heading.append(outlineButton,titleBlock,more);document.body.append(heading);
 
   const sidebar=make('aside','source-sidebar');sidebar.setAttribute('aria-label',L('Lecture contents','讲义目录'));document.body.append(sidebar);
@@ -126,7 +128,7 @@
   let marks={};try{const saved=JSON.parse(localStorage.getItem(markKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))marks=saved;}catch(_){markStatus.textContent=L('Saved marks could not be read.','无法读取已保存标记。');}
   const valid=r=>Array.isArray(r)&&r.length===4&&r.every(n=>Number.isFinite(n)&&n>=0&&n<=1)&&r[0]+r[2]<=1.001&&r[1]+r[3]<=1.001;
   function currentMarks(){const key=String(current);if(!Array.isArray(marks[key]))marks[key]=[];marks[key]=marks[key].filter(valid).slice(0,200);return marks[key];}
-  function saveMarks(){try{localStorage.setItem(markKey,JSON.stringify(marks));markStatus.textContent=L('Saved in this browser','已保存在此浏览器');}catch(_){markStatus.textContent=L('Storage unavailable; marks last only this session.','无法保存，标记仅保留在当前页面。');}paintMarks();}
+  function saveMarks(){try{localStorage.setItem(markKey,JSON.stringify(marks));markStatus.textContent=L('Saved in this browser','已保存在此浏览器');}catch(_){markStatus.textContent=L('Storage unavailable; marks last only this session.','无法保存，标记仅保留在当前页面。');}paintMarks();window.dispatchEvent(new Event('ppt-source-highlights-change'));}
   const layers=[];
   function paintMarks(){layers.forEach((layer,i)=>{if(!layer)return;layer.replaceChildren();const values=i===current?currentMarks():Array.isArray(marks[i])?marks[i].filter(valid).slice(0,200):[];for(const r of values){const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');['x','y','width','height'].forEach((a,j)=>rect.setAttribute(a,String(r[j]*1000)));layer.append(rect);}});}
   markTools.append(action(null,'Highlight center','标记中央区域',()=>{if(currentMarks().length<200){currentMarks().push([.25,.45,.5,.08]);saveMarks();}},'source-mode-button'),action(null,'Undo','撤销',()=>{currentMarks().pop();saveMarks();},'source-mode-button'),action(null,'Clear page','清除此页',()=>{marks[current]=[];saveMarks();},'source-mode-button'),action('close','Close highlighter','关闭荧光笔',()=>highlightTool.click()),markStatus);document.body.append(markTools);

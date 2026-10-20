@@ -10,3 +10,7 @@
 - Research: `LEARNING_STUDY_APPROVAL` and HTTPS `LEARNING_STUDY_INFO`. Both are required to expose opt-in research controls; supplying values is not institutional approval.
 
 CLI `serve --web-root`, `--deck`, `--host` and `--port` set the corresponding environment values before importing the server. Configure credentials before startup; restart after changing settings. Never put a real key, password or student response into an example, issue or commit.
+
+## Optional hash-lab compiler
+
+`CPP_RUNNER_ENABLED=1` opts into local C++ execution; it defaults to disabled. Install Node.js 22+ and run `npm ci --ignore-scripts` inside `tools/cpp-runner`. `CPP_RUNNER_NODE` optionally selects an absolute Node executable. These environment values are not loaded from the private provider JSON. The runner is restricted to same-origin loopback requests and WebAssembly isolation; it does not authorize public code execution services. Progress and Discussions need no configuration and remain browser-local.

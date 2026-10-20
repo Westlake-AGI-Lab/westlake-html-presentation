@@ -2,7 +2,7 @@
   'use strict';
   const $ = id => document.getElementById(id);
   const words = {
-    student:['Student','学生'],
+    student:['Student','学生'],progress:['My progress','我的进度'],discussions:['Discussions','讨论'],
     courses:['Courses','课程'],workspace:['Your space to understand.','在这里，理解每一个新想法。'],workspaceTitle:['Learning workspace','学习工作区'],
     heading:['Your courses','我的课程'],description:['Choose a subject. Find your next idea.','选择一门课程，开始探索新的知识。'],
     all:['All courses','全部课程'],math:['Mathematics','数学'],cs:['Computer science','计算机科学'],loading:['Loading courses…','正在加载课程…'],

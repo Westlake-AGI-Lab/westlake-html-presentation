@@ -230,6 +230,13 @@ class PresentationHandler(SimpleHTTPRequestHandler):
             except ClassroomError as exc: self.json_response(exc.code,{'error':exc.message})
             except Exception: self.json_response(500,{'error':'Classroom unavailable / 课堂暂不可用'})
             return
+        if name == 'api/cpp/status':
+            from ..cpp_runner import status
+            data = status()
+            if not ipaddress.ip_address(self.client_address[0]).is_loopback:
+                data['enabled'] = False
+            self.json_response(200, data, head)
+            return
         if name == "api/health":
             self.json_response(200, {"ok": True, "configured": bool(api_key()),
                 "model": OPENAI_MODEL, "stream": True, "images": True}, head)
@@ -259,6 +266,17 @@ class PresentationHandler(SimpleHTTPRequestHandler):
             origin = self.headers.get("Origin")
             if origin and origin != f"http://{self.headers.get('Host')}":
                 self.json_response(403, {"error": "不接受跨站请求。"})
+                return
+            if urlsplit(self.path).path == '/api/cpp/run':
+                if origin != f"http://{self.headers.get('Host')}" or not ipaddress.ip_address(self.client_address[0]).is_loopback:
+                    self.json_response(403, {'error':'C++ requires a same-origin localhost request.'}); return
+                length = int(self.headers.get('Content-Length', '0'))
+                if not 0 < length <= 32768:
+                    self.json_response(413, {'error':'C++ request too large.'}); return
+                self.connection.settimeout(25)
+                from ..cpp_runner import run
+                code, result = run(json.loads(self.rfile.read(length)))
+                self.json_response(code, result)
                 return
             if urlsplit(self.path).path.startswith('/api/classroom/'):
                 if origin != f"http://{self.headers.get('Host')}":

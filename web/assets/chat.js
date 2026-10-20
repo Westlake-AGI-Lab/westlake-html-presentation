@@ -253,6 +253,10 @@
       bubble.append(message.body,message.metaNode);row.append(bubble);this.log.append(row);
       if(window.PPTClassroom?.role==='student') this.button(PPTI18n.language==='en'?'Share excerpt with teacher':'分享片段给老师',()=>PPTClassroom.share(message).catch(e=>{this.notice.textContent=e.message;}),bubble);
       if(message.role==='assistant') this.button('复制 Markdown',async()=>{try{await copyText(message.text);this.notice.textContent='已复制原始 Markdown。';}catch(e){this.notice.textContent=e.message;}},bubble);
+      if(['user','assistant'].includes(message.role)) this.button(PPTI18n.language==='en'?'Share to Discussion':'分享到讨论',async()=>{
+        if(!message.text?.trim()||message.status==='streaming'){this.notice.textContent=PPTI18n.language==='en'?'Wait for this response to finish before sharing.':'请等待回答完成后再分享。';return;}
+        try{const {openComposer}=await import('./discussion-share.js');await openComposer({text:message.text,role:message.role,course:new URLSearchParams(location.search).get('course')||''});}catch(e){this.notice.textContent=e.message;}
+      },bubble);
       this.paint(message);return row;
     }
     paint(message) {

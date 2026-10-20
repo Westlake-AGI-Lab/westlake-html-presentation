@@ -37,3 +37,19 @@ The installed eigen demo was checked through the browser at desktop and mobile w
 2026-10-19 unified lecture workspace: 63 Python tests and desktop/390px browser regressions passed. Read text is absent. Verified PDF caption/note and drawn-region persistence, undo, original PDF hash, contents/search, zoom/page entry, mocked text-only AI, presenter navigation, print styles, catalog samples, and existing Linear Algebra features. No paid provider calls or physical-device/printing tests.
 
 Presenter workspace (2026-10-19): `tests/test_presenter_workspace.cjs` checks PDF and editable sample previews at 1360×880, 1024×600 and 390×844, complete preview bounds, audience zoom/size independence, linked navigation/jump, timer, language and ending. Run against the local catalog with `PRESENTER_WORKSPACE_URL=http://127.0.0.1:8782/ NODE_PATH=<playwright-node-modules> node tests/test_presenter_workspace.cjs`. This and the portable presentation browser suite passed; media controls, spoofed-message rejection, print and classroom restrictions remain covered. No real model, physical display or phone tests.
+
+## Progress, Discussions and public hash lab — 2026-10-20
+
+`python3 westlake.py test` passed 68 Python tests (two optional compiler cases skipped) and 10 JavaScript tests, including the hash model. After installing `tools/cpp-runner` dependencies, `CPP_RUNNER_ENABLED=1 PYTHONPATH=src python3 -m unittest discover -s tests -p test_cpp_runner.py -v` passed all four runner tests, including host-filesystem/environment isolation and WebAssembly memory limits.
+
+Start a new local course preview with `CPP_RUNNER_ENABLED=1 python3 westlake.py demo courses --output /tmp/xiaoxi-release-check --port 8794`. With Playwright and Chrome installed, run:
+
+```sh
+PROGRESS_TEST_URL=http://127.0.0.1:8794/ node tests/test_progress.cjs
+DISCUSSIONS_TEST_URL=http://127.0.0.1:8794/ node tests/test_discussions.cjs
+HASH_LAB_URL=http://127.0.0.1:8794/ node tests/test_hash_lab.cjs
+```
+
+All three suites passed on desktop/mobile. Progress covers controlled active/idle/focus clocks, midnight, cross-tab pause, PDF/text highlights, deletion scope, languages and storage failures. Discussions covers the actual lecture-chat share flow with mocked NDJSON, no private-prompt leakage, preview/confirmation/visibility metadata, replies/editing/helpful marks, agent approval, turn bounds/stop, reload and mobile overflow. The public original ten-slide hash lab covers guided steps and actual WASI byte-sum/Horner/rational output, edited code, diagnostics, timeout, draft persistence and navigation. No private Waterloo PDF is required.
+
+No paid provider calls, real student-to-student delivery, authenticated visibility enforcement, physical-device checks or internal deployment are established by these tests.

@@ -30,7 +30,7 @@ def run_tests(suite):
     node=shutil.which('node')
     if not node:raise ValueError('Node.js is required for the existing frontend checks; use --suite python for Python only')
     if suite in ('unit','all'):
-        code=subprocess.call([node,'--test','tests/test_archive.cjs','tests/test_i18n.cjs','tests/test_eigen_geometry.cjs'],cwd=root,env=env)
+        code=subprocess.call([node,'--test','tests/test_archive.cjs','tests/test_i18n.cjs','tests/test_eigen_geometry.cjs','tests/test_hash_model.cjs'],cwd=root,env=env)
         if code:return code
     if suite in ('browser','all'):
         return run_browser_tests(node,env)

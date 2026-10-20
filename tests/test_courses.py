@@ -45,8 +45,21 @@ class CourseTests(unittest.TestCase):
             with self.assertRaises(HTTPError) as error:urlopen(self.base+'/lecture.html?'+query)
             self.assertEqual(error.exception.code,code)
 
+    def test_public_hash_lab_is_original_and_isolated(self):
+        courses=catalog(server.BASE_DIR)
+        course=next(c for c in courses if c['id']=='data-structures')
+        lab=next(l for l in course['lectures'] if l['id']=='hash-functions')
+        self.assertEqual(lab['lab'],'hash-functions')
+        self.assertEqual(len(lab['slides']),10)
+        self.assertNotIn('source',lab)
+        self.assertNotIn('private-lectures',json.dumps(lab))
+        source=render_lecture((server.BASE_DIR/server.HTML_NAME).read_text(),course,lab)
+        self.assertIn('assets/hash-lab.js',source)
+        self.assertIn('assets/progress.js',source)
+        self.assertNotIn('assets/hash-lab.js',render_lecture((server.BASE_DIR/server.HTML_NAME).read_text(),courses[2],courses[2]['lectures'][0]))
+
     def test_head_and_explicit_public_files(self):
-        for path in ['/courses.html','/api/courses','/assets/courses.css','/assets/courses.js','/assets/course-player.css',
+        for path in ['/progress.html','/assets/progress.js','/discussions.html','/assets/discussions.js','/assets/discussion-service.js','/assets/discussion-share.js','/assets/hash-lab.js','/assets/hash-lab-model.js','/courses.html','/api/courses','/assets/courses.css','/assets/courses.js','/assets/course-player.css',
                      '/lecture.html?course=calculus&lecture=derivatives']:
             with urlopen(Request(self.base+path,method='HEAD')) as response:
                 self.assertEqual(response.status,200)

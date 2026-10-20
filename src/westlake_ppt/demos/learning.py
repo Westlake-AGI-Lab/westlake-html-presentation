@@ -61,6 +61,8 @@ def prepare(destination, mock):
     shutil.copytree(base/'web/assets', destination/'assets')
     shutil.copy2(base/'web/presenter.html', destination/'presenter.html')
     shutil.copy2(base/'web/courses.html', destination/'courses.html')
+    shutil.copy2(base/'web/progress.html', destination/'progress.html')
+    shutil.copy2(base/'web/discussions.html', destination/'discussions.html')
     name = 'deck.html'
     text = (base/'web'/name).read_text(); span = MainSpan(text)
     if span.start is None or span.end is None: raise SystemExit('Cannot locate the template deck')

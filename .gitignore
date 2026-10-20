@@ -24,3 +24,8 @@ build/
 .codex/
 .cursor/
 PRODUCT.md
+
+# Local-only inventories/materials and optional compiler dependencies.
+/web/assets/courses.local.json
+/web/assets/private-lectures/
+/tools/cpp-runner/node_modules/

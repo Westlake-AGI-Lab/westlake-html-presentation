@@ -152,3 +152,11 @@ Run `python3 westlake.py demo courses --output /tmp/xiaoxi-course-catalog --port
 ## Architecture Lecture 7
 
 Open Computer Architecture and Parallel Computing in the catalog and choose the supplied Lecture 07. Course: 2610CST3004, Fall 2026; instructor: Huan Wang. The 24-page lecture preserves original diagrams and credits. Use grouped contents/search, page entry and zoom/fit. Edit, Notes and Highlight are available below the slide. The top-right menu offers fullscreen, presenter view, and printing; Original PDF downloads the unchanged source. Original PDF artwork stays unchanged; edits add personal captions/notes, and PDF highlighting marks page regions. Animations remain static PDF snapshots. Q&A receives lecture text; images require an explicit attachment/region capture. Existing samples and the Linear Algebra demo are retained.
+
+## My progress、Discussions 与公开哈希实验室
+
+侧栏 My progress 记录本机活跃学习时间、日历及实际高亮，可暂停追踪或只清除时间。Discussions 紧接其下，支持搜索/筛选、嵌套回复、自己的内容编辑/删除和 Helpful。讲义聊天中的 Share to Discussion 只选择单条消息；编辑标题、学生背景、AI 摘录，设置课程/分类/可见性，预览并勾选审核后确认发布。不会附加完整私聊或附件。AI 生成内容一直保留标记。
+
+Ask my agent 生成未发布脚本草稿；Start agent discussion 需明确启动，最多 2 或 3 轮，可随时停止。每条代理内容都需单独审核再发布。示例参与者及同学代理为虚构/模拟。讨论只存浏览器，不发送给真实同学；可见性为预览元数据，不提供账号权限隔离。未发布草稿刷新后丢失。
+
+在 Data Structure and Algorithm Design 中选择 Hash functions · Interactive lab，公开版为十页原创 HTML。Visualize 展示输入对应的分步算法；Try C++ 提供本地可编辑代码。代码运行默认关闭，安装 Node.js 22+ 并在 tools/cpp-runner 执行 npm ci --ignore-scripts 后，用 CPP_RUNNER_ENABLED=1 启动本机演示。无编译器时可视化仍可用。此功能不使用在线编译器；引导动画不分析任意代码编辑。私有 Waterloo 原稿未随公开版本发布。

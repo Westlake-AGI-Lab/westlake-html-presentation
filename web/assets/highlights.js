@@ -101,6 +101,7 @@
         notify('saved');
       } catch (_) { notify('failed'); }
       render();
+      window.dispatchEvent(new Event('ppt-highlights-change'));
     }
     function remember(state) { state.history.push(state.marks.map(m => ({...m}))); if (state.history.length > 20) state.history.shift(); }
     function apply(color) {
@@ -178,7 +179,8 @@
       if (document.body.matches('.edit-mode,.region-selecting,.agent-open')) toggle(false);
       render();
     }).observe(document.body, {attributes: true, attributeFilter: ['class']});
-    localize(); render();
+    window.WestlakeHighlights={list:()=>slides.flatMap((slide,index)=>{const state=stateFor(slide);return state.marks.map(mark=>({page:index+1,type:'text',text:state.text.slice(mark.start,mark.end).slice(0,280),color:mark.color}));})};
+    localize(); render();window.dispatchEvent(new Event('ppt-highlights-ready'));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once: true}); else start();
 })();

@@ -817,6 +817,115 @@
     "description": "Choose representations, reason about cost, and design correct algorithms.",
     "lectures": [
       {
+        "id": "hash-functions",
+        "number": "LAB",
+        "title": "Hash functions · Interactive lab",
+        "summary": "Original 10-slide introduction with guided hash visualizations and optional local C++ experiments.",
+        "lab": "hash-functions",
+        "slides": [
+          {
+            "title": "Hash functions: from a key to a bucket",
+            "lead": "A hash table separates hashing from storage.",
+            "bullets": [
+              "A hash function maps a key to a fixed-size value.",
+              "A bucket index can be computed as hash(key) modulo the bucket count.",
+              "Open Visualize to experiment; Try C++ runs the same examples locally."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Equality is the first contract",
+            "lead": "Equal keys must have equal hashes.",
+            "bullets": [
+              "Fractions 1/2 and 2/4 represent the same value.",
+              "Normalize numerator and denominator before hashing.",
+              "Keep the denominator positive; reject zero denominators."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Canonical forms",
+            "lead": "Choose one representation for each equal value.",
+            "bullets": [
+              "Divide both parts of a fraction by their greatest common divisor.",
+              "Normalize the sign after reduction.",
+              "Different values may still produce the same hash."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "A simple string hash",
+            "lead": "Summing bytes is easy, but ignores their order.",
+            "bullets": [
+              "Use UTF-8 bytes so the encoding is explicit.",
+              "The strings form and from have the same byte sum: 436.",
+              "This collision shows why order matters."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Collisions are unavoidable",
+            "lead": "A finite hash space cannot uniquely represent unlimited keys.",
+            "bullets": [
+              "A collision is different keys producing the same hash.",
+              "The table must compare keys when resolving a collision.",
+              "A demonstration hash is not a cryptographic guarantee."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Horner-style hashing",
+            "lead": "Update a running hash as each byte arrives.",
+            "bullets": [
+              "Start at zero.",
+              "For each UTF-8 byte b, compute h = 12347h + b modulo 2³².",
+              "Open the byte-by-byte example to inspect every update."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Unsigned arithmetic",
+            "lead": "Make wraparound part of the algorithm.",
+            "bullets": [
+              "The JavaScript model and C++ examples both use 32-bit unsigned values.",
+              "Multiplication and addition wrap modulo 2³².",
+              "Use std::uint32_t instead of relying on signed overflow."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Sampling bytes",
+            "lead": "Reading fewer bytes trades away information.",
+            "bullets": [
+              "Try positions 0, 1, 3, 7 and so on.",
+              "Changing a skipped byte cannot change this sampled hash.",
+              "Compare the result with hashing every byte."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Bucket count and load factor",
+            "lead": "Distribution and table policy both affect performance.",
+            "bullets": [
+              "Load factor α is the number of keys divided by the number of buckets.",
+              "Resizing controls load, but cannot fix a hash that sends every key to one bucket.",
+              "Expected constant-time lookup relies on assumptions about distribution."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          },
+          {
+            "title": "Test your explanation",
+            "lead": "Use the lab to challenge a claim.",
+            "bullets": [
+              "Construct a collision for byte-sum hashing.",
+              "Explain why equal fractions need normalization.",
+              "Edit the C++ example, inspect the output, and share your reasoning in Discussions."
+            ],
+            "notes": "Original teaching example for the interactive hash lab. Demonstration algorithms are noncryptographic."
+          }
+        ]
+      },
+      {
         "id": "search",
         "number": "01",
         "title": "Searching, data structures, and complexity",
