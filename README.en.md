@@ -224,3 +224,6 @@ Future confirmed lecture deletions remove that lecture’s replacement archives 
 
 
 Student browser regression: `npm ci`, `npx playwright install chromium`, then `npm run test:student` (Python dependencies must be installed). The check starts its own temporary localhost server/database and fictional accounts, exercises real authentication at 1440/768/390/360px, and removes only its temporary state. Set `PYTHON` to your virtualenv interpreter if needed. It never uses the running demo or real credentials.
+
+
+GitHub Actions **Application tests** runs on every push and pull request with Python 3.12 and Node 22. It installs locked browser dependencies and Chromium, runs `PYTHONPATH=src PPT_AI_MODE=operator python -m westlake_ppt test --suite unit` (all discovered Python tests and Node checks), then `npm run test:student`. Provider calls are mocked and optional C++ execution tests remain opt-in. Tests use temporary private databases and do not require repository secrets.

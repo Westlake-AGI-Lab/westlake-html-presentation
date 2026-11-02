@@ -224,3 +224,6 @@ My progress 活动日历可通过方向键浏览，选择日期可查看当天�
 
 
 学生浏览器回归：安装 Python 依赖后运行 `npm ci`、`npx playwright install chromium`，然后运行 `npm run test:student`。测试自行启动临时本机服务、数据库和虚构账号，在 1440/768/390/360px 检查真实认证，只清理测试临时数据。必要时用 `PYTHON` 指定虚拟环境解释器。不会使用正在运行的演示或真实凭据。
+
+
+GitHub Actions **Application tests** 在每次 push 和 pull request 时运行，使用 Python 3.12、Node 22。安装锁定的浏览器依赖及 Chromium 后，执行 `PYTHONPATH=src PPT_AI_MODE=operator python -m westlake_ppt test --suite unit`（全部发现的 Python 测试和 Node 检查），再执行 `npm run test:student`。模型请求使用模拟，可选 C++ 执行测试仍需显式启用。测试使用临时私有数据库，不需要仓库密钥。
