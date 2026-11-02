@@ -69,6 +69,91 @@ class TeachingTests(unittest.TestCase):
   self.assertTrue(self.t.today('202400000')['mock'])
   self.t.own('other',item['id'])
 
+ def upload_for_delete(self):
+  lid=self.t.upload('202400000',self.cid,'audit.pdf',self.pdf())['id']
+  return lid,self.t.lecture(self.cid,lid,'202400000')[1]['fileToken']
+
+ def delete_uploaded(self,lid):
+  return self.t.mutate('202400000','delete',dict(course=self.cid,lecture=lid))
+
+ def test_delete_removes_replacement_versions_and_preserves_other_data(self):
+  lid,first=self.upload_for_delete();other,other_token=self.upload_for_delete()
+  tokens=[first]
+  for i in range(2):
+   self.t.upload('202400000',self.cid,f'replacement-{i}.pdf',self.pdf(),lid)
+   tokens.append(self.t.lecture(self.cid,lid,'202400000')[1]['fileToken'])
+  self.t.mutate('202400000','note',dict(course=self.cid,lecture=lid,slide=1,note='Temporary note'))
+  self.t.mutate('202400000','status',dict(course=self.cid,lecture=lid,status='published'))
+  event=self.t.event({'id':'student','is_teacher':0},dict(course=self.cid,lecture=lid,slide=1),'Question','Answer')
+  self.t.mutate('202400000','flag',dict(course=self.cid,lecture=lid,event=event))
+  orphan=self.t.files/('f'*32);orphan.mkdir();(orphan/'keep.txt').write_text('Unrelated orphan')
+  self.assertEqual(self.delete_uploaded(lid),{'ok':True})
+  for token in tokens:self.assertFalse((self.t.files/token).exists())
+  self.assertTrue((self.t.files/other_token/'original.pdf').exists());self.assertTrue(orphan.exists())
+  self.t.lecture(self.cid,other,'202400000')
+  with self.accounts.connect() as db:
+   for table,column in [('teaching_lectures','id'),('lecture_versions','lecture'),('slide_notes','lecture'),('study_events','lecture')]:
+    self.assertEqual(db.execute(f'SELECT COUNT(*) FROM {table} WHERE course=? AND {column}=?',(self.cid,lid)).fetchone()[0],0)
+   self.assertEqual(db.execute('SELECT COUNT(*) FROM answer_flags WHERE event=?',(event,)).fetchone()[0],0)
+
+ def test_delete_preserves_shared_live_and_archived_uploads(self):
+  for archived in (False,True):
+   with self.subTest(archived=archived):
+    lid,token=self.upload_for_delete();other,_=self.upload_for_delete()
+    with self.accounts.connect() as db:
+     value=json.loads(db.execute('SELECT data FROM teaching_lectures WHERE course=? AND id=?',(self.cid,other)).fetchone()[0])
+     value['fileToken']=token
+     if archived:
+      db.execute('INSERT INTO lecture_versions VALUES (?,?,?,?,?)',(other,self.cid,other,0,json.dumps({'lecture':value})))
+     else:db.execute('UPDATE teaching_lectures SET data=? WHERE course=? AND id=?',(json.dumps(value),self.cid,other))
+    self.delete_uploaded(lid);self.assertTrue((self.t.files/token/'original.pdf').exists())
+
+ def test_delete_rejects_corrupt_archive_before_changes(self):
+  lid,token=self.upload_for_delete()
+  with self.accounts.connect() as db:db.execute('INSERT INTO lecture_versions VALUES (?,?,?,?,?)',('broken',self.cid,lid,0,'not-json'))
+  with self.assertRaises(TeachingError) as e:self.delete_uploaded(lid)
+  self.assertEqual(e.exception.code,409);self.assertTrue((self.t.files/token).exists())
+  self.t.lecture(self.cid,lid,'202400000')
+
+ def test_delete_rejects_unsafe_tokens_and_symlinks(self):
+  outside=Path(self.tmp.name)/'outside';outside.mkdir();(outside/'keep.txt').write_text('Keep')
+  for token in ('../outside','a'*32):
+   with self.subTest(token=token):
+    lid,original=self.upload_for_delete()
+    if token=='a'*32:(self.t.files/token).symlink_to(outside,target_is_directory=True)
+    with self.accounts.connect() as db:
+     value=json.loads(db.execute('SELECT data FROM teaching_lectures WHERE course=? AND id=?',(self.cid,lid)).fetchone()[0]);value['fileToken']=token
+     db.execute('UPDATE teaching_lectures SET data=? WHERE course=? AND id=?',(json.dumps(value),self.cid,lid))
+    with self.assertRaises(TeachingError) as e:self.delete_uploaded(lid)
+    self.assertEqual(e.exception.code,409);self.assertTrue((outside/'keep.txt').exists());self.assertTrue((self.t.files/original).exists())
+    with self.accounts.connect() as db:
+     value['fileToken']=original
+     db.execute('UPDATE teaching_lectures SET data=? WHERE course=? AND id=?',(json.dumps(value),self.cid,lid))
+
+ def test_delete_does_not_remove_files_if_database_rolls_back(self):
+  import sqlite3
+  lid,token=self.upload_for_delete()
+  with self.accounts.connect() as db:db.execute("CREATE TRIGGER stop_deletion BEFORE DELETE ON teaching_lectures BEGIN SELECT RAISE(ABORT,'test rollback'); END")
+  with self.assertRaises(sqlite3.IntegrityError):self.delete_uploaded(lid)
+  self.assertTrue((self.t.files/token/'original.pdf').exists());self.t.lecture(self.cid,lid,'202400000')
+
+ def test_delete_reports_filesystem_failure_after_commit(self):
+  lid,token=self.upload_for_delete()
+  with patch('westlake_ppt.teaching.shutil.rmtree',side_effect=PermissionError('Test only')):
+   with self.assertRaises(TeachingError) as e:self.delete_uploaded(lid)
+  self.assertEqual(e.exception.code,500);self.assertIn('cleanup is incomplete',e.exception.message)
+  self.assertTrue((self.t.files/token).exists())
+  with self.assertRaises(TeachingError):self.t.lecture(self.cid,lid,'202400000')
+
+ def test_delete_denies_other_owner_and_keeps_bundled_materials(self):
+  lid,token=self.upload_for_delete()
+  with self.assertRaises(TeachingError):self.t.mutate('other','delete',dict(course=self.cid,lecture=lid))
+  self.assertTrue((self.t.files/token).exists())
+  with patch('westlake_ppt.teaching.shutil.rmtree') as remove:
+   self.mutate('delete');remove.assert_not_called()
+  for slide in self.course['lectures'][0]['slides']:
+   if slide.get('image'):self.assertTrue((self.web/slide['image']).is_file())
+
 if __name__=='__main__':unittest.main()
 
 class TeachingHTTPTests(unittest.TestCase):

@@ -218,3 +218,6 @@ Connected students can open Xiaoxi’s connection panel and switch between `deep
 The chat composer gives more space to message history with tighter padding and desktop action buttons. The university workflow no longer repeats the text-only disclaimer beneath the input; image limits remain in the connection panel. The inactive archive reminder is removed; archive consent, save status and storage errors remain available.
 
 The chat header no longer displays the secondary toolbar (language, width menu, export, learning archive and practice), freeing its row for the conversation. Desktop panel resizing remains available through the divider. These toolbar actions are not available from the chat header.
+
+
+Future confirmed lecture deletions remove that lecture’s replacement archives and unshared uploaded versions after committing database changes. Invalid metadata/unsafe paths stop deletion; shared uploads and bundled course assets remain. Cleanup failures are reported explicitly. No startup sweep or retroactive orphan cleanup runs.

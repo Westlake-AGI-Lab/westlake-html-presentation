@@ -137,6 +137,70 @@ class Teaching:
         with self.accounts.connect() as db:
             return {r[0]:r[1] for r in db.execute('SELECT slide,note FROM slide_notes WHERE course=? AND lecture=?',(course,lecture))}
 
+    @staticmethod
+    def _file_token(raw, archived=False):
+        """Fail closed on corrupt metadata before any destructive operation."""
+        try:
+            value = json.loads(raw)
+            if archived:
+                value = value['lecture']
+            if not isinstance(value, dict):
+                raise ValueError('Invalid lecture metadata')
+            token = value.get('fileToken')
+            if token is not None and (not isinstance(token, str) or
+                                      not re.fullmatch('[a-f0-9]{32}', token)):
+                raise ValueError('Invalid upload token')
+            return token
+        except (ValueError, KeyError, TypeError) as exc:
+            raise TeachingError(409, 'Deletion stopped: invalid lecture metadata / 删除已停止：讲义元数据无效') from exc
+
+    def _delete_lecture(self, teacher, course, lecture):
+        # Only an explicit future delete reaches here; never sweep existing orphans.
+        with self.accounts.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            if not db.execute('SELECT 1 FROM course_owners WHERE teacher=? AND course=?',
+                              (teacher, course)).fetchone():
+                raise TeachingError(404, 'Not found / 未找到')
+            row = db.execute('SELECT data FROM teaching_lectures WHERE course=? AND id=?',
+                             (course, lecture)).fetchone()
+            if not row:
+                raise TeachingError(404, 'Not found / 未找到')
+            tokens = {self._file_token(row[0])}
+            for version in db.execute('SELECT data FROM lecture_versions WHERE course=? AND lecture=?',
+                                      (course, lecture)):
+                tokens.add(self._file_token(version[0], archived=True))
+            tokens.discard(None)
+            # Files referenced anywhere else must remain, including archived references.
+            shared = set()
+            for other in db.execute('SELECT data FROM teaching_lectures WHERE NOT (course=? AND id=?)',
+                                    (course, lecture)):
+                shared.add(self._file_token(other[0]))
+            for other in db.execute('SELECT data FROM lecture_versions WHERE NOT (course=? AND lecture=?)',
+                                    (course, lecture)):
+                shared.add(self._file_token(other[0], archived=True))
+            targets = [self.files / token for token in sorted(tokens - shared)]
+            if self.files.is_symlink() or self.files.resolve() != self.accounts.path.parent / 'lecture-files':
+                raise TeachingError(409, 'Deletion stopped: unsafe upload directory / 删除已停止：上传目录不安全')
+            for path in targets:
+                if (path.is_symlink() or not path.resolve().is_relative_to(self.files.resolve()) or
+                        (path.exists() and (not path.is_dir() or
+                         any(child.is_symlink() for child in path.rglob('*'))))):
+                    raise TeachingError(409, 'Deletion stopped: unsafe upload path / 删除已停止：上传路径不安全')
+            db.execute('DELETE FROM answer_flags WHERE event IN (SELECT id FROM study_events WHERE course=? AND lecture=?)',
+                       (course, lecture))
+            for table in ('study_events', 'slide_notes', 'lecture_versions'):
+                db.execute(f'DELETE FROM {table} WHERE course=? AND lecture=?', (course, lecture))
+            db.execute('DELETE FROM teaching_lectures WHERE course=? AND id=?', (course, lecture))
+        # Do not remove files before the database transaction has successfully committed.
+        for path in targets:
+            try:
+                shutil.rmtree(path)
+            except FileNotFoundError:
+                pass
+            except OSError as exc:
+                raise TeachingError(500, 'Lecture deleted, but upload cleanup is incomplete. Refresh the list; ask the maintainer to review remaining files. No automatic cleanup will run. / 讲义已删除，但上传文件清理未完成。请刷新列表并联系维护者检查；不会自动清理。') from exc
+        return {'ok': True}
+
     def mutate(self, teacher, action, data):
         course=clean(data.get('course'),100);lecture=clean(data.get('lecture'),100)
         if action=='new-course':
@@ -150,6 +214,8 @@ class Teaching:
                 db.execute('INSERT INTO course_owners VALUES (?,?)',(teacher,course))
             return {'id':course}
         self.own(teacher,course)
+        if action == 'delete':
+            return self._delete_lecture(teacher, course, lecture)
         if action=='reorder':
             ids=[l['id'] for c in self.catalog(teacher) if c['id']==course for l in c['lectures']]
             order=data.get('order')
@@ -175,11 +241,6 @@ class Teaching:
                 title=clean(data.get('title'),300).strip()
                 if not title: raise TeachingError(400,'Title required / 请输入标题')
                 item['title']=title;db.execute('UPDATE teaching_lectures SET data=? WHERE course=? AND id=?',(json.dumps(item),course,lecture))
-            elif action=='delete':
-                db.execute('DELETE FROM answer_flags WHERE event IN (SELECT id FROM study_events WHERE course=? AND lecture=?)',(course,lecture))
-                for table in ('study_events','slide_notes'): db.execute(f'DELETE FROM {table} WHERE course=? AND lecture=?',(course,lecture))
-                db.execute('DELETE FROM teaching_lectures WHERE course=? AND id=?',(course,lecture))
-                if item.get('fileToken'):shutil.rmtree(self.files/item['fileToken'],ignore_errors=True)
             elif action=='note':
                 slide=data.get('slide')
                 if type(slide)!=int or not 1<=slide<=len(item['slides']): raise TeachingError(400,'Invalid slide / 无效页面')
