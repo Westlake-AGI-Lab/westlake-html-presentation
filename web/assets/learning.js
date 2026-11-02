@@ -162,6 +162,7 @@
           assisted: !!(s.hintCount || s.exposed || s.attempts), hints: s.hintCount, exposed: s.exposed});
         this.records = this.records.slice(-100); this.persist(); this.drawExercise(); this.drawHistory(); this.guardLabels();
       }));
+      this.submit.classList.add('learning-submit');
       this.hint = button(actions, L('Next hint', '下一条提示'), () => this.work(async () => {
         this.session = await api('hint', {session: s.session}); this.drawExercise();
       }));
@@ -170,11 +171,12 @@
       }));
       this.exercise.append(actions, node('p', `${stateName(s.state)} · ${L('Attempts', '尝试')}: ${s.attempts} · ${L('Hints', '提示')}: ${s.hintCount}`));
       for (const item of s.feedback) {
-        this.exercise.append(node('p', `${item.label}: ${stateName(item.status)}`));
-        if (item.quote) this.exercise.append(node('blockquote', item.quote));
+        const feedback=node('div','','learning-feedback');feedback.append(node('p', `${item.label}: ${stateName(item.status)}`));
+        if (item.quote) feedback.append(node('blockquote', item.quote));
+        this.exercise.append(feedback);
       }
       s.hints.forEach((h, i) => this.exercise.append(node('p', `${L('Hint', '提示')} ${i+1}: ${h}`, 'learning-hint')));
-      if (s.answer) this.exercise.append(node('h4', L('Reviewed explanation', '已审核讲解')), node('p', s.answer));
+      if (s.answer) {const explanation=node('section','','learning-explanation');explanation.append(node('h4', L('Reviewed explanation', '已审核讲解')), node('p', s.answer));this.exercise.append(explanation);}
       this.share = check(this.exercise, L('Share this concept summary with my teacher (no written answer)', '与教师分享本概念摘要（不含作答原文）'), box => {
         box.checked = false;
         if (!this.session.attempts) return;

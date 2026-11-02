@@ -24,3 +24,23 @@ build/
 .codex/
 .cursor/
 PRODUCT.md
+
+# Machine-specific catalog overrides; the shared demo catalog/assets are tracked.
+/web/assets/courses.local.json
+
+# Optional local WebAssembly C++ toolchain.
+/tools/cpp-runner/node_modules/
+
+# Generated local design-review screenshots, traces, and reports.
+/.impeccable/
+/.taste-skill/
+
+# Dependency caches and private runtime state.
+node_modules/
+.pytest_cache/
+.cache/
+*.db
+*.db-*
+workspace-seed.json
+demo-access.json
+lecture-files/

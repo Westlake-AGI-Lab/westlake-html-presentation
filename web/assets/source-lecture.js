@@ -23,12 +23,25 @@
   let zoom=1,current=window.PPTDeck.current();
   const header=make('header','source-header');
   const brand=make('a','source-home');brand.href='courses.html';brand.innerHTML=svg('grid');brand.append(label(make('span'),'Courses','课程'));
-  const course=make('div','source-course-heading');course.append(make('strong','',info.course),make('span','',[info.code,info.term].filter(Boolean).join(' · ')||L('Teaching sample · Self-study','教学示例 · 自学')));
+  const course=make('div','source-course-heading');course.append(make('strong','',info.course),make('span','',[info.code,info.term].filter(Boolean).join(' · ')||L(info.isPdf?'Course material · Self-study':'Teaching sample · Self-study',info.isPdf?'课程资料 · 自学':'教学示例 · 自学')));
   const tools=make('div','source-header-tools');
-  const download=make('a','source-download');download.href=info.file;download.download='2610CST3004-Lecture07.pdf';download.innerHTML=svg('download');download.append(label(make('span'),'Original PDF','原始 PDF'));
+  const download=make('a','source-download');download.href=info.file;download.download=info.file.split('/').pop()||'lecture.pdf';download.innerHTML=svg('download');download.append(label(make('span'),info.lab?'Selected slides PDF':'Original PDF',info.lab?'精选幻灯片 PDF':'原始 PDF'));
   const language=action(null,'中文','English',()=>PPTI18n.setLanguage(PPTI18n.language==='en'?'zh':'en'),'source-language');language.id='sourceLanguage';
-  // Keep the original launcher node and its focus/close behavior, but fit it into the toolbar.
-  const ask=$('agentLauncher');ask.classList.add('source-ask');
+  // Keep the draggable pet separate from the compact toolbar shortcut.
+  const pet=$('agentLauncher');document.body.append(pet);
+  const ask=action(null,'Practice','练习',()=>{
+    const practice=document.getElementById('agentPractice');
+    if(practice){practice.click();return;}
+    pet.click();
+    const input=$('agentInput');
+    if(!input.value.trim()){
+      input.value=L('Give me one practice question about this slide. Wait for my answer before explaining the solution.','请根据当前页给我一道练习题，等待我作答后再解释解法。');
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    input.focus();
+  },'source-assistant-button');
+  ask.id='sourceAskAssistant';ask.setAttribute('aria-controls','agentPanel');
+  const petIcon=make('img');petIcon.src='assets/pet-idle.png';petIcon.alt='';petIcon.width=24;petIcon.height=30;ask.prepend(petIcon);
   if(info.file)tools.append(download);tools.append(language,ask);header.append(brand,course,tools);document.body.append(header);
 
   const heading=make('section','source-heading');
@@ -37,6 +50,8 @@
   const titleBlock=make('div','source-title-block');titleBlock.append(make('h1','',info.title),make('p','',[L('Lecture ','第 ')+info.number+(L('',' 讲')),info.instructor,info.term].filter(Boolean).join(' · ')));
   const more=make('details','source-more');const summary=make('summary');summary.innerHTML=svg('more');summary.setAttribute('aria-label',L('More presentation tools','更多演示工具'));more.append(summary);
   for(const [id,en,zh]of [['editButton',info.isPdf?'Edit annotations E':'Edit slide E','编辑 E'],['notesButton','Notes N','讲稿 N'],['fullscreenButton','Fullscreen','全屏'],['presenterButton','Presenter view','演讲者视图'],['printButton','Print slides','打印幻灯片']])more.append(action(null,en,zh,()=>{$(id)?.click();more.open=false;syncTools();},'source-menu-action'));
+  more.append(action(null,'My progress','我的进度',()=>{location.href='progress.html';},'source-menu-action'));
+  more.append(action(null,'Discussions','讨论',()=>{location.href='discussions.html';},'source-menu-action'));
   heading.append(outlineButton,titleBlock,more);document.body.append(heading);
 
   const sidebar=make('aside','source-sidebar');sidebar.setAttribute('aria-label',L('Lecture contents','讲义目录'));document.body.append(sidebar);
@@ -126,7 +141,7 @@
   let marks={};try{const saved=JSON.parse(localStorage.getItem(markKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))marks=saved;}catch(_){markStatus.textContent=L('Saved marks could not be read.','无法读取已保存标记。');}
   const valid=r=>Array.isArray(r)&&r.length===4&&r.every(n=>Number.isFinite(n)&&n>=0&&n<=1)&&r[0]+r[2]<=1.001&&r[1]+r[3]<=1.001;
   function currentMarks(){const key=String(current);if(!Array.isArray(marks[key]))marks[key]=[];marks[key]=marks[key].filter(valid).slice(0,200);return marks[key];}
-  function saveMarks(){try{localStorage.setItem(markKey,JSON.stringify(marks));markStatus.textContent=L('Saved in this browser','已保存在此浏览器');}catch(_){markStatus.textContent=L('Storage unavailable; marks last only this session.','无法保存，标记仅保留在当前页面。');}paintMarks();}
+  function saveMarks(){try{localStorage.setItem(markKey,JSON.stringify(marks));markStatus.textContent=L('Saved in this browser','已保存在此浏览器');}catch(_){markStatus.textContent=L('Storage unavailable; marks last only this session.','无法保存，标记仅保留在当前页面。');}paintMarks();window.dispatchEvent(new Event('ppt-source-highlights-change'));}
   const layers=[];
   function paintMarks(){layers.forEach((layer,i)=>{if(!layer)return;layer.replaceChildren();const values=i===current?currentMarks():Array.isArray(marks[i])?marks[i].filter(valid).slice(0,200):[];for(const r of values){const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');['x','y','width','height'].forEach((a,j)=>rect.setAttribute(a,String(r[j]*1000)));layer.append(rect);}});}
   markTools.append(action(null,'Highlight center','标记中央区域',()=>{if(currentMarks().length<200){currentMarks().push([.25,.45,.5,.08]);saveMarks();}},'source-mode-button'),action(null,'Undo','撤销',()=>{currentMarks().pop();saveMarks();},'source-mode-button'),action(null,'Clear page','清除此页',()=>{marks[current]=[];saveMarks();},'source-mode-button'),action('close','Close highlighter','关闭荧光笔',()=>highlightTool.click()),markStatus);document.body.append(markTools);
@@ -145,6 +160,6 @@
   // Route shortcuts to the workspace tools before the hidden legacy chrome sees them.
   document.addEventListener('keydown',e=>{if(e.altKey||e.ctrlKey||e.metaKey||e.target.closest('input,textarea,[contenteditable=true],#agentPanel,dialog'))return;const k=e.key.toLowerCase();if(k==='g'){e.preventDefault();e.stopImmediatePropagation();outlineButton.click();}if(k==='h'){e.preventDefault();e.stopImmediatePropagation();highlightTool.click();}if(k==='escape'&&drawing){e.preventDefault();e.stopImmediatePropagation();highlightTool.click();} },true);
   addEventListener('resize',fit);addEventListener('ppt-slide-change',()=>{zoom=1;update();});addEventListener('ppt-language-change',localize);
-  const observer=new MutationObserver(()=>{if(drawing&&document.body.matches('.edit-mode,.region-selecting,.agent-open')){drawing=false;document.body.classList.remove('source-marking');markTools.hidden=true;}if(!document.body.classList.contains('agent-open'))fit();syncTools();});observer.observe(document.body,{attributes:true,attributeFilter:['class']});
+  const observer=new MutationObserver(()=>{if(drawing&&document.body.matches('.edit-mode,.region-selecting,.assistant-open')){drawing=false;document.body.classList.remove('source-marking');markTools.hidden=true;}if(!document.body.classList.contains('agent-open'))fit();syncTools();});observer.observe(document.body,{attributes:true,attributeFilter:['class']});
   responsive();localize();
 })();

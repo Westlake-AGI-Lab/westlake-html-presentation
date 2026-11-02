@@ -57,7 +57,7 @@
       this.chat.processing=true;this.chat.controls();
       try{
         this.enabled=localStorage.getItem('ppt-archive-consent')==='yes';
-        if(!this.enabled){this.status.textContent=L('仅本次会话；打开学习档案可启用本机保存。','Session only; open Learning archive to enable local saving.');return;}
+        if(!this.enabled){this.status.textContent='';return;}
         this.db=await new Promise((resolve,reject)=>{const req=indexedDB.open('westlake-learning',1);req.onupgradeneeded=()=>req.result.createObjectStore('sessions',{keyPath:'id'});req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);req.onblocked=()=>reject(Error('Database blocked'));});
         const all=(await this.all()).filter(x=>x.key===this.key).sort((a,b)=>b.updated.localeCompare(a.updated));
         if(all.length){this.current=all[0];this.replace(this.current.messages);}

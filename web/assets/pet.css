@@ -43,3 +43,21 @@
 .agent-avatar { background: transparent; }
 .agent-avatar img { width: 42px; height: 52px; object-fit: contain; }
 @media(max-width: 600px) { .agent-launcher { width: 72px; height: 96px; } .agent-launcher .agent-pet { width: 72px; height: 96px; } .agent-launcher-copy { display: none; } }
+
+/* Xiaoxi stays a floating companion, including in the source lecture reader. */
+.agent-launcher.xiaoxi-pet{width:74px;height:108px;min-width:0;min-height:0;right:22px;bottom:94px;z-index:92;background:none;border:0;box-shadow:none;gap:5px;touch-action:none}
+.xiaoxi-pet .agent-pet{width:66px;height:83px;filter:drop-shadow(0 5px 6px #18382b1a)}
+.xiaoxi-pet .agent-launcher-copy{font:600 11px/1.4 system-ui;color:#285d4b;background:#fff;border:1px solid #dbe8df;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.xiaoxi-pet .pet-greeting{border:1px solid #dce7df;border-radius:14px 14px 4px 14px;color:#315a47;box-shadow:0 8px 24px #1b3e2914;padding:13px 16px;animation:petGreetingRest 8s forwards}
+.xiaoxi-pet:is(:hover,:focus-visible,.pet-dragging) .pet-greeting{animation:none;opacity:1}
+.xiaoxi-pet:hover{transform:none;box-shadow:none}
+@keyframes petGreetingRest{0%,70%{opacity:1}100%{opacity:0}}
+@media(max-width:600px){.agent-launcher.xiaoxi-pet{width:56px;height:72px;right:12px;bottom:96px}.xiaoxi-pet .agent-pet{width:52px;height:66px}.xiaoxi-pet .agent-launcher-copy{display:none}.xiaoxi-pet .pet-greeting{font-size:12px;width:190px}}
+@media(prefers-reduced-motion:reduce){.xiaoxi-pet .pet-greeting{animation:none;opacity:0}.xiaoxi-pet:is(:hover,:focus-visible) .pet-greeting{opacity:1}}
+/* A small companion yields to study tools rather than covering their controls. */
+.agent-launcher.xiaoxi-pet{width:56px;height:78px;min-width:44px;min-height:44px;right:22px;bottom:80px;z-index:42}
+.xiaoxi-pet .agent-pet{width:48px;height:60px;animation:none}
+.xiaoxi-pet .agent-launcher-copy{font-size:10px;padding:3px 7px}
+body:has(#highlightToolbar:not([hidden])) .agent-launcher.xiaoxi-pet,
+body:has(.source-mark-tools:not([hidden])) .agent-launcher.xiaoxi-pet{visibility:hidden;pointer-events:none}
+@media(max-width:600px){.agent-launcher.xiaoxi-pet{width:44px;height:58px;right:12px;bottom:72px}.xiaoxi-pet .agent-pet{width:44px;height:56px}}

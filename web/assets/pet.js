@@ -1,6 +1,7 @@
 (() => {
  const agentLauncher = document.getElementById('agentLauncher');
  if (!agentLauncher) return;
+ agentLauncher.classList.add("xiaoxi-pet");
  agentLauncher.innerHTML = "    <span class=\"pet-greeting\" id=\"petGreeting\" lang=\"zh-CN\">\n      <strong id=\"petGreetingTitle\">你好，我是小西。</strong>\n      <span id=\"petGreetingQuestion\">有什么可以帮你？</span>\n    </span>\n    <span class=\"agent-pet\" aria-hidden=\"true\">\n      <img class=\"pet-idle\" src=\"assets/pet-idle.png\" alt=\"\" width=\"106\" height=\"132\">\n      <img class=\"pet-blink\" src=\"assets/pet-blink.png\" alt=\"\" width=\"106\" height=\"132\">\n      <img class=\"pet-walk\" src=\"assets/pet-walk.png\" alt=\"\" width=\"106\" height=\"132\">\n      <img class=\"pet-inspect\" src=\"assets/pet-inspect.png\" alt=\"\" width=\"106\" height=\"132\">\n    </span>\n    <span class=\"agent-launcher-copy\">问问这份 PPT</span>";
  const avatar = document.querySelector('.agent-avatar');
  if (avatar) avatar.innerHTML = '<img src="assets/pet-idle.png" alt="" width="42" height="52">';
@@ -17,6 +18,15 @@
         agentLauncher.querySelector('.agent-launcher-copy').textContent = english ? 'Ask Xiaoxi' : '问问这份 PPT';
         agentLauncher.setAttribute('aria-label', english ? 'Open presentation assistant' : '打开 PPT 智能讲解');
         agentLauncher.title = english ? 'Open presentation assistant (A)' : '打开 PPT 智能讲解（A）';
+        const title = document.querySelector('.agent-title');
+        if (title) title.textContent = english ? 'Xiaoxi · Learning companion' : '小西 · 学习伙伴';
+        const welcome = document.querySelector('.agent-welcome');
+        if (welcome) {
+          welcome.querySelector('strong').textContent = english ? "Let's work through it together." : '一起把问题弄明白。';
+          welcome.querySelector('p').textContent = english
+            ? 'Ask about this slide, work through a formula, or attach an image. Check source slides and review AI explanations.'
+            : '可以询问本页内容、梳理公式，或附上图片提问。请结合来源页核查 AI 讲解。';
+        }
         positionPetGreeting();
       }
       window.addEventListener('ppt-language-change', updatePetLanguage);

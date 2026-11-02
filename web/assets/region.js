@@ -75,6 +75,7 @@
       if (this.statusKey) this.status.textContent = t(this.statusKey);
     }
     start() {
+      if(this.chat.access?.required&&!this.chat.access.images){this.chat.open();this.chat.notice.textContent=this.chat.L('University image input is not verified. Ask a text question instead.','大学图片输入尚未验证，请使用文字问题。');return;}
       let issue = this.chat.busy || this.chat.processing ? 'busy' : document.body.classList.contains('edit-mode') ? 'edit' : null;
       if (this.chat.input.value.trim()) issue = 'draft';
       if (this.chat.pending.length >= 3 || this.chat.messages.slice(-12).reduce((n,m) => n + (m.images?.length || 0), 0) + this.chat.pending.length >= 6) issue = 'limit';
