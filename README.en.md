@@ -221,3 +221,6 @@ The chat header no longer displays the secondary toolbar (language, width menu, 
 
 
 Future confirmed lecture deletions remove that lecture’s replacement archives and unshared uploaded versions after committing database changes. Invalid metadata/unsafe paths stop deletion; shared uploads and bundled course assets remain. Cleanup failures are reported explicitly. No startup sweep or retroactive orphan cleanup runs.
+
+
+Student browser regression: `npm ci`, `npx playwright install chromium`, then `npm run test:student` (Python dependencies must be installed). The check starts its own temporary localhost server/database and fictional accounts, exercises real authentication at 1440/768/390/360px, and removes only its temporary state. Set `PYTHON` to your virtualenv interpreter if needed. It never uses the running demo or real credentials.

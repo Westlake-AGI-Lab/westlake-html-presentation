@@ -1,0 +1,6 @@
+{
+  "name": "westlake-workspace-checks",
+  "private": true,
+  "scripts": {"test:student": "node tests/test_student_design.cjs"},
+  "devDependencies": {"playwright": "1.64.1"}
+}
