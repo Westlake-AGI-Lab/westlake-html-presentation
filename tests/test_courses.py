@@ -1,4 +1,5 @@
 import json
+from http.client import HTTPConnection
 from pathlib import Path
 import threading
 import tempfile
@@ -60,9 +61,17 @@ class CourseTests(unittest.TestCase):
     def test_head_and_explicit_public_files(self):
         for path in ['/progress.html','/assets/progress.js','/assets/progress.css','/courses.html','/api/courses','/assets/courses.css','/assets/courses.js','/assets/course-player.css',
                      '/lecture.html?course=calculus&lecture=derivatives']:
-            with urlopen(Request(self.base+path,method='HEAD')) as response:
-                self.assertEqual(response.status,200)
+            connection = HTTPConnection('127.0.0.1', self.httpd.server_port)
+            try:
+                # urllib on older Python follows 303 using GET, so inspect HEAD directly.
+                connection.request('HEAD', path)
+                response = connection.getresponse()
+                self.assertEqual(response.status, 303 if path == '/courses.html' else 200)
+                if path == '/courses.html':
+                    self.assertEqual(response.getheader('Location'), '/student.html')
                 self.assertEqual(response.read(),b'')
+            finally:
+                connection.close()
         for path in ['/assets/courses.json','/src/westlake_ppt/courses.py']:
             with self.assertRaises(HTTPError) as error:urlopen(self.base+path)
             self.assertEqual(error.exception.code,404)

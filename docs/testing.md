@@ -67,3 +67,6 @@ No real provider quality, visual interpretation accuracy, comparative learning g
 ## Application CI
 
 `.github/workflows/tests.yml` runs on push and pull_request. Python 3.12 / Node 22 install requirements and locked Playwright dependencies, then run the full Python discovery plus Node unit checks and the isolated student browser regression. The Python total grows with regression coverage (the original 109 includes two opt-in skips; seven lecture-deletion regressions bring it to 116). Browser checks cover empty credentials, generic failures, real same-origin sessions, sign-out, filters and course dialogs at four widths. No running demo, credentials, real provider, real course deletion, or paid API call is used.
+
+
+HEAD regression checks inspect the original response without following redirects: anonymous `/courses.html` must return a body-free 303 to `/student.html`, while public routes return body-free 200. This avoids Python-version-specific urllib redirect-to-GET behavior without changing application routing.
