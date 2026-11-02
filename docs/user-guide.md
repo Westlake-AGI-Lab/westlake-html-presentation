@@ -1,5 +1,20 @@
 # 西湖大学 HTML 演示模板
 
+## 工作区账号登录（2026-11-01，取代下文旧演示登录说明）
+
+在原 `/student.html` 表单输入维护者配置的本地 ID 和密码。无需选择身份，系统自动打开 `/teacher` 或 `/courses`；已登录访问登录页或根地址也会自动跳转。不要使用校园密码，大学 Private Token 连接仍为独立机制。所有登录失败统一显示 Incorrect ID or password；15 分钟内每 ID 五次或每 IP 二十次失败会临时锁定。请等待窗口到期后重试。表单不再预填或在浏览器中校验样例密码，登录只提交至本站服务器。
+
+新工作区复用课程侧栏和配色：Courses 为占位，Students、AI settings、Analytics、Discussions 显示 Coming soon。使用中文/EN 切换语言，Sign out 撤销服务端会话。学生手动访问受保护页面会回到课程页。课程编辑、上传、管理、统计、讨论审核均尚未实现。账号种子与迁移见 README；密码仅在仓库外的私有配置中提供。会话最长 12 小时；浏览器本地学习记录不按账号隔离。原课堂教师口令仍为独立机制。
+
+
+## 小西宠物与学习入口
+
+验证（2026-10-19）：JavaScript 语法与差异空白检查通过。浏览器验证桌面及 390×844 视口、中英文、小西点击/拖动/刷新恢复、练习提问草稿与已有输入保留。主稿的 Quiz/Practice 和个人讲解页入口仍存在，未重新执行完整测验或 AI 生成，未调用真实模型。内网同步待完成：SSH 连接关闭，HTTP 返回空响应；未修改远端文件或设置。
+
+讲义页面保留可拖动的小西宠物，点击可打开 AI 面板。顶部“练习”（Practice）在可用时打开现有概念练习；独立讲义则在输入框准备可修改的练习提问，不自动发送，也不覆盖已有输入。宠物位置保存在本浏览器，拖动不会触发提问，刷新后恢复；手机显示较小，打印时隐藏，并尊重减少动态效果设置。AI 面板采用小西头像、浅色绿色界面、清晰的来源栏和可换行的工具按钮；原有练习、个人讲解页、档案、上传、导出与停止/重试操作保留。此为界面更新，不改变模型配置或提升 AI 准确率的声明。
+
+教师工作区与互动测验仍从现有主讲稿进入（教师入口仍需登录），本次不新增门户切换。班级测验与教师课程改进仍属于主课堂；独立讲义不会自动加入主课堂或使用其他讲义的测验。个人 Auto-slides 仍在讲义 AI 面板的“生成讲解页”中；教师批准流程仍在教师工作区。
+
 ## 安装与目录
 
 从仓库根目录运行 `python3 -m venv .venv`，然后运行 `.venv/bin/python -m pip install -e .`。当前目录入口为 `.venv/bin/python westlake.py demo courses --output /tmp/xiaoxi-workspace --port 8782`（输出目录须为空）。`serve` 仍用于内部通用模板或显式配置的网页目录。前端在 `web/`，Python 包在 `src/westlake_ppt/`。下文命令均从仓库根目录执行；旧 Python 启动脚本仍兼容。详细配置见 [configuration.md](configuration.md)，API 见 [api.md](api.md)。
@@ -149,6 +164,53 @@ Agent 会自动读取每一页的标题、正文和演讲者讲稿，并实时�
 
 Run `python3 westlake.py demo courses --output /tmp/xiaoxi-course-catalog --port 8782` with an empty output directory, then open `http://127.0.0.1:8782/`. Choose a card and a lecture. `/courses.html` is also available during ordinary serving. The existing animated Linear Algebra demo retains its practice and quizzes; seven new introductory samples are self-study only, with independent browser storage. UI language switches do not translate lecture content. Use the current checkout; GitHub updates and internal-server deployment are separate actions.
 
-## Architecture Lecture 7
+## PDF lecture viewer
 
-Open Computer Architecture and Parallel Computing in the catalog and choose the supplied Lecture 07. Course: 2610CST3004, Fall 2026; instructor: Huan Wang. The 24-page lecture preserves original diagrams and credits. Use grouped contents/search, page entry and zoom/fit. Edit, Notes and Highlight are available below the slide. The top-right menu offers fullscreen, presenter view, and printing; Original PDF downloads the unchanged source. Original PDF artwork stays unchanged; edits add personal captions/notes, and PDF highlighting marks page regions. Animations remain static PDF snapshots. Q&A receives lecture text; images require an explicit attachment/region capture. Existing samples and the Linear Algebra demo are retained.
+Choose a PDF lecture from the course catalog. The viewer preserves original diagrams and credits. Use grouped contents/search, page entry and zoom/fit. Edit, Notes and Highlight are available below the slide. The top-right menu offers fullscreen, presenter view, and printing; Original PDF downloads the unchanged source. Original PDF artwork stays unchanged; edits add personal captions/notes, and PDF highlighting marks page regions. Animations remain static PDF snapshots. Q&A receives lecture text; images require an explicit attachment/region capture. Existing samples and the Linear Algebra demo are retained.
+
+学生登录演示：从课程页底部 Demo sign-in & integrations 或 `/student.html` 进入，点击 Fill demo details 后进入演示。不要使用真实凭据。Canvas、校园服务是未连接的虚构预览；Courses、My progress、Discussions 链接进入现有学习平台。刷新或 Sign out of demo 退出，不存储或发送登录输入。
+
+登录页已与 Courses、My progress、Discussions 的字体、配色和布局统一。桌面侧栏及学习工具入口可直接浏览现有工作区；手机优先展示登录表单。演示登录和 Canvas／校园服务预览的使用方式不变。
+
+
+## SlideMate 视觉苏格拉底式练习
+
+使用现有讲义 **Practice**，再点击 **开始本页视觉练习**。开始操作会将所选幻灯片图像及文字发送至已配置的服务端模型服务商。不新增登录、课程、示例讲稿或替代仪表盘。PDF 练习通过本地目录解析课程/讲义/页码，使用已登记的教师原图，替换客户端提供的像素与文字。HTML 练习捕获浏览器当前渲染页面；它是浏览器快照，不是经核验的教师原稿。个人 PDF 标注与高亮不属于原图。媒体、复杂 CSS 和动画状态可能无法准确捕获，请核对快照。
+
+独立的 Curator 和 Questioner 调用识别可见元素、归一化边界框及空间/拓扑关系，然后生成引用这些元素的 Apply/Analyze/Evaluate/Create 问题。私有评分标准与完整推理保留在服务端。页码、幻灯片标识、文字和图像绑定至 SHA-256 快照版本。缺少视觉引用、坐标无效或视觉不可靠时会拒绝生成，而不是静默退回纯文本问题。标记区域由 AI 生成，仍需核对；坐标/结构检查不能证明视觉解读正确。
+
+每次实质性作答依次调用 Assessor、Socratic Tutor 和独立模型 Critic。评估需引用学生原文及问题涉及的视觉元素。误概念得到针对性的反问或反例，不返回预设提示或直接纠正。Critic 在展示前检查问题的视觉依据及答案泄露。模型检查仍可能出错，不保证绝对不泄露，也不声称优于其他产品。本次未进行真实模型质量评估。
+
+至少两次不同的有效作答、一次导师追问且最近修订得到支持后，才解锁 **对照完整推理**。首次正确回答仍会收到追问。空白/过短/重复回答、模型判定的未实际作答、过期版本及提前请求解析都不能推进服务端门槛。投入阈值与模型评估无法证明真实人类推理。失败请求保留输入草稿，不记录评分后的尝试。切换页面或修改文字需开始新会话；页面未关闭时仍显示旧对话。
+
+练习文字保存默认关闭。开启后，记录会出现在现有 **My progress → 苏格拉底式练习记录**，包括学生作答与导师追问；这些是活动/证据记录，不是成绩或掌握程度。记录仅在当前浏览器/来源，可在练习窗口删除。不保存图像、私有评分标准或完整答案。刷新后保留已同意保存的文字，但不会恢复已过期/内存中的教学会话。现有学习时间、高亮、聊天档案及讨论记录保持不变。**将此作答分享到讨论** 通过现有编辑器仅传入所选学生回复与页码；发布仍需审核和明确确认。不新增自动向同学发送功能。
+
+
+本次仅在本地更新，未获批准部署或进行付费模型调用。
+
+## 学生界面（2026-11-01）
+
+只保留登录与课程页。打开当前 `http://127.0.0.1:8784/courses.html`，使用“Demo sign-in”进入虚构登录；填写演示信息后直接回到课程页。中间工作区、SlideMate 实验室、集成预览及这两个界面的进度/讨论入口已移除。课程卡片、讲义列表、搜索、筛选与中英文切换保持可用。登录不构成访问控制，不保存或发送表单内容。内部新版同步因本次 SSH 连接超时而待完成。
+
+课程页不再显示吉祥物/研究演示横幅；中英文按钮位于“Your courses / 我的课程”标题右侧。
+
+登录卡片已简化并预填虚构样例信息，直接点击“Open courses”进入课程页。Show/Hide 切换密码可见性；若修改后无法通过，可刷新恢复样例值。没有真实账号认证，也不保存或发送输入。
+
+登录与课程页的入场动效仅播放一次；筛选时卡片短暂淡入淡出，输入框本身不移动。登录插画卡片有轻微慢浮动。系统“减少动态效果”会使页面完全静止。键盘操作不等待转场；鼠标打开同站页面时内容短暂淡出。已有预填样例值保持，未恢复之前删除的提示或按钮。
+
+### 学生入口视觉细化 / Student entry refinement
+
+登录与课程两屏统一字体、间距和层级；手机导航更紧凑，课程卡片说明更易读。卡片页脚区分课程资料与教学示例；登录、筛选和课程选择流程不变。
+Login and courses now share a clearer type/spacing hierarchy, compact phone navigation and readable course descriptions. Card footers distinguish course materials from teaching samples. Login, filtering and lecture selection workflows are unchanged.
+
+### 恢复工作区导航 / Restored workspace navigation
+课程页侧栏再次提供“我的进度”和“讨论”；手机上三项导航并排显示。点击打开原有页面，数据与功能不变。
+The courses sidebar again offers My Progress and Discussions. On phones, all three workspace links share a row. They open the existing pages; data and behavior are preserved.
+
+
+Workspace sidebar destinations retain their order/position and open immediately without a navigation fade.
+
+
+### Switch Xiaoxi's connected model
+
+Expand **Connected · model** in the existing chat, choose **Switch model**, select an allowed model and confirm. The server validates it with a short real inference using your existing session token. Successful switches update the active model shown in chat; failures show an error and keep the previous model. No token re-entry is needed for switching. History, unsent drafts and the current slide are retained. Switching is disabled during chat, slide generation and model validation. A server restart still ends memory-only connections.

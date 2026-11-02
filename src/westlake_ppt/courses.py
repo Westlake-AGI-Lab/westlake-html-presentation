@@ -8,7 +8,10 @@ from .demos.learning import MainSpan
 
 
 def catalog(web_root):
-    return json.loads((Path(web_root) / 'assets/courses.json').read_text(encoding='utf-8'))
+    assets = Path(web_root) / 'assets'
+    private = assets / 'courses.local.json'
+    inventory = private if private.is_file() else assets / 'courses.json'
+    return json.loads(inventory.read_text(encoding='utf-8'))
 
 
 def render_source_slide(slide, lecture):
@@ -61,11 +64,14 @@ def render_lecture(source, course, lecture):
     source = source.replace('</head>', '<link rel="stylesheet" href="assets/course-player.css"></head>')
     source = source.replace('</body>', '<script src="assets/course-player.js"></script></body>')
     info = dict(course=course['title'], code=course.get('code', ''), term=course.get('term', ''),
-                instructor=course.get('instructor', ''), canvas=course.get('canvas', ''),
-                title=lecture['title'], number=lecture['number'], file=lecture.get('source', {}).get('file', ''), isPdf=is_pdf,
-                pages=[dict(title=s['title'], page=s.get('sourcePage', i), group=s.get('group', 'Lecture'), thumbnail=s.get('thumbnail', '')) for i,s in enumerate(lecture['slides'], 1)])
+                instructor=lecture.get('author', course.get('instructor', '')), canvas=course.get('canvas', ''),
+                title=lecture['title'], number=lecture['number'], lab=lecture.get('lab', ''), attribution=lecture.get('attribution', {}), file=lecture.get('source', {}).get('file', ''), isPdf=is_pdf,
+                pages=[dict(title=s['title'], originalPage=s.get('originalPage'), page=s.get('sourcePage', i), group=s.get('group', 'Lecture'), thumbnail=s.get('thumbnail', '')) for i,s in enumerate(lecture['slides'], 1)])
     data = json.dumps(info, ensure_ascii=False).replace('<', '\\u003c')
     source = source.replace('</head>', '<link rel="stylesheet" href="assets/source-lecture.css"></head>')
     source = source.replace('</body>', '<script id="sourceLectureData" type="application/json">' + data +
                             '</script><script src="assets/source-lecture.js"></script></body>')
+    if lecture.get('lab') == 'hash-functions':
+        source = source.replace('</head>', '<link rel="stylesheet" href="assets/hash-lab.css"></head>')
+        source = source.replace('</body>', '<script src="assets/hash-lab-model.js"></script><script src="assets/hash-lab.js"></script></body>')
     return source

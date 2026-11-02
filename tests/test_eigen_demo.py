@@ -12,6 +12,7 @@ class EigenDemoTests(unittest.TestCase):
             eigen_demo.build(destination)
             deck = (destination/'deck.html').read_text()
             self.assertTrue((destination/'presenter.html').is_file())
+            self.assertTrue((destination/'student.html').is_file())
             self.assertEqual(deck.count('class="slide eigen-slide '), 16)
             self.assertIn('class="slide eigen-slide layout-lab"', deck)
             self.assertIn('class="slide eigen-slide layout-derivation"', deck)

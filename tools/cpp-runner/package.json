@@ -1,0 +1,11 @@
+{
+  "name": "westlake-local-cpp-runner",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@runno/sandbox": "0.10.2"
+  }
+}

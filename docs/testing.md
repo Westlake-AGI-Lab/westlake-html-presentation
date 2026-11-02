@@ -32,8 +32,33 @@ The installed eigen demo was checked through the browser at desktop and mobile w
 
 ## Supplied PDF lecture
 
-`tests/test_courses.py` also checks source-PDF SHA-256, all registered page/thumbnail assets, explicit public boundaries, 24-page transcript isolation, and read-only source markup. With a running course demo, run `SOURCE_LECTURE_TEST_URL=http://127.0.0.1:8782/ node tests/test_source_lecture.cjs`. Playwright/Chrome checks desktop/mobile source viewing, contents search, zoom, text mode, deep links, download hash, text-only mocked AI context, focus, bilingual controls, and print styles. These tests do not call a real AI provider or establish physical-device/printing behavior.
+`tests/test_courses.py` checks the public catalog in a clean checkout. PDF-specific tests are skipped unless optional local lecture materials are installed. With local materials, it also checks source-PDF SHA-256, all registered page/thumbnail assets, explicit public boundaries, 24-page transcript isolation, and read-only source markup. With a running course demo, run `SOURCE_LECTURE_TEST_URL=http://127.0.0.1:8782/ node tests/test_source_lecture.cjs`. Playwright/Chrome checks desktop/mobile source viewing, contents search, zoom, text mode, deep links, download hash, text-only mocked AI context, focus, bilingual controls, and print styles. These tests do not call a real AI provider or establish physical-device/printing behavior.
 
 2026-10-19 unified lecture workspace: 63 Python tests and desktop/390px browser regressions passed. Read text is absent. Verified PDF caption/note and drawn-region persistence, undo, original PDF hash, contents/search, zoom/page entry, mocked text-only AI, presenter navigation, print styles, catalog samples, and existing Linear Algebra features. No paid provider calls or physical-device/printing tests.
 
 Presenter workspace (2026-10-19): `tests/test_presenter_workspace.cjs` checks PDF and editable sample previews at 1360×880, 1024×600 and 390×844, complete preview bounds, audience zoom/size independence, linked navigation/jump, timer, language and ending. Run against the local catalog with `PRESENTER_WORKSPACE_URL=http://127.0.0.1:8782/ NODE_PATH=<playwright-node-modules> node tests/test_presenter_workspace.cjs`. This and the portable presentation browser suite passed; media controls, spoofed-message rejection, print and classroom restrictions remain covered. No real model, physical display or phone tests.
+
+## Hash-function lab
+
+`python3 westlake.py test` includes disabled-runner, request-origin and payload-boundary checks. Run `node --test tests/test_hash_model.cjs` for fraction equality, 32-bit wraparound, UTF-8 hashing, collisions and sampled positions. With the optional toolchain installed, `CPP_RUNNER_ENABLED=1 PYTHONPATH=src python3 -m unittest discover -s tests -p test_cpp_runner.py` additionally verifies that a real compiled WASI program cannot read a host file or a server environment sentinel. Against a local private course demo, `HASH_LAB_URL=http://127.0.0.1:8792/ NODE_PATH=<playwright-node-modules> node tests/test_hash_lab.cjs` exercises the 20-slide catalog, guided steps, actual C++ output, edited code, diagnostics, timeout and desktop/mobile layout. This suite does not call AI or an online compiler. Original deck redistribution permission is not asserted.
+
+
+## Xiaoxi companion interface — 2026-10-19
+
+Verification (2026-10-19): JavaScript syntax and diff whitespace checks passed. Browser checks covered desktop and 390×844 layout, English/Chinese labels, pet opening/drag/reload, Practice draft and draft preservation. Main-deck Quiz/Practice and personal-slide controls remain present; full quiz and AI generation were not rerun. No real model calls. Internal synchronization is pending: SSH was closed and HTTP returned an empty reply; remote files and settings were not changed.
+
+验证（2026-10-19）：JavaScript 语法与差异空白检查通过。浏览器验证桌面及 390×844 视口、中英文、小西点击/拖动/刷新恢复、练习提问草稿与已有输入保留。主稿的 Quiz/Practice 和个人讲解页入口仍存在，未重新执行完整测验或 AI 生成，未调用真实模型。内网同步待完成：SSH 连接关闭，HTTP 返回空响应；未修改远端文件或设置。
+
+## My progress
+
+Against a local course demo with private PDF fixtures, run `PROGRESS_TEST_URL=http://127.0.0.1:8782/ NODE_PATH=<playwright-node-modules> node tests/test_progress.cjs`. Controlled browser clocks and explicit focus/blur events verify active time, the idle cutoff, cross-tab pause/resume and midnight boundaries. Other checks cover actual PDF/text marks, per-subject totals, the activity calendar, current 4:3 source thumbnails, filters, clearing only time history, desktop/mobile layouts, bilingual labels, and blocked or malformed storage. Screenshot data is isolated test data, never a fabricated student history. This does not establish cross-device syncing or learning outcomes.
+
+## Visual Socratic practice — 2026-10-27
+
+From the current NAACL checkout, run `python3 westlake.py test --suite python` and `node tests/test_socratic.cjs` against the current local catalog (`SOCRATIC_TEST_URL`, default `http://127.0.0.1:8782/`). Browser checks require Playwright and Chrome. API responses in the browser test are mocked; backend stage fixtures and the model adapter test also make no provider requests.
+
+Verification: the Python run completed 77 tests with two skips; all remaining tests passed. Seven existing archive/i18n/geometry Node unit checks passed. The new desktop/mobile Chrome checks passed for PDF image capture, HTML slide rendering capture, visual region overlays, first-attempt gates, distinct revision unlock, active-practice chat blocking, retained drafts on failed checks, stale-slide rejection, opt-in text persistence and reloading it in My progress, selected-turn discussion sharing, Chinese UI switching and layout overflow. Backend tests cover instructor-image replacement of client pixels, changed registered instructor images, invalid boxes/references, recall-level rejection, exact student quotations, nonattempts, ownership/expiry/revision guards, critic rejection, same-origin and request limits. JavaScript syntax and Git whitespace checks passed. Screenshots were reviewed.
+
+Existing My progress and Discussions browser regression scripts passed. The course/source-lecture regression scripts remain blocked by the existing floating pet intercepting highlighter-close/zoom controls. The source-lecture zoom failure was reproduced with the new Socratic scripts disabled. The pet layout was left outside this approved change. These failures must not be represented as passing full UI regression coverage.
+
+No real provider quality, visual interpretation accuracy, comparative learning gain, formal answer-leakage resistance, physical-device or screen-reader evaluation was performed. This approval excluded deployment, paid model calls, commits and pushes; no internal Diffusion synchronization was attempted.

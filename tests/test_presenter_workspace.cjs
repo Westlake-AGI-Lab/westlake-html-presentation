@@ -3,7 +3,10 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
 const base=process.env.PRESENTER_WORKSPACE_URL||'http://127.0.0.1:8782/';
 (async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});
 try{const context=await browser.newContext({viewport:{width:1440,height:1000}}),errors=[];context.on('page',p=>p.on('pageerror',e=>errors.push(e.message)));
-for(const course of ['computer-architecture&lecture=lecture-07-tomasulo','calculus&lecture=derivatives']){
+const probe=await context.newPage(),inventory=await (await probe.request.get(base+'api/courses')).json();await probe.close();
+const lectures=['calculus&lecture=derivatives'];
+if(inventory.courses[0].lectures.some(l=>l.source))lectures.unshift('computer-architecture&lecture=lecture-07-tomasulo');
+for(const course of lectures){
  const audience=await context.newPage();await audience.goto(base+'lecture.html?course='+course);await audience.waitForSelector('.source-header');
  await audience.click('#sourceZoomIn');await audience.setViewportSize({width:390,height:844});
  const opened=audience.waitForEvent('popup');await audience.evaluate(()=>PPTPresenter.open());const speaker=await opened;await speaker.waitForFunction(()=>document.querySelector('#currentTitle').textContent.startsWith('1.'));

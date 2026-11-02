@@ -9,6 +9,11 @@
     "improvement-topics.v1.txt": "a6fdc6d9aa7b1de1f646140fdfee8b35512bc25ff374843965f593b7da718522",
     "improvement-draft.v1.txt": "21b0351b6ab72357b1d0c2a2cf633a369b6570cc87754741c65323da12420f06",
     "learning-extract.v1.txt": "18ead8c97c73e1670437a09494fa6e8a424ede361a81f02a4ee5a696b8314677",
-    "learning-assess.v1.txt": "361e9392c86aaa35e709a19248f914d2580f46097a3ee297c9d60199a596eaa0"
+    "learning-assess.v1.txt": "361e9392c86aaa35e709a19248f914d2580f46097a3ee297c9d60199a596eaa0",
+    "socratic-critic.v1.txt": "a32e50ec2cd8dc4571d2f04b263205af605832cee55bb1cabb98670f8fd296fa",
+    "socratic-assessor.v1.txt": "6ac6105aeef1df3abdef4a2b67339ac3d989f997e31a73f84c7ac83279f2c96b",
+    "socratic-questioner.v1.txt": "e2bc776cceab9ea1d734449fe9358c96cc7a508c000b8d9db06f5929cdd1fafd",
+    "socratic-tutor.v1.txt": "19ec6dff8b94937f9cad02869d256c1cef79421cd98ab5443744a4cf4a3d9462",
+    "socratic-curator.v1.txt": "fbea6d3884564b1f3e748460bc655b9562ecb85e3383abb841c50ba06065917d"
   }
 }

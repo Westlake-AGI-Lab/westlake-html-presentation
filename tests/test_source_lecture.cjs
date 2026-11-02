@@ -7,6 +7,8 @@ const base=process.env.SOURCE_LECTURE_TEST_URL||'http://127.0.0.1:8784/';
 (async()=>{
  const browser=await chromium.launch({channel:'chrome',headless:true});
  try{
+  const inventory=await (await (await browser.newPage()).request.get(base+'api/courses')).json();
+  if(!inventory.courses[0].lectures.some(l=>l.source)){console.log('Skipped: optional local PDF fixture is not installed.');return;}
   for(const mobile of [false,true]){
    const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1440,height:1000},hasTouch:mobile});
    const page=await context.newPage(),errors=[],failedAssets=[];
@@ -15,7 +17,7 @@ const base=process.env.SOURCE_LECTURE_TEST_URL||'http://127.0.0.1:8784/';
    await page.goto(base+'courses.html');await page.waitForSelector('.course-card');
    await page.getByRole('button',{name:'Computer Architecture and Parallel Computing',exact:true}).click();
    assert.ok((await page.textContent('#lectureCourseMeta')).includes('2610CST3004'));
-   assert.ok((await page.textContent('#lectureCourseMeta')).includes('Huan Wang'));
+   assert.ok((await page.textContent('#lectureCourseMeta')).includes(inventory.courses[0].instructor));
    assert.equal(await page.locator('.lecture-row').count(),3);
    await page.locator('.source-lecture-link').click();await page.waitForSelector('.source-header');
    assert.equal(await page.locator('.pdf-source-slide').count(),24);
